@@ -12,7 +12,10 @@ class SphericalUtil {
     final toLat = MathUtil.toRadians(to.latitude);
     final toLng = MathUtil.toRadians(to.longitude);
     final dLng = toLng - fromLng;
-    final heading = math.atan2(math.sin(dLng) * math.cos(toLat), math.cos(fromLat) * math.sin(toLat) - math.sin(fromLat) * math.cos(toLat) * math.cos(dLng));
+    final heading = math.atan2(
+        math.sin(dLng) * math.cos(toLat),
+        math.cos(fromLat) * math.sin(toLat) -
+            math.sin(fromLat) * math.cos(toLat) * math.cos(dLng));
 
     return MathUtil.wrap(MathUtil.toDegrees(heading), -180, 180);
   }
@@ -23,11 +26,14 @@ class SphericalUtil {
 
     if (begin.latitude < end.latitude && begin.longitude < end.longitude) {
       return MathUtil.toDegrees(math.atan(lng / lat)) + 90;
-    } else if (begin.latitude >= end.latitude && begin.longitude < end.longitude) {
+    } else if (begin.latitude >= end.latitude &&
+        begin.longitude < end.longitude) {
       return ((90 - MathUtil.toDegrees(math.atan(lng / lat))) + 90) + 45;
-    } else if (begin.latitude >= end.latitude && begin.longitude >= end.longitude) {
+    } else if (begin.latitude >= end.latitude &&
+        begin.longitude >= end.longitude) {
       return (MathUtil.toDegrees(math.atan(lng / lat)) + 180) - 90;
-    } else if (begin.latitude < end.latitude && begin.longitude >= end.longitude) {
+    } else if (begin.latitude < end.latitude &&
+        begin.longitude >= end.longitude) {
       return ((90 - MathUtil.toDegrees(math.atan(lng / lat))) + 270) + 90;
     }
 
@@ -55,27 +61,35 @@ class SphericalUtil {
     final angle = computeAngleBetween(from, to);
     final sinAngle = math.sin(angle);
     if (sinAngle < 1E-6) {
-      return LatLng(from.latitude + fraction * (to.latitude - from.latitude), from.longitude + fraction * (to.longitude - from.longitude));
+      return LatLng(from.latitude + fraction * (to.latitude - from.latitude),
+          from.longitude + fraction * (to.longitude - from.longitude));
     }
     final a = math.sin((1 - fraction) * angle) / sinAngle;
     final b = math.sin(fraction * angle) / sinAngle;
 
     // Converts from polar to vector and interpolate.
-    final x = a * cosFromLat * math.cos(fromLng) + b * cosToLat * math.cos(toLng);
-    final y = a * cosFromLat * math.sin(fromLng) + b * cosToLat * math.sin(toLng);
+    final x =
+        a * cosFromLat * math.cos(fromLng) + b * cosToLat * math.cos(toLng);
+    final y =
+        a * cosFromLat * math.sin(fromLng) + b * cosToLat * math.sin(toLng);
     final z = a * math.sin(fromLat) + b * math.sin(toLat);
 
     // Converts interpolated vector back to polar.
     final lat = math.atan2(z, math.sqrt(x * x + y * y));
     final lng = math.atan2(y, x);
 
-    return LatLng(MathUtil.toDegrees(lat).toDouble(), MathUtil.toDegrees(lng).toDouble());
+    return LatLng(
+        MathUtil.toDegrees(lat).toDouble(), MathUtil.toDegrees(lng).toDouble());
   }
 
-  static num distanceRadians(num lat1, num lng1, num lat2, num lng2) => MathUtil.arcHav(MathUtil.havDistance(lat1, lat2, lng1 - lng2));
+  static num distanceRadians(num lat1, num lng1, num lat2, num lng2) =>
+      MathUtil.arcHav(MathUtil.havDistance(lat1, lat2, lng1 - lng2));
 
-  static num computeAngleBetween(LatLng from, LatLng to) =>
-      distanceRadians(MathUtil.toRadians(from.latitude), MathUtil.toRadians(from.longitude), MathUtil.toRadians(to.latitude), MathUtil.toRadians(to.longitude));
+  static num computeAngleBetween(LatLng from, LatLng to) => distanceRadians(
+      MathUtil.toRadians(from.latitude),
+      MathUtil.toRadians(from.longitude),
+      MathUtil.toRadians(to.latitude),
+      MathUtil.toRadians(to.longitude));
 
   /*static double angleShortestDistance(double from, double to) {
     double diff = to - from;
@@ -98,7 +112,8 @@ class SphericalUtil {
     return delta.sign * (2 * da.abs() % max) - da;
   }
 
-  static num computeDistanceBetween(LatLng from, LatLng to) => computeAngleBetween(from, to) * earthRadius;
+  static num computeDistanceBetween(LatLng from, LatLng to) =>
+      computeAngleBetween(from, to) * earthRadius;
 
   static double bearingBetweenLocations(LatLng latLngFrom, LatLng latLngTo) {
     double lat1 = latLngTo.latitude * math.pi / 180;
@@ -109,7 +124,8 @@ class SphericalUtil {
     double dLon = (long2 - long1);
 
     double y = math.sin(dLon) * math.cos(lat2);
-    double x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(dLon);
+    double x = math.cos(lat1) * math.sin(lat2) -
+        math.sin(lat1) * math.cos(lat2) * math.cos(dLon);
 
     double brng = math.atan2(y, x);
 
@@ -129,7 +145,8 @@ class SphericalUtil {
     return math.log(mapPx / worldPx / fraction) / math.ln2;
   }
 
-  static double getBoundsZoomLevel(LatLngBounds bounds, Size size, [double ratio = 1, double padding = 0]) {
+  static double getBoundsZoomLevel(LatLngBounds bounds, Size size,
+      [double ratio = 1, double padding = 0]) {
     var worldDim = {
       'height': 256 * ratio,
       'width': 256 * ratio,
@@ -144,9 +161,11 @@ class SphericalUtil {
     var lngDiff = ne.longitude - sw.longitude;
     var lngFraction = ((lngDiff < 0) ? (lngDiff + 360) : lngDiff) / 360;
 
-    var latZoom = zoom((size.height * ratio) - (padding * ratio), worldDim["height"], latFraction);
+    var latZoom = zoom((size.height * ratio) - (padding * ratio),
+        worldDim["height"], latFraction);
 
-    var lngZoom = zoom((size.width * ratio) - (padding * ratio), worldDim["width"], lngFraction);
+    var lngZoom = zoom((size.width * ratio) - (padding * ratio),
+        worldDim["width"], lngFraction);
 
     return math.min(math.min(latZoom, lngZoom), zooMax);
   }

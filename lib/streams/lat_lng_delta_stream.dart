@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_map_marker_animation/models/lat_lng_delta.dart';
+import 'package:flutter_animarker/models/lat_lng_delta.dart';
 
 class LatLngDeltaStream {
   final _controller = StreamController<LatLngDelta>();

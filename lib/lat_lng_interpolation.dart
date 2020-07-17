@@ -36,7 +36,8 @@ class LatLngInterpolationStream {
   //Add Marker's LatLng for animation processing
   void addLatLng(LatLng latLng) {
     if (subscription == null) {
-      subscription = _latLngMovementInterpolation().listen((v) => _rotateLatLng(v));
+      subscription =
+          _latLngMovementInterpolation().listen((v) => _rotateLatLng(v));
     }
     _latLngStream.addLatLng(latLng);
   }
@@ -48,12 +49,15 @@ class LatLngInterpolationStream {
 
   Stream<LatLngDelta> getLatLngInterpolation() async* {
     int start = 0; //To determine when the animation has ended
-    double lastBearing = 0.0 / 0.0; //Creation a start position, since any value could be a valida angle
+    double lastBearing = 0.0 /
+        0.0; //Creation a start position, since any value could be a valida angle
     CurveTween curveTween = CurveTween(curve: curve);
 
     //Waiting for new incoming LatLng movement
     await for (LatLngDelta deltaPosition in _latLngRotationStream.stream) {
-      double angle = SphericalUtil.angleShortestDistance(MathUtil.toRadians(lastBearing), MathUtil.toRadians(deltaPosition.rotation));
+      double angle = SphericalUtil.angleShortestDistance(
+          MathUtil.toRadians(lastBearing),
+          MathUtil.toRadians(deltaPosition.rotation));
       double angleDelta = MathUtil.toDegrees(angle);
 
       //No taking angle movement below 25.0 degrees
@@ -77,12 +81,14 @@ class LatLngInterpolationStream {
       while (elapsed.toDouble() / rotationDuration.inMilliseconds < 1.0) {
         elapsed = DateTime.now().millisecondsSinceEpoch - start;
 
-        double t = (elapsed.toDouble() / rotationDuration.inMilliseconds).clamp(0.0, 1.0);
+        double t = (elapsed.toDouble() / rotationDuration.inMilliseconds)
+            .clamp(0.0, 1.0);
 
         //Value of the curve at point `t`;
         double value = curveTween.transform(t);
 
-        double rotation = SphericalUtil.angleLerp(lastAngle, currentAngle, value);
+        double rotation =
+            SphericalUtil.angleLerp(lastAngle, currentAngle, value);
 
         lastBearing = deltaPosition.rotation;
         deltaPosition.rotation = rotation;
@@ -100,7 +106,8 @@ class LatLngInterpolationStream {
     int start = 0;
 
     await for (LatLng pos in _latLngStream.stream) {
-      double distance = SphericalUtil.computeDistanceBetween(previousLatLng ?? pos, pos);
+      double distance =
+          SphericalUtil.computeDistanceBetween(previousLatLng ?? pos, pos);
 
       //First marker, required at least two from have a delta position
       if (previousLatLng == null || distance < 5.5) {
@@ -118,11 +125,14 @@ class LatLngInterpolationStream {
 
         LatLng latLng = SphericalUtil.interpolate(previousLatLng, pos, t);
 
-        double rotation = SphericalUtil.getBearing(latLng, lastInterpolatedPosition ?? previousLatLng);
+        double rotation = SphericalUtil.getBearing(
+            latLng, lastInterpolatedPosition ?? previousLatLng);
 
-        double diff = SphericalUtil.angleShortestDistance(rotation, lastBearing);
+        double diff =
+            SphericalUtil.angleShortestDistance(rotation, lastBearing);
 
-        double distance = SphericalUtil.computeDistanceBetween(latLng, lastInterpolatedPosition ?? previousLatLng);
+        double distance = SphericalUtil.computeDistanceBetween(
+            latLng, lastInterpolatedPosition ?? previousLatLng);
 
         //Determine if the marker's has made a significantly movement
         if (diff.isNaN || distance < 1.5) {

@@ -9,3 +9,5 @@
 ## [0.0.1+3] - Issue setting the Duration interval of interpolation
 
 ## [0.0.2] - Update with a working example and gif showing the animation movement
+
+## [0.1.1] - Added working project example to the GitHub repo. Just add your own **Google Maps Api Key**.
