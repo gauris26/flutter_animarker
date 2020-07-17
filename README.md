@@ -6,7 +6,7 @@ Here the main uses of this package to animate the markers changes of position.
 
 # Screenshots
 
-  ![](arts/marker_animation.gif)
+  ![](arts/marker_animation.gif | width=200)
 
 # Example
     LatLngInterpolationStream _latLngStream = LatLngInterpolationStream();
