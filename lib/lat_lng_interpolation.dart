@@ -115,14 +115,19 @@ class LatLngInterpolationStream {
         continue;
       }
 
+      CurveTween curveTween = CurveTween(curve: curve);
+
       start = DateTime.now().millisecondsSinceEpoch;
       int elapsed = 0;
 
       while (elapsed.toDouble() / movementDuration.inMilliseconds < 1.0) {
         elapsed = DateTime.now().millisecondsSinceEpoch - start;
 
-        double t = elapsed.toDouble() / movementDuration.inMilliseconds;
+        double t = (elapsed.toDouble() / movementDuration.inMilliseconds).clamp(0.0, 1.0);
 
+        //Value of the curve at point `t`;
+        double value = curveTween.transform(t);
+        
         LatLng latLng = SphericalUtil.interpolate(previousLatLng, pos, t);
 
         double rotation = SphericalUtil.getBearing(

@@ -91,13 +91,6 @@ class SphericalUtil {
       MathUtil.toRadians(to.latitude),
       MathUtil.toRadians(to.longitude));
 
-  /*static double angleShortestDistance(double from, double to) {
-    double diff = to - from;
-    diff = (diff + 180) % 360 - 180;
-
-    return diff;
-  }*/
-
   static double angleLerp(double from, double to, double t) {
     double radFrom = MathUtil.toRadians(from);
     double radTo = MathUtil.toRadians(to);
