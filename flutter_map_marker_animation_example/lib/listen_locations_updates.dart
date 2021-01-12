@@ -54,13 +54,10 @@ class _FlutterMapMarkerAnimationExampleState
       });
     });
 
-    var geolocator = Geolocator();
-    var locationOptions =
-        LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 10);
-
-    positionStream = geolocator
-        .getPositionStream(locationOptions)
-        .listen((Position position) {
+    positionStream = Geolocator.getPositionStream(
+      desiredAccuracy: LocationAccuracy.medium,
+      distanceFilter: 10,
+    ).listen((Position position) {
       double latitude = position.latitude;
       double longitude = position.longitude;
       //Push new location changes
