@@ -22,12 +22,22 @@ class LatLngInterpolationStream {
   StreamSubscription subscription;
   Curve curve;
 
+  /// Weather to rotate the marker along the way or not, default to `true`.
+  final bool shouldRotate;
+
+  /// Set the rotation degree of the marker, if this is provided, the marker
+  /// will be rotated by the provided degree and set to this rotation for the
+  /// whole animation.
+  final double rotateDegree;
+
   LatLngInterpolationStream({
     this.curve = Curves.linear,
     this.rotationDuration = const Duration(milliseconds: 600),
     this.movementDuration = const Duration(milliseconds: 1000),
     this.movementInterval = const Duration(milliseconds: 20),
     this.rotationInterval = const Duration(milliseconds: 12),
+    this.shouldRotate = true,
+    this.rotateDegree,
   }) {
     _latLngStream = LatLngStream();
     _latLngRotationStream = LatLngDeltaStream();
@@ -123,11 +133,12 @@ class LatLngInterpolationStream {
       while (elapsed.toDouble() / movementDuration.inMilliseconds < 1.0) {
         elapsed = DateTime.now().millisecondsSinceEpoch - start;
 
-        double t = (elapsed.toDouble() / movementDuration.inMilliseconds).clamp(0.0, 1.0);
+        double t = (elapsed.toDouble() / movementDuration.inMilliseconds)
+            .clamp(0.0, 1.0);
 
         //Value of the curve at point `t`;
         double value = curveTween.transform(t);
-        
+
         LatLng latLng = SphericalUtil.interpolate(previousLatLng, pos, t);
 
         double rotation = SphericalUtil.getBearing(
@@ -144,10 +155,19 @@ class LatLngInterpolationStream {
           continue;
         }
 
+        var resultRotation = rotateDegree;
+        if (resultRotation == null) {
+          if (shouldRotate) {
+            resultRotation = !rotation.isNaN ? rotation : lastBearing;
+          } else {
+            resultRotation = 0;
+          }
+        }
+
         yield LatLngDelta(
           from: lastInterpolatedPosition ?? previousLatLng,
           to: latLng,
-          rotation: !rotation.isNaN ? rotation : lastBearing,
+          rotation: resultRotation,
         );
 
         lastBearing = !rotation.isNaN ? rotation : lastBearing;
