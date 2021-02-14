@@ -161,6 +161,6 @@ class LatLngInterpolationStream {
   }
 
   void cancel() {
-    subscription.cancel();
+    subscription?.cancel();
   }
 }
