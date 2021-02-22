@@ -4,36 +4,64 @@ Sometime you need more than place a marker in the maps, you required a smoothly 
 
 Here the main uses of this package to animate the markers changes of position.
 
+The Google Maps dependencies was removed, since it was only required for the LatLng object, you can use now LatLngInfo wrapper.
+
+You can add multiple markers, and receive particular location updates for each one.
+
 ## Screenshots
 
   ![](arts/marker_animation.gif)
 
 ## Example
 ```dart
-    LatLngInterpolationStream _latLngStream = LatLngInterpolationStream();
-    StreamSubscription<LatLngDelta> subscription;
+    
+   LatLngInterpolationStream _latLngStream = LatLngInterpolationStream();
 
-    @override
-    void initState() {
-      subscription= _latLngStream.getLatLngInterpolation().listen((LatLngDelta delta) {
-      LatLng from = delta.from;
-      LatLng to = delta.to;
+   StreamGroup<LatLngDelta> subscriptions = StreamGroup<LatLngDelta>();
+
+   StreamSubscription<Position> positionStream;
+
+   @override
+   void initState() {
+      
+    //Merge all the Marker Poisition Stream into a single One
+    subscriptions.add(_latLngStream.getAnimatedPosition("Marker 1"));
+    subscriptions.add(_latLngStream.getAnimatedPosition("Marker 2"));
+    subscriptions.add(_latLngStream.getAnimatedPosition("Marker 3"));
+    
+    subscriptions.stream.listen((LatLngDelta delta) {
+      //Update the marker with animation
+      setState(() {
+        //Get the marker Id for this animation
+        var markerId = MarkerId(delta.markerId);
+        Marker sourceMarker = Marker(
+          markerId: markerId,
+          rotation: delta.rotation,
+          position: LatLng(
+            delta.from.latitude,
+            delta.from.longitude,
+          ),
+        );
+        _markers[markerId] = sourceMarker;
+      });
     });
 
     super.initState();
     }
 
+    //Push new location changes, use your own position values
     void updatePinOnMap() {
-      var pinPosition = LatLng(currentLocation.latitude, currentLocation.longitude);
-
-      _latLngStream.addLatLng(pinPosition);
+        
+      _latLngStream.addLatLng(LatLngInfo(latitudeMarker1, longitudeMarker1, "Marker 1"));
+      _latLngStream.addLatLng(LatLngInfo(latitudeMarker2, longitudeMarker2, "Marker 2"));
+      _latLngStream.addLatLng(LatLngInfo(latitudeMarker3, longitudeMarker3, "Marker 3"));
     }
 
     @override
     void dispose() {
-      subscription.cancel();
-      _latLngStream.cancel();
-    super.dispose();
+      subscriptions.close();
+      positionStream.cancel();
+      super.dispose();
     }
 ```
 ## License

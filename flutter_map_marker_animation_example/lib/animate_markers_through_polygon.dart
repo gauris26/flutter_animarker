@@ -1,21 +1,23 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animarker/flutter_map_marker_animation.dart';
 import 'package:flutter_animarker/lat_lng_interpolation.dart';
 import 'package:flutter_animarker/models/lat_lng_delta.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'extensions.dart';
 
-final startPosition = LatLng(18.488213, -69.959186);
+final startPosition = LatLngInfo(18.488213, -69.959186);
 
 //Run over the polygon position
-final polygon = <LatLng>[
+final polygon = <LatLngInfo>[
   startPosition,
-  LatLng(18.489338, -69.947091),
-  LatLng(18.495351, -69.949366),
-  LatLng(18.497477, -69.947596),
-  LatLng(18.498932, -69.948615),
-  LatLng(18.498373, -69.958779),
-  LatLng(18.488600, -69.959574),
+  LatLngInfo(18.489338, -69.947091),
+  LatLngInfo(18.495351, -69.949366),
+  LatLngInfo(18.497477, -69.947596),
+  LatLngInfo(18.498932, -69.948615),
+  LatLngInfo(18.498373, -69.958779),
+  LatLngInfo(18.488600, -69.959574),
 ];
 
 class FlutterMapMarkerAnimationExample extends StatefulWidget {
@@ -40,17 +42,18 @@ class _FlutterMapMarkerAnimationExampleState
   final Completer<GoogleMapController> _controller = Completer();
 
   final CameraPosition _kSantoDomingo = CameraPosition(
-    target: startPosition,
+    target: startPosition.toLatLng,
     zoom: 15,
   );
 
   @override
   void initState() {
     subscription =
-        _latLngStream.getLatLngInterpolation().listen((LatLngDelta delta) {
-      LatLng from = delta.from;
+        _latLngStream.getAnimatedPosition("SourcePin").listen((LatLngDelta delta) {
+
+      LatLng from = delta.from.toLatLng;
       print("To: -> ${from.toJson()}");
-      LatLng to = delta.to;
+      LatLng to = delta.to.toLatLng;
       print("From: -> ${to.toJson()}");
       double angle = delta.rotation;
       print("Angle: -> $angle");
@@ -96,7 +99,7 @@ class _FlutterMapMarkerAnimationExampleState
               setState(() {
                 Marker sourceMarker = Marker(
                   markerId: sourceId,
-                  position: startPosition,
+                  position: startPosition.toLatLng,
                 );
                 _markers[sourceId] = sourceMarker;
               });

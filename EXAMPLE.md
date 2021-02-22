@@ -1,26 +1,13 @@
-import 'dart:async';
+# Google Maps Markers Animation
 
-import 'package:async/async.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_animarker/flutter_map_marker_animation.dart';
-import 'package:flutter_animarker/lat_lng_interpolation.dart';
-import 'package:flutter_animarker/models/lat_lng_delta.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'extensions.dart';
+Sometime you need more than place a marker in the maps, you required a smoothly throught **Google Maps** canvas.
 
-const startPosition = LatLng(18.488213, -69.959186);
+Here the main uses of this package to animate the markers changes of position.
 
-class FlutterMapMarkerAnimationRealTimeExample extends StatefulWidget {
-  @override
-  _FlutterMapMarkerAnimationExampleState createState() =>
-      _FlutterMapMarkerAnimationExampleState();
-}
 
-class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnimationRealTimeExample> {
+# Example
 
-  //Markers collection, proper way
-  final Map<MarkerId, Marker> _markers = Map<MarkerId, Marker>();
+ final Map<MarkerId, Marker> _markers = Map<MarkerId, Marker>();
 
   MarkerId sourceId = MarkerId("SourcePin");
   MarkerId source2Id = MarkerId("SourcePin2");
@@ -32,20 +19,20 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
 
   StreamSubscription<Position> positionStream;
 
-  final Completer<GoogleMapController> _controller = Completer();
-
-  final CameraPosition _kSantoDomingo = CameraPosition(
+    final CameraPosition _kSantoDomingo = CameraPosition(
     target: startPosition,
     zoom: 15,
-  );
+   );
 
   @override
   void initState() {
 
+    //Now you use multiple marker at the same time
+    //Add all the stream to StreamGroup
     subscriptions.add(_latLngStream.getAnimatedPosition(sourceId.value));
     subscriptions.add(_latLngStream.getAnimatedPosition(source2Id.value));
     subscriptions.add(_latLngStream.getAnimatedPosition(source3Id.value));
-
+    
     subscriptions.stream.listen((LatLngDelta delta) {
       //Update the marker with animation
       setState(() {
@@ -62,7 +49,8 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
 
       });
     });
-
+    
+    //Using Geolocator Plugin to get location updates
     positionStream = Geolocator.getPositionStream(
       desiredAccuracy: LocationAccuracy.bestForNavigation,
       distanceFilter: 10,
@@ -70,8 +58,8 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
       double latitude = position.latitude;
       double longitude = position.longitude;
 
-      //Push new location changes
-      _latLngStream.addLatLng(LatLngInfo(latitude, longitude, sourceId.value));
+      //Push new location changes to each marker by location  
+      _latLngStream.addLatLng(LatLngInfo(latitude, longitude, sourceId.value)); 
       _latLngStream.addLatLng(LatLngInfo(latitude+0.1, longitude+0.1, source2Id.value));
       _latLngStream.addLatLng(LatLngInfo(latitude+0.2, longitude+0.2, source3Id.value));
     });
@@ -83,10 +71,6 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Google Maps Markers Animation Example',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
       home: Scaffold(
         body: SafeArea(
           child: GoogleMap(
@@ -100,6 +84,8 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
                   markerId: sourceId,
                   position: startPosition,
                 );
+
+                //Place marker for first time
                 _markers[sourceId] = sourceMarker;
 
                 Marker source2Marker = Marker(
@@ -115,7 +101,7 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
                 );
                 _markers[source3Id] = source3Marker;
               });
-
+                
               _latLngStream.addLatLng(startPosition.toLatLngInfo(sourceId.value));
               _latLngStream.addLatLng(startPosition.toLatLngInfo(source2Id.value));
               _latLngStream.addLatLng(startPosition.toLatLngInfo(source3Id.value));
@@ -132,4 +118,3 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
     positionStream.cancel();
     super.dispose();
   }
-}

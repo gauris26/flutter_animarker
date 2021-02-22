@@ -1,12 +1,12 @@
 // Port of SphericalUtil from android-maps-utils (https://github.com/googlemaps/android-maps-utils)
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_animarker/models/lat_lng_info.dart';
 import 'dart:math' as math;
-import 'dart:ui';
+//import 'dart:ui';
 import 'math_util.dart';
 
 class SphericalUtil {
   static const num earthRadius = 6371009.0;
-  static num computeHeading(LatLng from, LatLng to) {
+  static num computeHeading(LatLngInfo from, LatLngInfo to) {
     final fromLat = MathUtil.toRadians(from.latitude);
     final fromLng = MathUtil.toRadians(from.longitude);
     final toLat = MathUtil.toRadians(to.latitude);
@@ -20,7 +20,7 @@ class SphericalUtil {
     return MathUtil.wrap(MathUtil.toDegrees(heading), -180, 180);
   }
 
-  static double getBearing(LatLng begin, LatLng end) {
+  static double getBearing(LatLngInfo begin, LatLngInfo end) {
     double lat = (begin.latitude - end.latitude).abs();
     double lng = (begin.longitude - end.longitude).abs();
 
@@ -46,7 +46,7 @@ class SphericalUtil {
   /// @param to       The LatLng toward which to travel.
   /// @param fraction A fraction of the distance to travel.
   /// @return The interpolated LatLng.
-  static LatLng interpolate(LatLng from, LatLng to, num fraction) {
+  static LatLngInfo interpolate(LatLngInfo from, LatLngInfo to, num fraction) {
     if (from == null) {
       return to;
     }
@@ -61,7 +61,7 @@ class SphericalUtil {
     final angle = computeAngleBetween(from, to);
     final sinAngle = math.sin(angle);
     if (sinAngle < 1E-6) {
-      return LatLng(from.latitude + fraction * (to.latitude - from.latitude),
+      return LatLngInfo(from.latitude + fraction * (to.latitude - from.latitude),
           from.longitude + fraction * (to.longitude - from.longitude));
     }
     final a = math.sin((1 - fraction) * angle) / sinAngle;
@@ -78,14 +78,14 @@ class SphericalUtil {
     final lat = math.atan2(z, math.sqrt(x * x + y * y));
     final lng = math.atan2(y, x);
 
-    return LatLng(
+    return LatLngInfo(
         MathUtil.toDegrees(lat).toDouble(), MathUtil.toDegrees(lng).toDouble());
   }
 
   static num distanceRadians(num lat1, num lng1, num lat2, num lng2) =>
       MathUtil.arcHav(MathUtil.havDistance(lat1, lat2, lng1 - lng2));
 
-  static num computeAngleBetween(LatLng from, LatLng to) => distanceRadians(
+  static num computeAngleBetween(LatLngInfo from, LatLngInfo to) => distanceRadians(
       MathUtil.toRadians(from.latitude),
       MathUtil.toRadians(from.longitude),
       MathUtil.toRadians(to.latitude),
@@ -105,10 +105,10 @@ class SphericalUtil {
     return delta.sign * (2 * da.abs() % max) - da;
   }
 
-  static num computeDistanceBetween(LatLng from, LatLng to) =>
+  static num computeDistanceBetween(LatLngInfo from, LatLngInfo to) =>
       computeAngleBetween(from, to) * earthRadius;
 
-  static double bearingBetweenLocations(LatLng latLngFrom, LatLng latLngTo) {
+  static double bearingBetweenLocations(LatLngInfo latLngFrom, LatLngInfo latLngTo) {
     double lat1 = latLngTo.latitude * math.pi / 180;
     double long1 = latLngTo.longitude * math.pi / 180;
     double lat2 = latLngFrom.latitude * math.pi / 180;
@@ -138,8 +138,7 @@ class SphericalUtil {
     return math.log(mapPx / worldPx / fraction) / math.ln2;
   }
 
-  static double getBoundsZoomLevel(LatLngBounds bounds, Size size,
-      [double ratio = 1, double padding = 0]) {
+  /*static double getBoundsZoomLevel(LatLngBounds bounds, Size size, [double ratio = 1, double padding = 0]) {
     var worldDim = {
       'height': 256 * ratio,
       'width': 256 * ratio,
@@ -161,5 +160,5 @@ class SphericalUtil {
         worldDim["width"], lngFraction);
 
     return math.min(math.min(latZoom, lngZoom), zooMax);
-  }
+  }*/
 }

@@ -13,3 +13,8 @@
 ## [0.1.1] - Added working project example to the GitHub repo. Just add your own **Google Maps Api Key**.
 
 ## [0.1.1+1] - Update metadata plugin information
+
+## [0.1.2] - Update Google Maps constraints and pull request merging
+
+## [1.0.0] - Remove Google Maps dependencies
+           - Added multiple markers at same time functionality

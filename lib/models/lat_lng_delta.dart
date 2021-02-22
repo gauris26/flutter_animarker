@@ -1,9 +1,10 @@
-import 'package:google_maps_flutter/google_maps_flutter.dart' show LatLng;
+import 'lat_lng_info.dart';
 
 class LatLngDelta {
-  final LatLng from;
-  final LatLng to;
+  final LatLngInfo from;
+  final LatLngInfo to;
   double rotation;
+  String markerId;
 
-  LatLngDelta({this.from, this.to, this.rotation});
+  LatLngDelta({this.from, this.to, this.rotation, this.markerId = ""});
 }
