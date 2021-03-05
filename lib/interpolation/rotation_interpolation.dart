@@ -5,6 +5,7 @@ import 'package:flutter_animarker/helpers/spherical_util.dart';
 import 'package:flutter_animarker/models/lat_lng_delta.dart';
 import 'package:flutter_animarker/streams/lat_lng_delta_stream.dart';
 
+@deprecated
 class RotationInterpolation {
   Curve curve;
   CurveTween curveTween;
@@ -14,14 +15,14 @@ class RotationInterpolation {
 
   RotationInterpolation({
     this.curve = Curves.linear,
-    this.rotationDuration = const Duration(milliseconds: 600),
-    this.rotationInterval = const Duration(milliseconds: 12),
+    this.rotationDuration = const Duration(milliseconds: 500),
+    this.rotationInterval = const Duration(milliseconds: 10),
   }) {
     _latLngRotationStream = LatLngDeltaStream();
     curveTween = CurveTween(curve: curve);
   }
 
-  ///Rotate marker between two given delta position (end-start)
+  ///Rotate marker between two given delta position (End-Start)
   void rotatePosition(LatLngDelta latLng) {
     _latLngRotationStream.addLatLng(latLng);
   }

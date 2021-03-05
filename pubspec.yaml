@@ -5,7 +5,7 @@ homepage: https://github.com/gauris26/flutter_animarker
 repository: https://github.com/gauris26/clsflutter_animarker
 publish_to: https://pub.dev
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.11.0 <3.0.0"
   flutter: ">=1.16.3 <2.0.0"
 
 dependencies:

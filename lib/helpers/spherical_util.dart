@@ -1,4 +1,5 @@
 // Port of SphericalUtil from android-maps-utils (https://github.com/googlemaps/android-maps-utils)
+import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/models/lat_lng_info.dart';
 import 'dart:math' as math;
 //import 'dart:ui';
@@ -25,16 +26,13 @@ class SphericalUtil {
     double lng = (begin.longitude - end.longitude).abs();
 
     if (begin.latitude < end.latitude && begin.longitude < end.longitude) {
-      return MathUtil.toDegrees(math.atan(lng / lat)) + 90;
-    } else if (begin.latitude >= end.latitude &&
-        begin.longitude < end.longitude) {
-      return ((90 - MathUtil.toDegrees(math.atan(lng / lat))) + 90) + 45;
-    } else if (begin.latitude >= end.latitude &&
-        begin.longitude >= end.longitude) {
-      return (MathUtil.toDegrees(math.atan(lng / lat)) + 180) - 90;
-    } else if (begin.latitude < end.latitude &&
-        begin.longitude >= end.longitude) {
-      return ((90 - MathUtil.toDegrees(math.atan(lng / lat))) + 270) + 90;
+      return MathUtil.toDegrees(math.atan(lng / lat)) /*+ 90*/;
+    } else if (begin.latitude >= end.latitude && begin.longitude < end.longitude) {
+      return ((90 - MathUtil.toDegrees(math.atan(lng / lat))) + 90) /*+ 45*/;
+    } else if (begin.latitude >= end.latitude && begin.longitude >= end.longitude) {
+      return (MathUtil.toDegrees(math.atan(lng / lat)) + 180) /*- 90*/;
+    } else if (begin.latitude < end.latitude && begin.longitude >= end.longitude) {
+      return ((90 - MathUtil.toDegrees(math.atan(lng / lat))) + 270) /*+ 90*/;
     }
 
     return -1;
@@ -46,7 +44,7 @@ class SphericalUtil {
   /// @param to       The LatLng toward which to travel.
   /// @param fraction A fraction of the distance to travel.
   /// @return The interpolated LatLng.
-  static LatLngInfo interpolate(LatLngInfo from, LatLngInfo to, num fraction) {
+  static ILatLng interpolate(ILatLng from, ILatLng to, num fraction) {
     if (from == null) {
       return to;
     }
@@ -60,9 +58,10 @@ class SphericalUtil {
     // Computes Spherical interpolation coefficients.
     final angle = computeAngleBetween(from, to);
     final sinAngle = math.sin(angle);
+
     if (sinAngle < 1E-6) {
       return LatLngInfo(from.latitude + fraction * (to.latitude - from.latitude),
-          from.longitude + fraction * (to.longitude - from.longitude));
+          from.longitude + fraction * (to.longitude - from.longitude), from.markerId);
     }
     final a = math.sin((1 - fraction) * angle) / sinAngle;
     final b = math.sin(fraction * angle) / sinAngle;
@@ -79,7 +78,7 @@ class SphericalUtil {
     final lng = math.atan2(y, x);
 
     return LatLngInfo(
-        MathUtil.toDegrees(lat).toDouble(), MathUtil.toDegrees(lng).toDouble());
+        MathUtil.toDegrees(lat).toDouble(), MathUtil.toDegrees(lng).toDouble(), from.markerId);
   }
 
   static num distanceRadians(num lat1, num lng1, num lat2, num lng2) =>

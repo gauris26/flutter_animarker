@@ -1,8 +1,9 @@
+/*
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animarker/flutter_map_marker_animation.dart';
-import 'package:flutter_animarker/lat_lng_interpolation.dart';
+import 'package:flutter_animarker/animation_marker_controller.dart';
 import 'package:flutter_animarker/models/lat_lng_delta.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'extensions.dart';
@@ -29,13 +30,11 @@ class FlutterMapMarkerAnimationExample extends StatefulWidget {
 class _FlutterMapMarkerAnimationExampleState
     extends State<FlutterMapMarkerAnimationExample> {
   //Markers collection, proper way
-  final Map<MarkerId, Marker> _markers = Map<MarkerId, Marker>();
+  final _markers = Map<MarkerId, Marker>();
 
   MarkerId sourceId = MarkerId("SourcePin");
 
-  LatLngInterpolationStream _latLngStream = LatLngInterpolationStream(
-    movementDuration: Duration(milliseconds: 2000),
-  );
+  final _latLngStream = AnimarkerController();
 
   StreamSubscription<LatLngDelta> subscription;
 
@@ -122,3 +121,4 @@ class _FlutterMapMarkerAnimationExampleState
     super.dispose();
   }
 }
+*/

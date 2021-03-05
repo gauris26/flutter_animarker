@@ -1,5 +1,5 @@
 library fluttermapmarkeranimation;
 
-export 'lat_lng_interpolation.dart';
+export 'animation_marker_controller.dart';
 export 'models/lat_lng_delta.dart';
 export 'models/lat_lng_info.dart';

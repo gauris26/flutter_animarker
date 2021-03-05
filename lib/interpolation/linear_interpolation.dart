@@ -3,11 +3,11 @@ import 'package:flutter_animarker/models/lat_lng_delta.dart';
 import 'package:flutter_animarker/models/lat_lng_info.dart';
 import 'package:flutter_animarker/streams/lat_lng_stream.dart';
 
-
-class LinearInterpolation{
-  LatLngInfo previousLatLng;
+@deprecated
+class LinearInterpolation {
   final Duration movementDuration;
   final Duration movementInterval;
+  LatLngInfo previousLatLng;
   LatLngStream _linearLatLngStream;
   LatLngInfo lastInterpolatedPosition;
 
@@ -17,6 +17,7 @@ class LinearInterpolation{
 }) : _linearLatLngStream = LatLngStream();
 
   Stream<LatLngDelta> latLngLinearInterpolation() async* {
+
     double lastBearing = 0;
     int start = 0;
 
@@ -39,9 +40,6 @@ class LinearInterpolation{
 
         double t = (elapsed.toDouble() / movementDuration.inMilliseconds).clamp(0.0, 1.0);
 
-        //Value of the curve at point `t`;
-        //double value = curveTween.transform(t);
-
         LatLngInfo latLng = SphericalUtil.interpolate(previousLatLng, pos, t);
 
         double rotation = SphericalUtil.getBearing(
@@ -61,6 +59,7 @@ class LinearInterpolation{
           from: lastInterpolatedPosition ?? previousLatLng,
           to: latLng,
           markerId: pos.markerId,
+          isStopover: elapsed.toDouble() / movementDuration.inMilliseconds >= 1.0,
           rotation: !rotation.isNaN ? rotation : lastBearing,
         );
 
@@ -76,4 +75,6 @@ class LinearInterpolation{
   }
 
   void addLatLng(LatLngInfo latLng)  => _linearLatLngStream.addLatLng(latLng);
+
+  void dispose() => _linearLatLngStream.dispose();
 }

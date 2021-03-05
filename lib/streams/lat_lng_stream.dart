@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_animarker/models/lat_lng_info.dart';
 
+@deprecated
 class LatLngStream {
   final _controller = StreamController<LatLngInfo>();
 
