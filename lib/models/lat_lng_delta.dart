@@ -2,9 +2,9 @@ import 'lat_lng_info.dart';
 
 @deprecated
 class LatLngDelta {
-  final LatLngInfo from;
-  final LatLngInfo to;
-  double rotation;
+  final LatLngInfo? from;
+  final LatLngInfo? to;
+  double? rotation;
   String markerId;
   bool isStopover;
 

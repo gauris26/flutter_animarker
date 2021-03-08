@@ -1,18 +1,20 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/helpers/spherical_util.dart';
+import 'package:flutter_animarker/models/lat_lng_info.dart';
 
 /// A tween with a location values (latitude, Longitude).
 class LocationTween extends Tween<ILatLng> {
   ILatLng _previousValue = EmptyLatLng();
   double _previousBearing = 0;
   final bool useRotation;
-  final double threshold;
+
   /// Create a tween whose [begin] and [end] values location points.
-  LocationTween({ILatLng begin, ILatLng end, this.useRotation = true, this.threshold = 10})
-      : assert(begin != null, "Must selected a begin position"),
-        assert(end != null, "Must selected a end position"),
-        super(begin: begin, end: end);
+  LocationTween({
+    required ILatLng begin,
+    required ILatLng end,
+    this.useRotation = true,
+  }) : super(begin: begin, end: end);
 
   ///Interpolate two locations with planet spherical calculations at the given animation clock value.
   @override
@@ -20,11 +22,11 @@ class LocationTween extends Tween<ILatLng> {
     assert(begin != null, "Must selected a begin position");
     assert(end != null, "Must selected a end position");
 
-    if(begin == end) return end;
+    if (begin == end) return end!;
 
-    var interposition = SphericalUtil.interpolate(begin, end, t);
+    var interposition = SphericalUtil.interpolate(begin, end, t)!;
 
-    if(useRotation) _performBearing(interposition);
+    if (useRotation) _performBearing(interposition);
 
     _previousValue = interposition;
 
@@ -39,16 +41,16 @@ class LocationTween extends Tween<ILatLng> {
   ILatLng transform(double t) {
     //Setting bearing from previous position to avoid sudden flicking markers
     if (t == 0.0) {
-      begin.bearing = _previousBearing;
-      begin.isStopover = true;
-      return begin;
+      begin!.bearing = _previousBearing;
+      begin!.isStopover = true;
+      return begin!;
     }
 
     //Setting bearing from previous position to avoid sudden flicking markers
     if (t == 1.0) {
-      end.bearing = _previousBearing;
-      end.isStopover = false;
-      return end;
+      end!.bearing = _previousBearing;
+      end!.isStopover = true;
+      return end!;
     }
 
     return lerp(t);
@@ -57,7 +59,12 @@ class LocationTween extends Tween<ILatLng> {
   ///Perfom rotation of the marker from the angle between the given positions
   void _performBearing(ILatLng interposition) {
 
-    double bearing = SphericalUtil.getBearing(_previousValue ?? begin, interposition);
+    if(_previousValue == begin){
+      interposition.bearing = 0;
+      return;
+    }
+
+    double bearing = SphericalUtil.getBearing(_previousValue, interposition);
 
     if (bearing.isNaN || _previousBearing == bearing) bearing = _previousBearing;
 
@@ -66,8 +73,8 @@ class LocationTween extends Tween<ILatLng> {
     _previousBearing = bearing;
   }
 
-  void reset(){
+  void reset() {
     _previousBearing = 0;
-    _previousBearing = null;
+    _previousValue = EmptyLatLng();
   }
 }

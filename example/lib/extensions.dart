@@ -8,7 +8,7 @@ extension GoogleMapLatLng on ILatLng {
 }
 
 extension LatLngInfoEx on LatLng {
-  LatLngInfo toLatLngInfo(String markerId, [double bearing = 0]) => LatLngInfo(latitude, longitude, markerId, bearing);
+  LatLngInfo toLatLngInfo(String markerId, [double bearing = 0]) => LatLngInfo(latitude, longitude, markerId, bearing: bearing);
 
   CameraUpdate get cameraPosition => CameraUpdate.newCameraPosition(
         CameraPosition(

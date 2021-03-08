@@ -1,4 +1,6 @@
 // Port of SphericalUtil from android-maps-utils (https://github.com/googlemaps/android-maps-utils)
+import 'dart:math';
+
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/models/lat_lng_info.dart';
 import 'dart:math' as math;
@@ -21,12 +23,12 @@ class SphericalUtil {
     return MathUtil.wrap(MathUtil.toDegrees(heading), -180, 180);
   }
 
-  static double getBearing(LatLngInfo begin, LatLngInfo end) {
+  static double getBearing(ILatLng begin, ILatLng end) {
     double lat = (begin.latitude - end.latitude).abs();
     double lng = (begin.longitude - end.longitude).abs();
 
     if (begin.latitude < end.latitude && begin.longitude < end.longitude) {
-      return MathUtil.toDegrees(math.atan(lng / lat)) /*+ 90*/;
+      return MathUtil.toDegrees(math.atan(lng / lat)) as double /*+ 90*/;
     } else if (begin.latitude >= end.latitude && begin.longitude < end.longitude) {
       return ((90 - MathUtil.toDegrees(math.atan(lng / lat))) + 90) /*+ 45*/;
     } else if (begin.latitude >= end.latitude && begin.longitude >= end.longitude) {
@@ -44,13 +46,13 @@ class SphericalUtil {
   /// @param to       The LatLng toward which to travel.
   /// @param fraction A fraction of the distance to travel.
   /// @return The interpolated LatLng.
-  static ILatLng interpolate(ILatLng from, ILatLng to, num fraction) {
+  static ILatLng? interpolate(ILatLng? from, ILatLng? to, num fraction) {
     if (from == null) {
       return to;
     }
     final fromLat = MathUtil.toRadians(from.latitude);
     final fromLng = MathUtil.toRadians(from.longitude);
-    final toLat = MathUtil.toRadians(to.latitude);
+    final toLat = MathUtil.toRadians(to!.latitude);
     final toLng = MathUtil.toRadians(to.longitude);
     final cosFromLat = math.cos(fromLat);
     final cosToLat = math.cos(toLat);
@@ -63,6 +65,7 @@ class SphericalUtil {
       return LatLngInfo(from.latitude + fraction * (to.latitude - from.latitude),
           from.longitude + fraction * (to.longitude - from.longitude), from.markerId);
     }
+
     final a = math.sin((1 - fraction) * angle) / sinAngle;
     final b = math.sin(fraction * angle) / sinAngle;
 
@@ -84,24 +87,40 @@ class SphericalUtil {
   static num distanceRadians(num lat1, num lng1, num lat2, num lng2) =>
       MathUtil.arcHav(MathUtil.havDistance(lat1, lat2, lng1 - lng2));
 
-  static num computeAngleBetween(LatLngInfo from, LatLngInfo to) => distanceRadians(
+  static num computeAngleBetween(ILatLng from, ILatLng to) => distanceRadians(
       MathUtil.toRadians(from.latitude),
       MathUtil.toRadians(from.longitude),
       MathUtil.toRadians(to.latitude),
       MathUtil.toRadians(to.longitude));
 
+
   static double angleLerp(double from, double to, double t) {
-    double radFrom = MathUtil.toRadians(from);
-    double radTo = MathUtil.toRadians(to);
-    double diff = radFrom + angleShortestDistance(radFrom, radTo) * t;
-    return MathUtil.toDegrees(diff);
+    double shortestAngle = angleShortestDistance(from, to);
+
+    double result = from * (1 - t) + shortestAngle * t;
+
+    //1e-6: the smallest value that is not stringified in scientific notation.
+    //Prevent unwanted result [1e-6, -1e-6]
+    if(result < 1e-6 && result > -1e-6) return 0;
+
+    return result;
   }
 
-  static double angleShortestDistance(double from, double to) {
+
+
+/*  function interpolator(t) {
+    return a * (1 - t) + b * t;
+  }*/
+
+/*  static double angleShortestDistance(double from, double to) {
     var max = math.pi * 2;
     var delta = to - from;
     var da = delta.sign * (delta.abs() % max);
     return delta.sign * (2 * da.abs() % max) - da;
+  }*/
+
+  static double angleShortestDistance(double from, double to) {
+    return ((to-from) + 180) % 360 - 180;
   }
 
   static num computeDistanceBetween(LatLngInfo from, LatLngInfo to) =>
@@ -121,7 +140,7 @@ class SphericalUtil {
 
     double brng = math.atan2(y, x);
 
-    brng = MathUtil.toDegrees(brng);
+    brng = MathUtil.toDegrees(brng) as double;
     brng = (brng + 360) % 360;
 
     return brng;

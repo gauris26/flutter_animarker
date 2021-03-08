@@ -1,10 +1,6 @@
 name: flutter_map_marker_animation_example
 description: A new Flutter project.
 
-# The following line prevents the package from being accidentally published to
-# pub.dev using `pub publish`. This is preferred for private packages.
-publish_to: "pub.dev" # Remove this line if you wish to publish to pub.dev
-
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
 # followed by an optional build number separated by a +.

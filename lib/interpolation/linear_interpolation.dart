@@ -7,9 +7,9 @@ import 'package:flutter_animarker/streams/lat_lng_stream.dart';
 class LinearInterpolation {
   final Duration movementDuration;
   final Duration movementInterval;
-  LatLngInfo previousLatLng;
+  LatLngInfo? previousLatLng;
   LatLngStream _linearLatLngStream;
-  LatLngInfo lastInterpolatedPosition;
+  LatLngInfo? lastInterpolatedPosition;
 
   LinearInterpolation({
     this.movementDuration = const Duration(milliseconds: 1000),
@@ -23,7 +23,7 @@ class LinearInterpolation {
 
     await for (LatLngInfo pos in _linearLatLngStream.stream) {
 
-      double distance = SphericalUtil.computeDistanceBetween(previousLatLng ?? pos, pos);
+      double distance = SphericalUtil.computeDistanceBetween(previousLatLng ?? pos, pos) as double;
 
       //First marker, required at least two from have a delta position
       if (previousLatLng == null || distance < 5.5) {
@@ -40,15 +40,15 @@ class LinearInterpolation {
 
         double t = (elapsed.toDouble() / movementDuration.inMilliseconds).clamp(0.0, 1.0);
 
-        LatLngInfo latLng = SphericalUtil.interpolate(previousLatLng, pos, t);
+        LatLngInfo latLng = SphericalUtil.interpolate(previousLatLng, pos, t) as LatLngInfo;
 
         double rotation = SphericalUtil.getBearing(
-            latLng, lastInterpolatedPosition ?? previousLatLng);
+            latLng, lastInterpolatedPosition ?? previousLatLng!);
 
         double diff = SphericalUtil.angleShortestDistance(rotation, lastBearing);
 
         double distance = SphericalUtil.computeDistanceBetween(
-            latLng, lastInterpolatedPosition ?? previousLatLng);
+            latLng, lastInterpolatedPosition ?? previousLatLng!) as double;
 
         //Determine if the marker's has made a significantly movement
         if (diff.isNaN || distance < 1.5) {

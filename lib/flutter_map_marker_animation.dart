@@ -1,5 +1,10 @@
 library fluttermapmarkeranimation;
 
-export 'animation_marker_controller.dart';
-export 'models/lat_lng_delta.dart';
+export 'anims/location_tween.dart';
+export 'anims/angle_tween.dart';
+export 'core/i_lat_lng.dart';
 export 'models/lat_lng_info.dart';
+export 'widgets/animarker.dart';
+export 'core/performance_mode.dart';
+export 'core/ripple_marker.dart';
+
