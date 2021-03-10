@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter_animarker/widgets/animarker.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
@@ -9,6 +10,10 @@ import 'package:flutter_animarker/flutter_map_marker_animation.dart';
 
 const startPosition = LatLng(18.488213, -69.959186);
 
+const CameraPosition _kSantoDomingo = CameraPosition(
+  target: startPosition,
+  zoom: 15,
+);
 class FlutterMapMarkerAnimationRealTimeExample extends StatefulWidget {
   @override
   _FlutterMapMarkerAnimationExampleState createState() => _FlutterMapMarkerAnimationExampleState();
@@ -22,20 +27,15 @@ class _FlutterMapMarkerAnimationExampleState
 
   final Completer<GoogleMapController> _controller = Completer();
 
-  CameraPosition _kSantoDomingo;
-
   double zoom = 1;
+
+  Random random = Random();
 
   Map<MarkerId, Marker> _markers = Map<MarkerId, Marker>();
 
   @override
   void initState() {
     super.initState();
-
-    _kSantoDomingo = CameraPosition(
-      target: startPosition,
-      zoom: 15,
-    );
 
     positionStream = Geolocator.getPositionStream(
       desiredAccuracy: LocationAccuracy.bestForNavigation,
@@ -47,22 +47,29 @@ class _FlutterMapMarkerAnimationExampleState
       setState(() {
         var markerId = MarkerId("MarkerId2");
         _markers[markerId] = RippleMarker(
-          markerId: MarkerId("MarkerId2"),
+          markerId: markerId,
           position: LatLng(latitude, longitude),
+          onTap: () => print(markerId.value),
           ripple: ripple,
         );
       });
 
+      /*await Future.delayed(Duration(milliseconds: min(1000, random.nextInt(1000) + 100)), () {
+        setState(() {
+          startPosition = LatLng(latitude + 0.001, longitude + 0.001);
+        });
+      });*/
+
       //Push new location changes
       CameraPosition cPosition = CameraPosition(
-        zoom: 16,
+        zoom: 15,
         tilt: 0,
         bearing: 30,
         target: LatLng(latitude, longitude),
       );
 
-      _controller.future
-          .then((value) => value.animateCamera(CameraUpdate.newCameraPosition(cPosition)));
+      GoogleMapController controller = await _controller.future;
+      await controller.animateCamera(CameraUpdate.newCameraPosition(cPosition));
     });
   }
 
@@ -83,6 +90,7 @@ class _FlutterMapMarkerAnimationExampleState
                 Animarker(
                   controller: _controller.future,
                   performanceMode: PerformanceMode.better,
+                  onStopover: onStopover,
                   markers: <Marker>{
                     //Avoid sent duplicate MarkerId
                     ..._markers.values.toSet(),
@@ -120,14 +128,22 @@ class _FlutterMapMarkerAnimationExampleState
     );
   }
 
+  Future<void> onStopover(LatLng latLng) async {
+
+
+
+  }
+
   void onMapCreated(GoogleMapController controller) async {
     /*TODO*/
     //animarker.controller.getZoomLevel().then((value) => zoom = value/100);
   }
 
   @override
-  void dispose() {
+  void dispose() async {
     positionStream.cancel();
+    GoogleMapController controller = await _controller.future;
+    controller.dispose();
     super.dispose();
   }
 }

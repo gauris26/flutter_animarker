@@ -1,10 +1,7 @@
 // Port of SphericalUtil from android-maps-utils (https://github.com/googlemaps/android-maps-utils)
-import 'dart:math';
-
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/models/lat_lng_info.dart';
 import 'dart:math' as math;
-//import 'dart:ui';
 import 'math_util.dart';
 
 class SphericalUtil {
@@ -15,10 +12,8 @@ class SphericalUtil {
     final toLat = MathUtil.toRadians(to.latitude);
     final toLng = MathUtil.toRadians(to.longitude);
     final dLng = toLng - fromLng;
-    final heading = math.atan2(
-        math.sin(dLng) * math.cos(toLat),
-        math.cos(fromLat) * math.sin(toLat) -
-            math.sin(fromLat) * math.cos(toLat) * math.cos(dLng));
+    final heading = math.atan2(math.sin(dLng) * math.cos(toLat),
+        math.cos(fromLat) * math.sin(toLat) - math.sin(fromLat) * math.cos(toLat) * math.cos(dLng));
 
     return MathUtil.wrap(MathUtil.toDegrees(heading), -180, 180);
   }
@@ -46,13 +41,12 @@ class SphericalUtil {
   /// @param to       The LatLng toward which to travel.
   /// @param fraction A fraction of the distance to travel.
   /// @return The interpolated LatLng.
-  static ILatLng? interpolate(ILatLng? from, ILatLng? to, num fraction) {
-    if (from == null) {
-      return to;
-    }
+  static ILatLng interpolate(ILatLng from, ILatLng to, num fraction) {
+    if (from.isEmpty) return to;
+
     final fromLat = MathUtil.toRadians(from.latitude);
     final fromLng = MathUtil.toRadians(from.longitude);
-    final toLat = MathUtil.toRadians(to!.latitude);
+    final toLat = MathUtil.toRadians(to.latitude);
     final toLng = MathUtil.toRadians(to.longitude);
     final cosFromLat = math.cos(fromLat);
     final cosToLat = math.cos(toLat);
@@ -70,10 +64,8 @@ class SphericalUtil {
     final b = math.sin(fraction * angle) / sinAngle;
 
     // Converts from polar to vector and interpolate.
-    final x =
-        a * cosFromLat * math.cos(fromLng) + b * cosToLat * math.cos(toLng);
-    final y =
-        a * cosFromLat * math.sin(fromLng) + b * cosToLat * math.sin(toLng);
+    final x = a * cosFromLat * math.cos(fromLng) + b * cosToLat * math.cos(toLng);
+    final y = a * cosFromLat * math.sin(fromLng) + b * cosToLat * math.sin(toLng);
     final z = a * math.sin(fromLat) + b * math.sin(toLat);
 
     // Converts interpolated vector back to polar.
@@ -93,7 +85,6 @@ class SphericalUtil {
       MathUtil.toRadians(to.latitude),
       MathUtil.toRadians(to.longitude));
 
-
   static double angleLerp(double from, double to, double t) {
     double shortestAngle = angleShortestDistance(from, to);
 
@@ -101,12 +92,10 @@ class SphericalUtil {
 
     //1e-6: the smallest value that is not stringified in scientific notation.
     //Prevent unwanted result [1e-6, -1e-6]
-    if(result < 1e-6 && result > -1e-6) return 0;
+    if (result < 1e-6 && result > -1e-6) return 0;
 
     return result;
   }
-
-
 
 /*  function interpolator(t) {
     return a * (1 - t) + b * t;
@@ -120,10 +109,10 @@ class SphericalUtil {
   }*/
 
   static double angleShortestDistance(double from, double to) {
-    return ((to-from) + 180) % 360 - 180;
+    return ((to - from) + 180) % 360 - 180;
   }
 
-  static num computeDistanceBetween(LatLngInfo from, LatLngInfo to) =>
+  static num computeDistanceBetween(ILatLng from, ILatLng to) =>
       computeAngleBetween(from, to) * earthRadius;
 
   static double bearingBetweenLocations(LatLngInfo latLngFrom, LatLngInfo latLngTo) {
@@ -135,8 +124,7 @@ class SphericalUtil {
     double dLon = (long2 - long1);
 
     double y = math.sin(dLon) * math.cos(lat2);
-    double x = math.cos(lat1) * math.sin(lat2) -
-        math.sin(lat1) * math.cos(lat2) * math.cos(dLon);
+    double x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(dLon);
 
     double brng = math.atan2(y, x);
 
