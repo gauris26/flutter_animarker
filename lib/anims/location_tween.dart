@@ -39,7 +39,7 @@ class LocationTween extends Tween<ILatLng> with BearingHeadingMixin {
   ILatLng lerp(double t) {
     if (begin == end) return end;
 
-    var tPosition = SphericalUtil.interpolate(begin, end, t);
+    var tPosition = SphericalUtil.interpolate(_previousPosition, end, t).copyWith(ripple: begin.ripple);
 
     if (isBearing) {
       tPosition = _bearing(tPosition);

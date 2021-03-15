@@ -7,4 +7,5 @@ export 'models/lat_lng_info.dart';
 export 'widgets/animarker.dart';
 export 'core/performance_mode.dart';
 export 'core/ripple_marker.dart';
+export 'widgets/aniripple.dart';
 

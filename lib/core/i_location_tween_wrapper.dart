@@ -3,9 +3,9 @@ import 'package:flutter_animarker/anims/location_tween.dart';
 
 import 'i_lat_lng.dart';
 
-abstract class ILocationTweenWrapper {
+abstract class ILocationAnimationWrapper {
 
-  ILocationTweenWrapper(LocationTween locationTween, {required Animation<double> controller});
+  ILocationAnimationWrapper(LocationTween locationTween, {required Animation<double> controller});
 
   ILatLng get begin;
   set begin (ILatLng value);

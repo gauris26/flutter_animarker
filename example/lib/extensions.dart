@@ -1,14 +1,14 @@
 import 'package:flutter_animarker/flutter_map_marker_animation.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'
-    show CameraPosition, CameraUpdate, LatLng;
+    show CameraPosition, CameraUpdate, LatLng, MarkerId;
 
 extension GoogleMapLatLng on ILatLng {
   LatLng get toLatLng => LatLng(this.latitude, this.longitude);
 }
 
 extension LatLngInfoEx on LatLng {
-  LatLngInfo toLatLngInfo(String markerId, [double bearing = 0]) => LatLngInfo(latitude, longitude, markerId, bearing: bearing);
+  LatLngInfo toLatLngInfo(MarkerId markerId, [double bearing = 0]) => LatLngInfo(latitude, longitude, markerId, bearing: bearing);
 
   CameraUpdate get cameraPosition => CameraUpdate.newCameraPosition(
         CameraPosition(

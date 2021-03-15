@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter_animarker/helpers/math_util.dart';
+import 'package:flutter_animarker/helpers/spherical_util.dart';
 import 'package:flutter_animarker/widgets/animarker.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +16,7 @@ const CameraPosition _kSantoDomingo = CameraPosition(
   target: startPosition,
   zoom: 15,
 );
+
 class FlutterMapMarkerAnimationRealTimeExample extends StatefulWidget {
   @override
   _FlutterMapMarkerAnimationExampleState createState() => _FlutterMapMarkerAnimationExampleState();
@@ -27,9 +30,9 @@ class _FlutterMapMarkerAnimationExampleState
 
   final Completer<GoogleMapController> _controller = Completer();
 
-  double zoom = 1;
+  double zoom = 15;
 
-  Random random = Random();
+  bool isActiveTrip = true;
 
   Map<MarkerId, Marker> _markers = Map<MarkerId, Marker>();
 
@@ -40,36 +43,21 @@ class _FlutterMapMarkerAnimationExampleState
     positionStream = Geolocator.getPositionStream(
       desiredAccuracy: LocationAccuracy.bestForNavigation,
       distanceFilter: 20,
-    ).listen((Position position) async {
-      double latitude = position.latitude;
-      double longitude = position.longitude;
-
+    ).listen((Position p) {
       setState(() {
         var markerId = MarkerId("MarkerId2");
         _markers[markerId] = RippleMarker(
           markerId: markerId,
-          position: LatLng(latitude, longitude),
-          onTap: () => print(markerId.value),
+          position: LatLng(p.latitude, p.longitude),
           ripple: ripple,
         );
       });
 
-      /*await Future.delayed(Duration(milliseconds: min(1000, random.nextInt(1000) + 100)), () {
+      /* await Future.delayed(Duration(milliseconds: min(1000, random.nextInt(1000) + 100)), () {
         setState(() {
           startPosition = LatLng(latitude + 0.001, longitude + 0.001);
         });
       });*/
-
-      //Push new location changes
-      CameraPosition cPosition = CameraPosition(
-        zoom: 15,
-        tilt: 0,
-        bearing: 30,
-        target: LatLng(latitude, longitude),
-      );
-
-      GoogleMapController controller = await _controller.future;
-      await controller.animateCamera(CameraUpdate.newCameraPosition(cPosition));
     });
   }
 
@@ -89,7 +77,11 @@ class _FlutterMapMarkerAnimationExampleState
               children: [
                 Animarker(
                   controller: _controller.future,
+                  isActiveTrip: isActiveTrip,
+                  radius: 0.08,
+                  zoom: zoom,
                   performanceMode: PerformanceMode.better,
+                  duration: Duration(milliseconds: 2000),
                   onStopover: onStopover,
                   markers: <Marker>{
                     //Avoid sent duplicate MarkerId
@@ -104,21 +96,34 @@ class _FlutterMapMarkerAnimationExampleState
                     mapType: MapType.normal,
                     initialCameraPosition: _kSantoDomingo,
                     onMapCreated: (controller) => _controller.complete(controller),
-                    onCameraMove: (ca) {
-                      zoom = ca.zoom / 100;
-                    },
+                    onCameraMove: (ca) => setState(() => zoom = ca.zoom),
                   ),
                 ),
                 Align(
-                  alignment: Alignment(0, 0.9),
-                  child: ElevatedButton(
-                      style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStateProperty.all<Color>(ripple ? Colors.red : Colors.blue)),
-                      onPressed: () => setState(() {
-                            ripple = !ripple;
-                          }),
-                      child: Text("Ripple: $ripple")),
+                  alignment: Alignment(0, 0.85),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                ripple ? Colors.red : Colors.blue)),
+                        onPressed: () => setState(() {
+                          ripple = !ripple;
+                        }),
+                        child: Text(ripple ? "End Ripple" : "Active Ripple"),
+                      ),
+                      ElevatedButton(
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                isActiveTrip ? Colors.red : Colors.blue)),
+                        onPressed: () => setState(() {
+                          isActiveTrip = !isActiveTrip;
+                        }),
+                        child: Text(isActiveTrip ? "End trip" : "Active trip"),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             );
@@ -129,9 +134,19 @@ class _FlutterMapMarkerAnimationExampleState
   }
 
   Future<void> onStopover(LatLng latLng) async {
+    if (!_controller.isCompleted) return;
 
+    GoogleMapController controller = await _controller.future;
+    double zoom = await controller.getZoomLevel();
 
+    CameraPosition camPosition = CameraPosition(
+      zoom: zoom,
+      tilt: 0,
+      bearing: 30,
+      target: latLng,
+    );
 
+    await controller.animateCamera(CameraUpdate.newCameraPosition(camPosition));
   }
 
   void onMapCreated(GoogleMapController controller) async {

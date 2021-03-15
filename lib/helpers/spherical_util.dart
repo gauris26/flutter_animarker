@@ -1,21 +1,41 @@
 // Port of SphericalUtil from android-maps-utils (https://github.com/googlemaps/android-maps-utils)
+// https://docs.microsoft.com/en-us/bingmaps/articles/bing-maps-tile-system?redirectedfrom=MSDN
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/models/lat_lng_info.dart';
 import 'dart:math' as math;
 import 'math_util.dart';
 
 class SphericalUtil {
-  static const num earthRadius = 6371009.0;
-  static num computeHeading(LatLngInfo from, LatLngInfo to) {
+  static const double earthRadius = 6378137.0;
+  static const double maxLatitude = 85.05112878;
+  static const double minLatitude = -85.05112878;
+
+  static num computeHeading(ILatLng from, ILatLng to) {
     final fromLat = MathUtil.toRadians(from.latitude);
     final fromLng = MathUtil.toRadians(from.longitude);
     final toLat = MathUtil.toRadians(to.latitude);
     final toLng = MathUtil.toRadians(to.longitude);
     final dLng = toLng - fromLng;
-    final heading = math.atan2(math.sin(dLng) * math.cos(toLat),
-        math.cos(fromLat) * math.sin(toLat) - math.sin(fromLat) * math.cos(toLat) * math.cos(dLng));
+    var x = math.sin(dLng) * math.cos(toLat);
+    var y = math.cos(fromLat) * math.sin(toLat) - math.sin(fromLat) * math.cos(toLat) * math.cos(dLng);
+    final heading = math.atan2(x, y);
 
-    return MathUtil.wrap(MathUtil.toDegrees(heading), -180, 180);
+    return MathUtil.toDegrees(heading);
+    //return MathUtil.wrap(MathUtil.toDegrees(heading), -180, 180);
+  }
+
+  static double calculateZoomScale(double densityDpi, double zoomLevel, ILatLng target){
+
+    var dpi = densityDpi * 160;
+
+    double mapwidth = 256.0 * math.pow(2, zoomLevel);
+    double clipLatitude = math.min(math.max(target.latitude, minLatitude), maxLatitude);
+    double angle = clipLatitude * math.pi/180;
+    double angleRadians = MathUtil.toRadians(angle).toDouble();
+    double groundResolution = (math.cos(angleRadians) * 2 * math.pi * SphericalUtil.earthRadius) / mapwidth;
+    double mapScale = (groundResolution * dpi / 0.0254);
+
+    return 1/mapScale;
   }
 
   static double getBearing(ILatLng begin, ILatLng end) {

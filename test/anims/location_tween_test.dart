@@ -2,12 +2,13 @@ import 'package:flutter_animarker/anims/location_tween.dart';
 import 'package:flutter_animarker/flutter_map_marker_animation.dart';
 import 'package:flutter_animarker/helpers/spherical_util.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 void main() {
   group("Location Tween Interpolation", () {
     test('Just after constructor initialization begin-end angle should keep their values', () {
-      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, "");
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, "");
+      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(""));
+      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(""));
 
       LocationTween locationTween = LocationTween(begin: beginLocation, end: endLocation);
       ILatLng resultBegin = locationTween.begin;
@@ -18,8 +19,8 @@ void main() {
     });
 
     test('Ensure that [begin,end] angles have\'nt changed after calling lerp method', () {
-      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, "");
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, "");
+      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(""));
+      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(""));
       double t = 0.6;
 
       LocationTween locationTween = LocationTween(begin: beginLocation, end: endLocation);
@@ -34,8 +35,8 @@ void main() {
     test(
         'If begin and end locations are equal the result should be empty, not matter (t) position on the timeline',
         () {
-      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, "MarkerId");
-      ILatLng endLocation = LatLngInfo(18.48817486792756, -69.95916740356776, "MarkerId");
+      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(""));
+      ILatLng endLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(""));
       double t = 0.5;
 
       LocationTween locationTween = LocationTween(begin: beginLocation, end: endLocation);
@@ -45,8 +46,8 @@ void main() {
     });
 
     test('lerp(t) should return the same begin location at 0.0 (t) position on the timeline', () {
-      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, "");
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, "");
+      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(""));
+      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(""));
       double t = 0.0;
 
       LocationTween locationTween = LocationTween(begin: beginLocation, end: endLocation);
@@ -58,8 +59,8 @@ void main() {
     test(
         'lerp(t) should return the same end location at 1.0 (t) position on the timeline, without rotation deactivated',
         () {
-      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, "");
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, "");
+      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(""));
+      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(""));
       double t = 1.0;
 
       LocationTween locationTween =
@@ -72,8 +73,8 @@ void main() {
     test(
         'lerp(t) should return the same end location just the bearing filed updated at 1.0 (t) position on the timeline with rotation activated',
         () {
-      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, "");
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, "");
+      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(""));
+      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(""));
       double t = 1.0;
 
       LocationTween locationTween =
@@ -87,9 +88,9 @@ void main() {
     test(
         'lerp(t) should return the middle point betwwen begin-end location at 1.0 (t) position on the timeline, without rotation deactivated',
         () {
-      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, "");
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, "");
-      ILatLng middleLocation = LatLngInfo(18.48850695153677, -69.95256775721292, "");
+      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(""));
+      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(""));
+      ILatLng middleLocation = LatLngInfo(18.48850695153677, -69.95256775721292, MarkerId(""));
       double t = 0.5;
 
       LocationTween locationTween =
@@ -102,8 +103,8 @@ void main() {
     test(
         'lerp(t) should returns same result that source function interpolation (SphericalUtil.interpolate) returns, acting as control',
         () {
-      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, "");
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, "");
+      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(""));
+      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(""));
       double t = 0.5;
 
       LocationTween locationTween =
@@ -116,8 +117,8 @@ void main() {
     });
 
     test('Location between begin-end, no inclusive, are not stopover', () {
-      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, "");
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, "");
+      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(""));
+      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(""));
       Stream<double> t = Stream.fromIterable([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]);
 
       LocationTween locationTween =
@@ -134,8 +135,8 @@ void main() {
     });
 
     test('Location between begin-end using transform(t), no inclusive, are not stopover', () {
-      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, "");
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, "");
+      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(""));
+      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(""));
       Stream<double> t = Stream.fromIterable([0.0, 1.0]);
 
       LocationTween locationTween =
@@ -160,13 +161,13 @@ void main() {
     test(
         'The tween begin-end need to be swapple, to interpolate from the last position to the new one, and so on, without rotation',
         () {
-      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, "");
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, "");
+      ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(""));
+      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(""));
       double t = 1.0;
 
       LocationTween locationTween = LocationTween(begin: beginLocation, end: endLocation, isBearing: false);
 
-      ILatLng newPosition = LatLngInfo(18.48430279636411, -69.94079341600313, ""); //new location updates
+      ILatLng newPosition = LatLngInfo(18.48430279636411, -69.94079341600313, MarkerId("")); //new location updates
 
       locationTween.begin = locationTween.end;
       locationTween.end = newPosition;
@@ -174,7 +175,7 @@ void main() {
       expect(locationTween.begin, endLocation);
       expect(locationTween.end, equals(newPosition));
 
-      ILatLng newPosition2 = LatLngInfo(18.4658611180733, -69.93044604942473, ""); //new location updates
+      ILatLng newPosition2 = LatLngInfo(18.4658611180733, -69.93044604942473, MarkerId("")); //new location updates
 
       locationTween.begin = locationTween.end;
       locationTween.end = newPosition2;
@@ -194,15 +195,15 @@ void main() {
     test(
         'The tween begin-end need to be swapple, to interpolate from the last position to the new one, and so on',
             () {
-          ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, "");
-          ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, "");
+          ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(""));
+          ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(""));
           double t = 1.0;
 
           LocationTween locationTween = LocationTween(begin: beginLocation, end: endLocation);
 
           double bearing = locationTween.lerp(t).bearing;
           print(bearing);
-          ILatLng newPosition = LatLngInfo(18.48430279636411, -69.94079341600313, ""); //new location updates
+          ILatLng newPosition = LatLngInfo(18.48430279636411, -69.94079341600313, MarkerId("")); //new location updates
 
           locationTween.begin = locationTween.end;
           locationTween.end = newPosition;
@@ -213,7 +214,7 @@ void main() {
           expect(locationTween.begin, endLocation);
           expect(locationTween.end, equals(newPosition));
 
-          ILatLng newPosition2 = LatLngInfo(18.4658611180733, -69.93044604942473, ""); //new location updates
+          ILatLng newPosition2 = LatLngInfo(18.4658611180733, -69.93044604942473, MarkerId("")); //new location updates
 
           locationTween.begin = locationTween.end;
           locationTween.end = newPosition2;
@@ -224,7 +225,7 @@ void main() {
           expect(locationTween.begin, equals(newPosition));
           expect(locationTween.end, equals(newPosition2));
 
-          ILatLng newPosition3 = LatLngInfo(18.451382274885972, -69.92247245553017, "");
+          ILatLng newPosition3 = LatLngInfo(18.451382274885972, -69.92247245553017, MarkerId(""));
 
           locationTween.begin = locationTween.end;
           locationTween.end = newPosition3;

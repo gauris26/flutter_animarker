@@ -1,16 +1,20 @@
 import 'package:flutter_animarker/core/i_lat_lng.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+final MarkerId defaultId = MarkerId("");
 
 class LatLngInfo implements ILatLng {
   final double latitude;
   final double longitude;
-  final String markerId;
+  final MarkerId? markerId;
   final double bearing;
   final bool isStopover;
   final bool ripple;
   final bool isEmpty;
+  final double mapScale;
 
   const LatLngInfo(this.latitude, this.longitude, this.markerId,
-      {this.bearing = 0, this.isStopover = false, this.ripple = false})
+      {this.bearing = 0, this.isStopover = false, this.ripple = false, this.mapScale = 0.5})
       : isEmpty = false;
 
   const LatLngInfo.empty()
@@ -18,8 +22,9 @@ class LatLngInfo implements ILatLng {
         isStopover = false,
         latitude = 0,
         longitude = 0,
-        markerId = "",
+        markerId = null,
         ripple = false,
+        mapScale = 0.5,
         isEmpty = true;
 
   @override
@@ -33,7 +38,8 @@ class LatLngInfo implements ILatLng {
           bearing == other.bearing &&
           isStopover == other.isStopover &&
           ripple == other.ripple &&
-          isEmpty == other.isEmpty;
+          isEmpty == other.isEmpty &&
+          mapScale == other.mapScale;
 
   @override
   int get hashCode =>
@@ -43,21 +49,23 @@ class LatLngInfo implements ILatLng {
       bearing.hashCode ^
       isStopover.hashCode ^
       ripple.hashCode ^
-      isEmpty.hashCode;
+      isEmpty.hashCode ^
+      mapScale.hashCode;
 
   @override
   String toString() {
-    return 'LatLngInfo{latitude: $latitude, longitude: $longitude, markerId: $markerId, bearing: $bearing, isStopover: $isStopover, ripple: $ripple}';
+    return 'LatLngInfo{latitude: $latitude, longitude: $longitude, markerId: $markerId, bearing: $bearing, isStopover: $isStopover, ripple: $ripple, isEmpty: $isEmpty, mapScale: $mapScale}';
   }
 
   LatLngInfo copyWith({
     double? latitude,
     double? longitude,
     double? bearing,
-    String? markerId,
+    MarkerId? markerId,
     bool? isStopover,
     bool? ripple,
     bool? isEmpty,
+    double? mapScale,
   }) {
     if ((latitude == null || identical(latitude, this.latitude)) &&
         (longitude == null || identical(longitude, this.longitude)) &&
@@ -65,7 +73,8 @@ class LatLngInfo implements ILatLng {
         (markerId == null || identical(markerId, this.markerId)) &&
         (isStopover == null || identical(isStopover, this.isStopover)) &&
         (ripple == null || identical(ripple, this.ripple)) &&
-        (isEmpty == null || identical(isEmpty, this.isEmpty))) {
+        (isEmpty == null || identical(isEmpty, this.isEmpty)) &&
+        (mapScale == null || identical(mapScale, this.mapScale))) {
       return this;
     }
 
@@ -75,7 +84,8 @@ class LatLngInfo implements ILatLng {
       markerId ?? this.markerId,
       bearing: bearing ?? this.bearing,
       isStopover: isStopover ?? this.isStopover,
-      ripple: ripple ?? this.ripple
+      ripple: ripple ?? this.ripple,
+      mapScale: mapScale ?? this.mapScale,
     );
   }
 }

@@ -7,6 +7,21 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 extension GoogleMapLatLng on ILatLng {
   LatLng get toLatLng => LatLng(this.latitude, this.longitude);
+
+  bool get isRipple {
+    if (this is RippleMarker)
+      return (this as RippleMarker).ripple;
+    else
+      return false;
+  }
+}
+
+extension AnimationControllerEx on AnimationController {
+  bool get isFinished => this.isCompleted || this.isDismissed;
+  TickerFuture resetAndForward({ double? from }) {
+    this.reset();
+    return this.forward(from: from);
+  }
 }
 
 extension LatLngEx on Marker {
@@ -17,9 +32,8 @@ extension LatLngEx on Marker {
       return false;
   }
 
-  ILatLng get toLatLngInfo =>
-      LatLngInfo(this.position.latitude, this.position.longitude, this.markerId.value,
-          ripple: this.isRipple);
+  ILatLng toLatLngInfo([double bearing = 0]) =>
+      LatLngInfo(this.position.latitude, this.position.longitude, this.markerId, bearing: bearing, ripple: this.isRipple);
 }
 
 extension LocationTweenEx on LocationTween {
@@ -40,6 +54,6 @@ extension CircleToSet on Map<CircleId, Circle> {
 }
 
 extension LatLngInfoEx on LatLng {
-  LatLngInfo toLatLngInfo(String markerId, [double bearing = 0]) =>
+  ILatLng toLatLngInfo(MarkerId markerId, [double bearing = 0]) =>
       LatLngInfo(latitude, longitude, markerId, bearing: bearing);
 }

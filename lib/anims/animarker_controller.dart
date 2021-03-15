@@ -1,9 +1,8 @@
-import 'dart:collection';
-
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animarker/core/I_location_tween_factory.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
+import 'package:flutter_animarker/core/i_location_dispatcher.dart';
 import 'package:flutter_animarker/flutter_map_marker_animation.dart';
 import 'package:flutter_animarker/helpers/spherical_util.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -28,16 +27,14 @@ class AnimarkerController {
   final Duration rotationDuration;
   late final Map<MarkerId, LocationTween> tracker;
   final ILocationTweenFactory locationTweenFactory;
-  late final Queue<Marker> _queueMarker = Queue<Marker>();
-  final bool activeTrip;
-  final double threshold;
-  LatLng previous = LatLng(0, 0);
+  final ILocationDispatcher locationDispatcher;
+  late bool _isActiveTrip;
+  LatLng previousPosition = LatLng(0, 0);
 
   //Tweens
   //late final LocationTween _locationTween;
   late final AngleTween _angleTween;
-  late final Tween<double> radiusTween;
-  late final ColorTween colorTween;
+  late final Tween<double> _radiusTween;
 
   //Animations
   //late final Animation<ILatLng> _locationAnimation;
@@ -49,31 +46,43 @@ class AnimarkerController {
   final MarkerListener onMarkerAnimation;
   final RippleListener onRippleAnimation;
   final OnStopover onStopover;
+  double mapScale = 0.05;
+  bool isResseting = false;
 
   AnimarkerController({
     required this.vsync,
     required this.onMarkerAnimation,
     required this.onRippleAnimation,
     required this.locationTweenFactory,
+    required this.locationDispatcher,
     required this.onStopover,
-    this.threshold = 1.5,
-    this.activeTrip = true,
-    /**TODO**/
+    bool isActiveTrip = true,
     this.duration = const Duration(milliseconds: 1000),
     this.rotationDuration = const Duration(milliseconds: 10000),
     this.rippleColor = Colors.red,
     this.rippleDuration = const Duration(milliseconds: 2000),
-  }) {
+  })  : _isActiveTrip = isActiveTrip {
     init();
   }
 
   void init() {
+
     _locationAnimController = AnimationController(vsync: vsync, duration: duration)
-      ..addStatusListener((status) async {
-        if (status == AnimationStatus.completed && !_locationAnimController.isDismissed) {
-          if (_queueMarker.isNotEmpty) {
-            await Future.delayed(
-                Duration(milliseconds: 500), () => _generate(_queueMarker.removeFirst()));
+      ..addStatusListener((status) {
+        if (isResseting) {
+          print("Resseting: ${_locationAnimController.status}");
+          isResseting = false;
+          return;
+        }
+        if (status == AnimationStatus.completed || _locationAnimController.isDismissed) {
+          if (locationDispatcher.isNotEmpty) {
+            var next = locationDispatcher.next();
+            if (_isActiveTrip) {
+              _generate(next);
+            } else {
+              var last = locationDispatcher.goTo(locationDispatcher.length - 1);
+              _generate(last);
+            }
           }
         }
       });
@@ -89,7 +98,6 @@ class AnimarkerController {
         ;
 
     _rippleAnimController = AnimationController(vsync: vsync, duration: rippleDuration);
-    /*..addListener(rippleListener)*/
 
     //Tweens Init
     _angleTween = AngleTween(begin: 0, end: 0);
@@ -97,9 +105,9 @@ class AnimarkerController {
     _angleAnimation = _angleTween
         .animate(CurvedAnimation(curve: Curves.linearToEaseOut, parent: _angleAnimController));
 
-    radiusTween = Tween<double>(begin: 0, end: 160);
+    _radiusTween = Tween<double>(begin: 0, end: 1.0);
 
-    radiusAnimation = radiusTween
+    radiusAnimation = _radiusTween
         .animate(CurvedAnimation(curve: Curves.easeOutSine, parent: _rippleAnimController))
           ..addStatusListener(_rippleStatusListener);
 
@@ -110,6 +118,8 @@ class AnimarkerController {
 
     tracker = Map<MarkerId, LocationTween>();
   }
+
+  set isActiveTrip(bool value) => _isActiveTrip = value;
 
   void _angleListener(MarkerId markerId) {
     ILatLng location = tracker[markerId]!.evaluate(_locationAnimController);
@@ -123,26 +133,42 @@ class AnimarkerController {
     onMarkerAnimation(marker);
   }
 
-  void _rippleStatusListener(AnimationStatus status) {
-    if (_rippleAnimController.status == AnimationStatus.completed &&
+  void _rippleStatusListener(AnimationStatus status) async {
+    if (_rippleAnimController.isCompleted &&
         !_rippleAnimController.isDismissed) {
       Future.delayed(Duration(milliseconds: 500), () => _rippleAnimController.forward(from: 0));
     }
   }
 
+  void updateZoomLevel(double density, double radiusScale, double zoomLevel) {
+
+    tracker.forEach((k, v) {
+      mapScale = SphericalUtil.calculateZoomScale(density, zoomLevel, v.begin);
+    });
+
+    _radiusTween.end = radiusScale.clamp(0.0, 1.0);
+    _rippleAnimController.reset();
+    _rippleAnimController.forward();
+  }
+
   void _rippleListener(MarkerId markerId) {
+
     ILatLng location = tracker[markerId]!.evaluate(_locationAnimController);
+
+    var radius = (radiusAnimation.value / 100) / mapScale;
+
+    var opacity = colorAnimation.value.opacity;
+    var color = colorAnimation.value.withOpacity((opacity + 0.03).clamp(0.0, 1.0));
 
     for (int wave = 3; wave >= 0; wave--) {
       var circleId = CircleId("CircleId->$wave");
       Circle circle = Circle(
         circleId: circleId,
         center: location.toLatLng,
-        radius: (radiusAnimation.value * wave),
+        radius: radius * wave,
         fillColor: colorAnimation.value,
         strokeWidth: 1,
-        strokeColor:
-            colorAnimation.value.withOpacity((colorAnimation.value.opacity + 0.03).clamp(0.0, 1.0)),
+        strokeColor: color,
       );
 
       onRippleAnimation(circle);
@@ -150,6 +176,7 @@ class AnimarkerController {
   }
 
   void _locationUpdates(MarkerId markerId) async {
+
     ILatLng location = tracker[markerId]!.evaluate(_locationAnimController);
 
     Marker marker = Marker(
@@ -159,61 +186,56 @@ class AnimarkerController {
 
     onMarkerAnimation(marker);
 
-    /*if(location.isStopover){
+    if (location.isStopover) {
       await onStopover(location.toLatLng);
-    }*/
+    }
   }
 
-  double lastBearing = 0;
-  int thresholdCount = 0;
-  Future<void> pushMarker(Marker marker) async {
-    if (previous == marker.position) return;
+  void pushMarker(Marker marker) async {
+    if (!_isActiveTrip) return;
+    if(previousPosition == marker.position) return;
 
-    var bearing = SphericalUtil.getBearing(previous.toLatLngInfo(marker.markerId.value),
-        marker.position.toLatLngInfo(marker.markerId.value));
 
-    double delta = bearing - lastBearing;
+    ILatLng position = marker.toLatLngInfo();
 
-    if (delta.abs() < threshold) {
-      if(_queueMarker.isNotEmpty) _queueMarker.removeLast();
-    }
-
-    print("Bearing Delta: ${delta} Count: $thresholdCount");
-    _queueMarker.addLast(marker);
-
-    lastBearing = bearing;
-    previous = marker.position;
+    locationDispatcher.push(position);
 
     tracker[marker.markerId] ??= locationTweenFactory.create()
       ..animarker(
         controller: _locationAnimController,
-        curve: Curves.linearToEaseOut,
+        curve: Curves.ease,
         listener: () {
           _locationUpdates(marker.markerId);
-          //_angleListener(marker.markerId);
+          _angleListener(marker.markerId);
           _rippleListener(marker.markerId);
         },
       );
 
-    if (_locationAnimController.isDismissed || _locationAnimController.isCompleted) {
-      _locationAnimController.reset();
-      _locationAnimController.forward();
+    //Start animation
+    if (!_locationAnimController.isAnimating &&
+        (_locationAnimController.isDismissed || _locationAnimController.isCompleted)
+    ) {
+      _locationAnimController.resetAndForward();
     }
+
+    previousPosition = marker.position;
   }
 
-  void _generate(Marker marker) {
+  void _generate(ILatLng marker) {
+    if (!tracker.containsKey(marker.markerId)) return;
+
     final location = tracker[marker.markerId]!;
 
     //If is isEmpty (no set) the "begin LatLng" field is ready for animation, delta location required
     if (location.begin.isEmpty) {
-      location.begin = marker.toLatLngInfo;
-      location.end = marker.toLatLngInfo;
+      location.begin = marker;
+      location.end = marker;
     } else {
       location.begin = location.end;
-      location.end = marker.toLatLngInfo;
+      location.end = marker;
 
-      _locationAnimController.reset();
-      _locationAnimController.forward();
+      isResseting = true;
+      _locationAnimController.resetAndForward();
 
       _angleTween.begin = _angleAnimation.value;
       _angleTween.end = location.evaluate(_locationAnimController).bearing;
@@ -223,17 +245,19 @@ class AnimarkerController {
     }
 
     //Control when starts/stops ripple
-    if (marker.isRipple &&
-        (_rippleAnimController.isCompleted || _rippleAnimController.isDismissed)) {
+    /*if (marker.ripple && !_rippleAnimController.isAnimating) {
       _rippleAnimController.forward();
     } else if (_rippleAnimController.isAnimating) {
       _rippleAnimController.reset();
-    }
+    }*/
   }
 
+
+
   void dispose() {
-    _queueMarker.clear();
+    previousPosition = LatLng(0, 0);
     tracker.clear();
+    locationDispatcher.dispose();
     _angleAnimController.dispose();
     _locationAnimController.dispose();
     _rippleAnimController.dispose();
