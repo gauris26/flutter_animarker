@@ -6,19 +6,14 @@ import 'package:flutter_animarker/core/i_lat_lng.dart';
 
 class LocationDispatcherImpl implements ILocationDispatcher {
   final threshold;
-  //final OnNewMarkerPosition onNewMarkerPosition;
   final DoubleLinkedQueue<ILatLng> _locationQueue = DoubleLinkedQueue<ILatLng>();
 
-  LocationDispatcherImpl({
-    this.threshold = 1.5,
-    //required this.onNewMarkerPosition,
-  });
+  LocationDispatcherImpl({this.threshold = 1.5});
 
   ILatLng get last => _locationQueue.last;
 
   @override
   ILatLng next() {
-
     if (_locationQueue.isNotEmpty) {
       var entry = _locationQueue.firstEntry()!;
 
@@ -60,7 +55,7 @@ class LocationDispatcherImpl implements ILocationDispatcher {
     return entry;
   }
 
-  void push(ILatLng latLng){
+  void push(ILatLng latLng) {
     _locationQueue.addLast(latLng);
     //onNewMarkerPosition(latLng);
   }

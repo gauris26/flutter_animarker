@@ -8,7 +8,7 @@ import 'package:flutter_animarker/models/lat_lng_info.dart';
 class LocationTween extends Tween<ILatLng> with BearingHeadingMixin {
   ILatLng _previousPosition = LatLngInfo.empty();
   double _previousBearing = 0;
-  final bool isBearing;
+  final bool shouldBearing;
   ILatLng _begin;
   ILatLng _end;
 
@@ -16,7 +16,7 @@ class LocationTween extends Tween<ILatLng> with BearingHeadingMixin {
   LocationTween({
     required ILatLng begin,
     required ILatLng end,
-    this.isBearing = true,
+    this.shouldBearing = true,
   })  : _begin = begin,
         _end = end;
 
@@ -41,7 +41,7 @@ class LocationTween extends Tween<ILatLng> with BearingHeadingMixin {
 
     var tPosition = SphericalUtil.interpolate(_previousPosition, end, t).copyWith(ripple: begin.ripple);
 
-    if (isBearing) {
+    if (shouldBearing) {
       tPosition = _bearing(tPosition);
     }
 

@@ -25,6 +25,7 @@ class FlutterMapMarkerAnimationRealTimeExample extends StatefulWidget {
 class _FlutterMapMarkerAnimationExampleState
     extends State<FlutterMapMarkerAnimationRealTimeExample> {
   LatLng startPosition = LatLng(18.488213, -69.959186);
+  LatLng startPosition2 = LatLng(18.488213, -69.959186);
 
   StreamSubscription<Position> positionStream;
 
@@ -33,6 +34,8 @@ class _FlutterMapMarkerAnimationExampleState
   double zoom = 15;
 
   bool isActiveTrip = true;
+
+  Random random = new Random();
 
   Map<MarkerId, Marker> _markers = Map<MarkerId, Marker>();
 
@@ -43,7 +46,7 @@ class _FlutterMapMarkerAnimationExampleState
     positionStream = Geolocator.getPositionStream(
       desiredAccuracy: LocationAccuracy.bestForNavigation,
       distanceFilter: 20,
-    ).listen((Position p) {
+    ).listen((Position p) async {
       setState(() {
         var markerId = MarkerId("MarkerId2");
         _markers[markerId] = RippleMarker(
@@ -53,11 +56,17 @@ class _FlutterMapMarkerAnimationExampleState
         );
       });
 
-      /* await Future.delayed(Duration(milliseconds: min(1000, random.nextInt(1000) + 100)), () {
+      await Future.delayed(Duration(milliseconds: min(1000, random.nextInt(1000) + 100)), () {
         setState(() {
-          startPosition = LatLng(latitude + 0.001, longitude + 0.001);
+          startPosition = LatLng(p.latitude + 0.001, p.longitude + 0.001);
         });
-      });*/
+      });
+
+      await Future.delayed(Duration(milliseconds: min(1000, random.nextInt(1000) + 100)), () {
+        setState(() {
+          startPosition2 = LatLng(p.latitude - 0.01, p.longitude - 0.002);
+        });
+      });
     });
   }
 
@@ -86,11 +95,16 @@ class _FlutterMapMarkerAnimationExampleState
                   markers: <Marker>{
                     //Avoid sent duplicate MarkerId
                     ..._markers.values.toSet(),
-                    /*RippleMarker(
+                    RippleMarker(
                       markerId: MarkerId("MarkerId1"),
                       position: startPosition,
                       ripple: true,
-                    )*/
+                    ),
+                    RippleMarker(
+                      markerId: MarkerId("MarkerId3"),
+                      position: startPosition2,
+                      ripple: true,
+                    )
                   },
                   child: GoogleMap(
                     mapType: MapType.normal,
@@ -147,11 +161,6 @@ class _FlutterMapMarkerAnimationExampleState
     );
 
     await controller.animateCamera(CameraUpdate.newCameraPosition(camPosition));
-  }
-
-  void onMapCreated(GoogleMapController controller) async {
-    /*TODO*/
-    //animarker.controller.getZoomLevel().then((value) => zoom = value/100);
   }
 
   @override
