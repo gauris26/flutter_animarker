@@ -72,21 +72,18 @@ class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
       rippleColor: widget.rippleColor,
       onMarkerAnimation: locationListener,
       onRippleAnimation: rippleListener,
-      locationDispatcher: LocationDispatcherImpl(
-        threshold: widget.threshold,
-        //onNewMarkerPosition: onNewMarkerPosition,
-      ),
+      locationDispatcher: LocationDispatcherImpl(threshold: widget.threshold),
       locationTweenFactory: LocationTweenFactoryImpl(useRotation: widget.useRotation),
       onStopover: widget.onStopover,
     );
 
     //Create markers running for first time
-    if (_markers.isEmpty && _markers.length != widget.markers.length) {
+/*    if (_markers.isEmpty && _markers.length != widget.markers.length) {
       widget.controller.then((controller) {
         GoogleMapHelper.updateMarkers(controller.mapId, _markers.set, widget.markers);
         _markers = keyByMarkerId(widget.markers);
       });
-    }
+    }*/
 
     child = widget.child;
 

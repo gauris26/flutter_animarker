@@ -64,7 +64,7 @@ void main() {
       double t = 1.0;
 
       LocationTween locationTween =
-          LocationTween(begin: beginLocation, end: endLocation, isBearing: false);
+          LocationTween(begin: beginLocation, end: endLocation, shouldBearing: false);
       ILatLng result = locationTween.lerp(t);
 
       expect(result, equals(endLocation));
@@ -78,7 +78,7 @@ void main() {
       double t = 1.0;
 
       LocationTween locationTween =
-          LocationTween(begin: beginLocation, end: endLocation, isBearing: false);
+          LocationTween(begin: beginLocation, end: endLocation, shouldBearing: false);
       ILatLng result = locationTween.lerp(t);
       ILatLng updateBearing = endLocation.copyWith(bearing: result.bearing);
 
@@ -94,7 +94,7 @@ void main() {
       double t = 0.5;
 
       LocationTween locationTween =
-          LocationTween(begin: beginLocation, end: endLocation, isBearing: false);
+          LocationTween(begin: beginLocation, end: endLocation, shouldBearing: false);
       ILatLng result = locationTween.lerp(t);
 
       expect(result, equals(middleLocation));
@@ -108,7 +108,7 @@ void main() {
       double t = 0.5;
 
       LocationTween locationTween =
-          LocationTween(begin: beginLocation, end: endLocation, isBearing: false);
+          LocationTween(begin: beginLocation, end: endLocation, shouldBearing: false);
       ILatLng result = locationTween.lerp(t);
 
       ILatLng control = SphericalUtil.interpolate(beginLocation, endLocation, t);
@@ -122,7 +122,7 @@ void main() {
       Stream<double> t = Stream.fromIterable([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]);
 
       LocationTween locationTween =
-          LocationTween(begin: beginLocation, end: endLocation, isBearing: false);
+          LocationTween(begin: beginLocation, end: endLocation, shouldBearing: false);
 
       t.listen(expectAsync1<void, double>(
         (t) {
@@ -140,7 +140,7 @@ void main() {
       Stream<double> t = Stream.fromIterable([0.0, 1.0]);
 
       LocationTween locationTween =
-          LocationTween(begin: beginLocation, end: endLocation, isBearing: false);
+          LocationTween(begin: beginLocation, end: endLocation, shouldBearing: false);
 
       t.listen(expectAsync1<void, double>(
         (t) {
@@ -165,7 +165,7 @@ void main() {
       ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(""));
       double t = 1.0;
 
-      LocationTween locationTween = LocationTween(begin: beginLocation, end: endLocation, isBearing: false);
+      LocationTween locationTween = LocationTween(begin: beginLocation, end: endLocation, shouldBearing: false);
 
       ILatLng newPosition = LatLngInfo(18.48430279636411, -69.94079341600313, MarkerId("")); //new location updates
 

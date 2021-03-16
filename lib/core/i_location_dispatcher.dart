@@ -4,7 +4,6 @@ typedef void OnNewMarkerPosition(ILatLng latLng);
 
 abstract class ILocationDispatcher {
   final double threshold;
-  //final OnNewMarkerPosition onNewMarkerPosition;
 
   bool get isEmpty;
 
@@ -16,10 +15,7 @@ abstract class ILocationDispatcher {
 
   List<ILatLng> get values;
 
-  ILocationDispatcher({
-    this.threshold = 1.5,
-    //required this.onNewMarkerPosition,
-  });
+  ILocationDispatcher({this.threshold = 1.5});
 
   ILatLng next();
 
