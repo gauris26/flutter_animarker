@@ -12,7 +12,7 @@ abstract class ILocationTweenFactory {
     required TickerProvider vsync,
     required OnAnimCompleted onAnimCompleted,
     required LatLngListener latLngListener,
-    Curve curve: Curves.linear,
+    Curve curve = Curves.linear,
     ILatLng begin,
     ILatLng end,
   });

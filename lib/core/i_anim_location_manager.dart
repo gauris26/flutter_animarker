@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+import 'i_animation_mode.dart';
 import 'i_lat_lng.dart';
 
-abstract class IAnimLocationManager {
+abstract class IAnimLocationManager implements IAnimationMode {
 
   ILatLng get begin;
   set begin (ILatLng value);
@@ -17,10 +17,7 @@ abstract class IAnimLocationManager {
 
   bool get isCompleted;
 
-  TickerFuture resetAndForward({double? from });
-
-  ILatLng animateTo(ILatLng iLatLng);
-
   void dispose();
 
+  void play();
 }

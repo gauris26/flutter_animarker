@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-typedef void OnZoomChanged(double zoom);
+typedef OnZoomChanged = void Function(double zoom);
 
 class AniRipple extends StatefulWidget {
   final Duration rippleDuration;
@@ -21,7 +21,7 @@ class AniRipple extends StatefulWidget {
     this.active = true,
     required this.child,
   })   : assert(radius >= 0.0 && radius <= 1.0,
-            "Must choose values between 0.0 and 1.0 for radius scale"),
+            'Must choose values between 0.0 and 1.0 for radius scale'),
         super(key: key);
 
   static AniRippleData? of(BuildContext context) =>
@@ -36,12 +36,12 @@ class _AniRippleState extends State<AniRipple> {
   Widget build(BuildContext context) {
     return AniRippleData(
       zoom: widget.zoom,
-      child: widget.child,
       active: widget.active,
       radius: widget.radius,
       rippleColor: widget.rippleColor,
       rippleDuration: widget.rippleDuration,
       rotationDuration: widget.rotationDuration,
+      child: widget.child,
     );
   }
 }
