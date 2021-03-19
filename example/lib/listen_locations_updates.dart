@@ -1,8 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-
-import 'package:flutter_animarker/helpers/math_util.dart';
-import 'package:flutter_animarker/helpers/spherical_util.dart';
 import 'package:flutter_animarker/widgets/animarker.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +24,7 @@ class _FlutterMapMarkerAnimationExampleState
   LatLng startPosition = LatLng(18.488213, -69.959186);
   LatLng startPosition2 = LatLng(18.488213, -69.959186);
 
-  StreamSubscription<Position> positionStream;
+  late final StreamSubscription<Position> positionStream;
 
   final Completer<GoogleMapController> _controller = Completer();
 
@@ -56,7 +53,7 @@ class _FlutterMapMarkerAnimationExampleState
         );
       });
 
-      await Future.delayed(Duration(milliseconds: min(1000, random.nextInt(1000) + 100)), () {
+      /*await Future.delayed(Duration(milliseconds: min(1000, random.nextInt(1000) + 100)), () {
         setState(() {
           startPosition = LatLng(p.latitude + 0.001, p.longitude + 0.001);
         });
@@ -66,7 +63,7 @@ class _FlutterMapMarkerAnimationExampleState
         setState(() {
           startPosition2 = LatLng(p.latitude - 0.01, p.longitude - 0.002);
         });
-      });
+      });*/
     });
   }
 
@@ -95,7 +92,7 @@ class _FlutterMapMarkerAnimationExampleState
                   markers: <Marker>{
                     //Avoid sent duplicate MarkerId
                     ..._markers.values.toSet(),
-                    RippleMarker(
+                    /*RippleMarker(
                       markerId: MarkerId("MarkerId1"),
                       position: startPosition,
                       ripple: true,
@@ -104,7 +101,7 @@ class _FlutterMapMarkerAnimationExampleState
                       markerId: MarkerId("MarkerId3"),
                       position: startPosition2,
                       ripple: true,
-                    )
+                    )*/
                   },
                   child: GoogleMap(
                     mapType: MapType.normal,

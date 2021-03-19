@@ -1,16 +1,24 @@
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-final MarkerId defaultId = MarkerId("");
+final MarkerId defaultId = MarkerId('');
 
 class LatLngInfo implements ILatLng {
+  @override
   final double latitude;
+  @override
   final double longitude;
+  @override
   final MarkerId? markerId;
+  @override
   final double bearing;
+  @override
   final bool isStopover;
+  @override
   final bool ripple;
+  @override
   final bool isEmpty;
+  @override
   final double mapScale;
 
   const LatLngInfo(this.latitude, this.longitude, this.markerId,
@@ -57,6 +65,7 @@ class LatLngInfo implements ILatLng {
     return 'LatLngInfo{latitude: $latitude, longitude: $longitude, markerId: $markerId, bearing: $bearing, isStopover: $isStopover, ripple: $ripple, isEmpty: $isEmpty, mapScale: $mapScale}';
   }
 
+  @override
   LatLngInfo copyWith({
     double? latitude,
     double? longitude,

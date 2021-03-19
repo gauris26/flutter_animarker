@@ -1,9 +1,13 @@
 // Port of SphericalUtil from android-maps-utils (https://github.com/googlemaps/android-maps-utils)
 // https://docs.microsoft.com/en-us/bingmaps/articles/bing-maps-tile-system?redirectedfrom=MSDN
-import 'package:flutter_animarker/core/i_lat_lng.dart';
-import 'package:flutter_animarker/models/lat_lng_info.dart';
 import 'dart:math' as math;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import 'math_util.dart';
+import 'package:vector_math/vector_math.dart';
+import 'package:flutter_animarker/core/i_lat_lng.dart';
+import 'package:flutter_animarker/helpers/extensions.dart';
+import 'package:flutter_animarker/models/lat_lng_info.dart';
 
 class SphericalUtil {
   static const double earthRadius = 6378137.0;
@@ -17,30 +21,31 @@ class SphericalUtil {
     final toLng = MathUtil.toRadians(to.longitude);
     final dLng = toLng - fromLng;
     var x = math.sin(dLng) * math.cos(toLat);
-    var y = math.cos(fromLat) * math.sin(toLat) - math.sin(fromLat) * math.cos(toLat) * math.cos(dLng);
+    var y =
+        math.cos(fromLat) * math.sin(toLat) - math.sin(fromLat) * math.cos(toLat) * math.cos(dLng);
     final heading = math.atan2(x, y);
 
     return MathUtil.toDegrees(heading);
     //return MathUtil.wrap(MathUtil.toDegrees(heading), -180, 180);
   }
 
-  static double calculateZoomScale(double densityDpi, double zoomLevel, ILatLng target){
-
+  static double calculateZoomScale(double densityDpi, double zoomLevel, ILatLng target) {
     var dpi = densityDpi * 160;
 
-    double mapwidth = 256.0 * math.pow(2, zoomLevel);
-    double clipLatitude = math.min(math.max(target.latitude, minLatitude), maxLatitude);
-    double angle = clipLatitude * math.pi/180;
-    double angleRadians = MathUtil.toRadians(angle).toDouble();
-    double groundResolution = (math.cos(angleRadians) * 2 * math.pi * SphericalUtil.earthRadius) / mapwidth;
-    double mapScale = (groundResolution * dpi / 0.0254);
+    var mapwidth = 256.0 * math.pow(2, zoomLevel);
+    var clipLatitude = math.min(math.max(target.latitude, minLatitude), maxLatitude);
+    var angle = clipLatitude * math.pi / 180;
+    var angleRadians = MathUtil.toRadians(angle).toDouble();
+    var groundResolution =
+        (math.cos(angleRadians) * 2 * math.pi * SphericalUtil.earthRadius) / mapwidth;
+    var mapScale = (groundResolution * dpi / 0.0254);
 
-    return 1/mapScale;
+    return 1 / mapScale;
   }
 
   static double getBearing(ILatLng begin, ILatLng end) {
-    double lat = (begin.latitude - end.latitude).abs();
-    double lng = (begin.longitude - end.longitude).abs();
+    var lat = (begin.latitude - end.latitude).abs();
+    var lng = (begin.longitude - end.longitude).abs();
 
     if (begin.latitude < end.latitude && begin.longitude < end.longitude) {
       return MathUtil.toDegrees(math.atan(lng / lat)) as double /*+ 90*/;
@@ -64,10 +69,10 @@ class SphericalUtil {
   static ILatLng interpolate(ILatLng from, ILatLng to, num fraction) {
     if (from.isEmpty) return to;
 
-    final fromLat = MathUtil.toRadians(from.latitude);
-    final fromLng = MathUtil.toRadians(from.longitude);
-    final toLat = MathUtil.toRadians(to.latitude);
-    final toLng = MathUtil.toRadians(to.longitude);
+    final fromLat = from.latitude.radians;
+    final fromLng = from.longitude.radians;
+    final toLat = to.latitude.radians;
+    final toLng = to.longitude.radians;
     final cosFromLat = math.cos(fromLat);
     final cosToLat = math.cos(toLat);
 
@@ -76,8 +81,11 @@ class SphericalUtil {
     final sinAngle = math.sin(angle);
 
     if (sinAngle < 1E-6) {
-      return LatLngInfo(from.latitude + fraction * (to.latitude - from.latitude),
-          from.longitude + fraction * (to.longitude - from.longitude), from.markerId);
+      return LatLngInfo(
+        from.latitude + fraction * (to.latitude - from.latitude),
+        from.longitude + fraction * (to.longitude - from.longitude),
+        from.markerId,
+      );
     }
 
     final a = math.sin((1 - fraction) * angle) / sinAngle;
@@ -92,23 +100,77 @@ class SphericalUtil {
     final lat = math.atan2(z, math.sqrt(x * x + y * y));
     final lng = math.atan2(y, x);
 
-    return LatLngInfo(
-        MathUtil.toDegrees(lat).toDouble(), MathUtil.toDegrees(lng).toDouble(), from.markerId);
+    return LatLngInfo(lat.degrees, lng.degrees, from.markerId);
+  }
+
+  static ILatLng vectorInterpolate(ILatLng from, ILatLng to, double t) {
+    var min = toVector3(from.latitude, from.longitude).normalized();
+    var max = toVector3(to.latitude, to.longitude).normalized();
+
+    var value = min + (max - min) * t;
+
+    return vectorToPolar(value);
+  }
+
+  static Vector3 toVector3(double lat, double lng) {
+    var latRad = MathUtil.toRadians(lat).toDouble();
+    var lonRad = MathUtil.toRadians(lng).toDouble();
+    var x = math.cos(lonRad) * math.cos(latRad);
+    var y = math.sin(lonRad) * math.cos(latRad);
+    var z = math.sin(latRad);
+
+    return Vector3(x, y, z);
+  }
+
+  static ILatLng vectorToPolar(Vector3 i) {
+    final lat = math.atan2(i.z, math.sqrt(i.x * i.x + i.y * i.y));
+    final lng = math.atan2(i.y, i.x);
+
+    return LatLngInfo(lat.degrees, lng.degrees, MarkerId(''));
+  }
+
+  static Vector3 vectorSlerp(List<double> inputs, List<Vector3> results, double desiredInput) {
+    var n = inputs.length;
+    var inputMin = inputs[0];
+    var inputMax = inputs[n - 1];
+
+    // Don't support extrapolation:
+    if (desiredInput < inputMin) return results[0];
+    if (desiredInput >= inputMax) return results[n - 1];
+
+    // Map to values that correspond to the array index progression
+    var percent = inverseLerp(inputMin, inputMax, desiredInput);
+    var step = 1 / (n - 1);
+    var matchedRangeStartIndex = percent ~/ step;
+    var matchedRangePct = (percent % step) / step;
+
+    return lerpUnclamped(
+        results[matchedRangeStartIndex], results[matchedRangeStartIndex + 1], matchedRangePct);
+  }
+
+  static double inverseLerp(double min, double max, double value) {
+    if (min == max) return min;
+    return (value - min) / (max - min);
+  }
+
+  static Vector3 lerpUnclamped(Vector3 min, Vector3 max, double x) {
+    return min + (max - min) * x;
   }
 
   static num distanceRadians(num lat1, num lng1, num lat2, num lng2) =>
       MathUtil.arcHav(MathUtil.havDistance(lat1, lat2, lng1 - lng2));
 
   static num computeAngleBetween(ILatLng from, ILatLng to) => distanceRadians(
-      MathUtil.toRadians(from.latitude),
-      MathUtil.toRadians(from.longitude),
-      MathUtil.toRadians(to.latitude),
-      MathUtil.toRadians(to.longitude));
+        from.latitude.radians,
+        from.longitude.radians,
+        to.latitude.radians,
+        to.longitude.radians,
+      );
 
   static double angleLerp(double from, double to, double t) {
-    double shortestAngle = angleShortestDistance(from, to);
+    var shortestAngle = angleShortestDistance(from, to);
 
-    double result = from * (1 - t) + shortestAngle * t;
+    var result = from * (1 - t) + shortestAngle * t;
 
     //1e-6: the smallest value that is not stringified in scientific notation.
     //Prevent unwanted result [1e-6, -1e-6]
@@ -116,17 +178,6 @@ class SphericalUtil {
 
     return result;
   }
-
-/*  function interpolator(t) {
-    return a * (1 - t) + b * t;
-  }*/
-
-/*  static double angleShortestDistance(double from, double to) {
-    var max = math.pi * 2;
-    var delta = to - from;
-    var da = delta.sign * (delta.abs() % max);
-    return delta.sign * (2 * da.abs() % max) - da;
-  }*/
 
   static double angleShortestDistance(double from, double to) {
     return ((to - from) + 180) % 360 - 180;
@@ -136,20 +187,19 @@ class SphericalUtil {
       computeAngleBetween(from, to) * earthRadius;
 
   static double bearingBetweenLocations(LatLngInfo latLngFrom, LatLngInfo latLngTo) {
-    double lat1 = latLngTo.latitude * math.pi / 180;
-    double long1 = latLngTo.longitude * math.pi / 180;
-    double lat2 = latLngFrom.latitude * math.pi / 180;
-    double long2 = latLngFrom.longitude * math.pi / 180;
+    var lat1 = latLngTo.latitude * math.pi / 180;
+    var long1 = latLngTo.longitude * math.pi / 180;
+    var lat2 = latLngFrom.latitude * math.pi / 180;
+    var long2 = latLngFrom.longitude * math.pi / 180;
 
-    double dLon = (long2 - long1);
+    var dLon = (long2 - long1);
 
-    double y = math.sin(dLon) * math.cos(lat2);
-    double x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(dLon);
+    var y = math.sin(dLon) * math.cos(lat2);
+    var x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(dLon);
 
-    double brng = math.atan2(y, x);
+    var brng = math.atan2(y, x);
 
-    brng = MathUtil.toDegrees(brng) as double;
-    brng = (brng + 360) % 360;
+    brng = (brng.degrees + 360) % 360;
 
     return brng;
   }
@@ -163,28 +213,4 @@ class SphericalUtil {
   static double zoom(mapPx, worldPx, fraction) {
     return math.log(mapPx / worldPx / fraction) / math.ln2;
   }
-
-  /*static double getBoundsZoomLevel(LatLngBounds bounds, Size size, [double ratio = 1, double padding = 0]) {
-    var worldDim = {
-      'height': 256 * ratio,
-      'width': 256 * ratio,
-    };
-    var zooMax = 21.0;
-
-    var ne = bounds.northeast;
-    var sw = bounds.southwest;
-
-    var latFraction = (latRad(ne.latitude) - latRad(sw.latitude)) / math.pi;
-
-    var lngDiff = ne.longitude - sw.longitude;
-    var lngFraction = ((lngDiff < 0) ? (lngDiff + 360) : lngDiff) / 360;
-
-    var latZoom = zoom((size.height * ratio) - (padding * ratio),
-        worldDim["height"], latFraction);
-
-    var lngZoom = zoom((size.width * ratio) - (padding * ratio),
-        worldDim["width"], lngFraction);
-
-    return math.min(math.min(latZoom, lngZoom), zooMax);
-  }*/
 }

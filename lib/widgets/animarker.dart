@@ -1,4 +1,5 @@
 import 'package:flutter_animarker/anims/animarker_controller.dart';
+import 'package:flutter_animarker/core/i_animarker_controller.dart';
 import 'package:flutter_animarker/core/performance_mode.dart';
 import 'package:flutter_animarker/helpers/google_map_helper.dart';
 import 'package:flutter_animarker/infrastructure/location_dispatcher_impl.dart';
@@ -42,11 +43,11 @@ class Animarker extends StatefulWidget {
     this.zoom = 15.0,
     this.rippleColor = Colors.red,
     this.useRotation = true,
-  })  : assert(!markers.any((e) => e.markerId.value.isEmpty), "Must choose a not empty MarkerId"),
+  })  : assert(!markers.any((e) => e.markerId.value.isEmpty), 'Must choose a not empty MarkerId'),
         assert(radius >= 0.0 && radius <= 1.0,
-            "Must choose values between 0.0 and 1.0 for radius scale"),
+            'Must choose values between 0.0 and 1.0 for radius scale'),
         assert(markers.map((e) => e.markerId.value).toSet().length == markers.length,
-            "Must choose a unique MarkerId per Marker item");
+            'Must choose a unique MarkerId per Marker item');
 //
   @override
   _AnimarkerState createState() => _AnimarkerState();
@@ -54,12 +55,12 @@ class Animarker extends StatefulWidget {
 
 class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   //Animation Controllers
-  late AnimarkerController _animarkerController;
+  late IAnimarkerController _animarkerController;
 
   //Variables
   late Widget child;
-  Map<MarkerId, Marker> _markers = Map<MarkerId, Marker>();
-  Map<CircleId, Circle> _circles = Map<CircleId, Circle>();
+  final Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
+  final Map<CircleId, Circle> _circles = <CircleId, Circle>{};
   double _devicePixelRatio = 1.0;
 
   @override
@@ -76,14 +77,6 @@ class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
       locationTweenFactory: LocationTweenFactoryImpl(useRotation: widget.useRotation),
       onStopover: widget.onStopover,
     );
-
-    //Create markers running for first time
-/*    if (_markers.isEmpty && _markers.length != widget.markers.length) {
-      widget.controller.then((controller) {
-        GoogleMapHelper.updateMarkers(controller.mapId, _markers.set, widget.markers);
-        _markers = keyByMarkerId(widget.markers);
-      });
-    }*/
 
     child = widget.child;
 
@@ -113,11 +106,16 @@ class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
     super.didUpdateWidget(oldWidget);
   }
 
+
   @override
-  Widget build(BuildContext context) {
+  void didChangeDependencies() {
     _devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
-    return widget.performanceMode == PerformanceMode.better ? child : widget.child;
+    super.didChangeDependencies();
   }
+
+  @override
+  Widget build(BuildContext context) => widget.performanceMode == PerformanceMode.better ? child : widget.child;
+
 
   void locationListener(Marker marker) async {
     //Saving previous marker position
@@ -142,7 +140,7 @@ class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   @override
   void dispose() async {
     _animarkerController.dispose();
-    GoogleMapController controller = await widget.controller;
+    var controller = await widget.controller;
     controller.dispose();
     super.dispose();
   }

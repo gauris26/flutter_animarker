@@ -8,7 +8,7 @@ mixin BearingHeadingMixin  on Tween<ILatLng> {
 
     if (begin == end) return 0;
 
-    double bearing = SphericalUtil.getBearing(begin, end);
+    var bearing = SphericalUtil.getBearing(begin, end);
 
     if (bearing.isNaN) bearing = 0;
 

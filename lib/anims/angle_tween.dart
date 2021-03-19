@@ -12,19 +12,23 @@ class AngleTween extends Tween<double> {
   AngleTween({double begin = 0, double end = 0}) : _begin = begin, _end = end;
 
   //Getters
+  @override
   double get begin => _begin;
 
+  @override
   double get end => _end;
 
   //Setters
-  //Reset previous angle every begin assignment
+  ///Reset previous angle every begin assignment
+  @override
   set begin(double? angle) {
     //Reset previous value every begin assignment
     _previousAngle = double.nan;
     _begin = angle!;
   }
 
-  //Reset previous value every begin assignment
+  ///Reset previous value every begin assignment
+  @override
   set end(double? angle) => _end = angle!;
 
   ///Interpolates two angles at the given animation clock value.
@@ -35,7 +39,7 @@ class AngleTween extends Tween<double> {
 
     if (_previousAngle.isNaN) _previousAngle = _begin;
 
-    double angle = SphericalUtil.angleLerp(_previousAngle, _end, t);
+    var angle = SphericalUtil.angleLerp(_previousAngle, _end, t);
 
     _previousAngle = angle;
 
@@ -45,7 +49,7 @@ class AngleTween extends Tween<double> {
   /// Returns interpolated angles for the current position (t) on timeline.
   @override
   double transform(double t) {
-    assert(t >= 0 && t <= 1, "value must between 0.0 and 1.0");
+    assert(t >= 0 && t <= 1, 'value must between 0.0 and 1.0');
     if (t == 0.0) return _previousAngle.isNaN ? _begin : _previousAngle;
     if (t == 1.0) return _previousAngle.isNaN ? _end: _previousAngle;
 

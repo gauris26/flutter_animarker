@@ -1,6 +1,6 @@
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 
-typedef void OnNewMarkerPosition(ILatLng latLng);
+typedef OnNewMarkerPosition = void Function(ILatLng latLng);
 
 abstract class ILocationDispatcher {
   final double threshold;
@@ -9,7 +9,7 @@ abstract class ILocationDispatcher {
 
   bool get isNotEmpty;
 
-  ILatLng get last;
+  ILatLng get popLast;
 
   int get length;
 
@@ -22,6 +22,8 @@ abstract class ILocationDispatcher {
   void push(ILatLng latLng);
 
   void dispose();
+
+  void clear();
 
   ILatLng goTo(int index);
 }
