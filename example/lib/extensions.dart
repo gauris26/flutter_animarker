@@ -4,7 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart'
     show CameraPosition, CameraUpdate, LatLng, MarkerId;
 
 extension GoogleMapLatLng on ILatLng {
-  LatLng get toLatLng => LatLng(this.latitude, this.longitude);
+  LatLng get toLatLng => LatLng(latitude, longitude);
 }
 
 extension LatLngInfoEx on LatLng {

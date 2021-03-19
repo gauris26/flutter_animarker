@@ -1,13 +1,20 @@
+// Flutter imports:
 import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_animarker/infrastructure/anim_location_manager.dart';
+
+// Package imports:
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// Project imports:
+import 'i_anim_location_manager.dart';
 import 'i_lat_lng.dart';
+import 'package:flutter_animarker/infrastructure/location_tween_factory.dart';
 
 abstract class ILocationTweenFactory {
-  ILocationTweenFactory({bool useRotation = true, Curve curve = Curves.linear});
 
-  AnimLocationManagerImpl create({
+  const factory ILocationTweenFactory.factory({bool useRotation}) = LocationTweenFactoryImpl;
+
+  IAnimLocationManager create({
     required MarkerId markerId,
     required TickerProvider vsync,
     required OnAnimCompleted onAnimCompleted,
@@ -16,4 +23,6 @@ abstract class ILocationTweenFactory {
     ILatLng begin,
     ILatLng end,
   });
+
+
 }

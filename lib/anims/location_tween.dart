@@ -1,17 +1,21 @@
+// Flutter imports:
 import 'package:flutter/animation.dart';
+
+// Package imports:
+import 'package:vector_math/vector_math.dart';
+
+// Project imports:
 import 'package:flutter_animarker/core/bearing_heading_mixin.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
-import 'package:flutter_animarker/helpers/spherical_util.dart';
-import 'package:flutter_animarker/models/lat_lng_info.dart';
-import 'package:vector_math/vector_math.dart';
 import 'package:flutter_animarker/helpers/extensions.dart';
+import 'package:flutter_animarker/helpers/spherical_util.dart';
 
 /// A tween with a location values (latitude, Longitude).
 class LocationTween extends Tween<ILatLng> with BearingHeadingMixin {
   //Begin-End Interpolation
   late ILatLng _begin;
   late ILatLng _end;
-  ILatLng _previousPosition = LatLngInfo.empty();
+  ILatLng _previousPosition = ILatLng.empty();
   double _previousBearing = 0;
 
   //Multipoint
@@ -21,7 +25,7 @@ class LocationTween extends Tween<ILatLng> with BearingHeadingMixin {
   double _step = 0;
 
   late bool _isMultipoint;
-  late final _shouldBearing;
+  //late final _shouldBearing;
 
   bool get isMultipoint => _isMultipoint;
 
@@ -32,21 +36,20 @@ class LocationTween extends Tween<ILatLng> with BearingHeadingMixin {
     bool shouldBearing = true,
   })  : _begin = begin,
         _end = end,
-        _shouldBearing = shouldBearing,
+        //_shouldBearing = shouldBearing,
         _points = [],
         _isMultipoint = false;
 
   /// Interpolate over a setter of position as a single line, without stop at the end positions
-  LocationTween.multipoint({
+  LocationTween._multipoint({
     required List<ILatLng> points,
     bool shouldBearing = true,
   }) {
     _isMultipoint = true;
-    _shouldBearing = shouldBearing;
+    //_shouldBearing = shouldBearing;
     _points = points;
 
     if (_points.isNotEmpty) {
-
       _begin = _points[0];
       _end = _points[_points.length - 1];
 
@@ -60,10 +63,15 @@ class LocationTween extends Tween<ILatLng> with BearingHeadingMixin {
         _results.insert(index, _points[index].vector);
       }
     } else {
-      _begin = const LatLngInfo.empty();
-      _end = const LatLngInfo.empty();
+      _begin = ILatLng.empty();
+      _end = ILatLng.empty();
     }
   }
+
+factory LocationTween.multipoint({
+  required List<ILatLng> points,
+  bool shouldBearing = true,
+}) => LocationTween._multipoint(points: points, shouldBearing: shouldBearing);
 
   @override
   ILatLng get begin => _begin;
@@ -76,7 +84,7 @@ class LocationTween extends Tween<ILatLng> with BearingHeadingMixin {
 
   @override
   set end(ILatLng? value) {
-   _end = value!;
+    _end = value!;
   }
 
   ILatLng get previousPosition => _previousPosition.isEmpty ? begin : _previousPosition;
@@ -87,21 +95,23 @@ class LocationTween extends Tween<ILatLng> with BearingHeadingMixin {
     if (begin == end) return end;
 
     if (!_isMultipoint) {
-      var tPosition =
-          SphericalUtil.interpolate(_previousPosition, end, t).copyWith(ripple: begin.ripple);
+      print('Single');
+      var tPosition = SphericalUtil.interpolate(previousPosition, end, t);
 
-      if (_shouldBearing) {
-        tPosition = _bearing(tPosition);
-      }
-
+      /*if (_shouldBearing) {
+        tPosition = tPosition.copyWith(bearing: _bearing(tPosition));
+      }*/
+      //print('Bearing at ($t): ${tPosition.bearing}');
       _previousPosition = tPosition; //If it's being interpolated is not a stopover
 
       return tPosition;
-    } else {
-      //Multipoint
-      var i = SphericalUtil.vectorSlerp(_ranges, _results, t);
 
-      return SphericalUtil.vectorToPolar(i).copyWith(markerId: begin.markerId!);
+    } else {
+      print('Multipoint');
+      //Multipoint
+      var vector = SphericalUtil.vectorSlerp(_ranges, _results, t);
+
+      return vector.toPolar.copyWith(markerId: begin.markerId);
     }
   }
 
@@ -118,7 +128,7 @@ class LocationTween extends Tween<ILatLng> with BearingHeadingMixin {
   }
 
   ///Perform rotation of the marker from the angle between the given positions
-  ILatLng _bearing(ILatLng tPosition) {
+/*  double _bearing(ILatLng tPosition) {
     //Resetting bearing to make object equal, just for comparison
     var pre = previousPosition.copyWith(bearing: tPosition.bearing);
 
@@ -126,11 +136,11 @@ class LocationTween extends Tween<ILatLng> with BearingHeadingMixin {
 
     _previousBearing = bearing;
 
-    return tPosition.copyWith(bearing: bearing);
-  }
+    return bearing;
+  }*/
 
   void reset() {
     _previousBearing = 0;
-    _previousPosition = LatLngInfo.empty();
+    _previousPosition = ILatLng.empty();
   }
 }

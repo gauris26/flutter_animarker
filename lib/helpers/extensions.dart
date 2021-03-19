@@ -1,17 +1,29 @@
+// Dart imports:
 import 'dart:math';
 
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:vector_math/vector_math.dart';
+
+// Project imports:
 import 'package:flutter_animarker/anims/location_tween.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/core/ripple_marker.dart';
 import 'package:flutter_animarker/helpers/math_util.dart';
+import 'package:flutter_animarker/helpers/spherical_util.dart';
 import 'package:flutter_animarker/models/lat_lng_info.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:vector_math/vector_math.dart';
 
 extension DoubleEx on double {
   double get radians => MathUtil.toRadians(this).toDouble();
   double get degrees => MathUtil.toDegrees(this).toDouble();
+}
+
+extension MarkerEx on Set<Marker> {
+  Set<String> get markerIds => map<String>((e) => e.markerId.value).toSet();
+  bool get isAnyEmpty => any((e) => e.markerId.value.isEmpty);
 }
 
 extension AnimationStatusEx on AnimationStatus {
@@ -40,6 +52,10 @@ extension GoogleMapLatLng on ILatLng {
 
     return Vector3(x, y, z);
   }
+}
+
+extension Vector3Ex on Vector3 {
+  ILatLng get toPolar => SphericalUtil.vectorToPolar(this);
 }
 
 extension AnimationControllerEx on AnimationController {

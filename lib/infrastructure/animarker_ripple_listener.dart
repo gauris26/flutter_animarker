@@ -1,8 +1,13 @@
+// Flutter imports:
 import 'package:flutter/animation.dart';
+
+// Package imports:
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// Project imports:
 import 'package:flutter_animarker/core/i_animarker_controller.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/helpers/extensions.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 mixin AnimarkerRippleListenerMixin on IAnimarkerController {
 

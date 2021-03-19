@@ -1,5 +1,8 @@
+// Flutter imports:
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 typedef RippleListener = void Function(Circle circle);

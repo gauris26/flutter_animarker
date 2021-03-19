@@ -32,9 +32,9 @@ class _FlutterMapMarkerAnimationExampleState
 
   bool isActiveTrip = true;
 
-  Random random = new Random();
+  Random random = Random();
 
-  Map<MarkerId, Marker> _markers = Map<MarkerId, Marker>();
+  final Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
 
   @override
   void initState() {
@@ -45,7 +45,7 @@ class _FlutterMapMarkerAnimationExampleState
       distanceFilter: 20,
     ).listen((Position p) async {
       setState(() {
-        var markerId = MarkerId("MarkerId2");
+        var markerId = MarkerId('MarkerId2');
         _markers[markerId] = RippleMarker(
           markerId: markerId,
           position: LatLng(p.latitude, p.longitude),
@@ -122,7 +122,7 @@ class _FlutterMapMarkerAnimationExampleState
                         onPressed: () => setState(() {
                           ripple = !ripple;
                         }),
-                        child: Text(ripple ? "End Ripple" : "Active Ripple"),
+                        child: Text(ripple ? 'End Ripple' : 'Active Ripple'),
                       ),
                       ElevatedButton(
                         style: ButtonStyle(
@@ -131,7 +131,7 @@ class _FlutterMapMarkerAnimationExampleState
                         onPressed: () => setState(() {
                           isActiveTrip = !isActiveTrip;
                         }),
-                        child: Text(isActiveTrip ? "End trip" : "Active trip"),
+                        child: Text(isActiveTrip ? 'End trip' : 'Active trip'),
                       ),
                     ],
                   ),
@@ -147,10 +147,11 @@ class _FlutterMapMarkerAnimationExampleState
   Future<void> onStopover(LatLng latLng) async {
     if (!_controller.isCompleted) return;
 
-    GoogleMapController controller = await _controller.future;
-    double zoom = await controller.getZoomLevel();
+    var controller = await _controller.future;
+    /*TODO*/
+    //var zoom = await controller.getZoomLevel();
 
-    CameraPosition camPosition = CameraPosition(
+    var camPosition = CameraPosition(
       zoom: zoom,
       tilt: 0,
       bearing: 30,
@@ -161,9 +162,9 @@ class _FlutterMapMarkerAnimationExampleState
   }
 
   @override
-  void dispose() async {
-    positionStream.cancel();
-    GoogleMapController controller = await _controller.future;
+  Future<void> dispose() async {
+    await positionStream.cancel();
+    var controller = await _controller.future;
     controller.dispose();
     super.dispose();
   }

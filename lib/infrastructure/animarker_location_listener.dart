@@ -1,6 +1,8 @@
-import 'package:flutter_animarker/core/i_animarker_controller.dart';
+// Package imports:
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+// Project imports:
+import 'package:flutter_animarker/core/i_animarker_controller.dart';
 import '../flutter_map_marker_animation.dart';
 import '../helpers/extensions.dart';
 
@@ -8,7 +10,7 @@ mixin AnimarkerLocationListenerMixin on IAnimarkerController{
 
   void locationListener(ILatLng location) async {
     var marker = Marker(
-      markerId: location.markerId!,
+      markerId: location.markerId,
       position: location.toLatLng,
       rotation: location.bearing,
     );

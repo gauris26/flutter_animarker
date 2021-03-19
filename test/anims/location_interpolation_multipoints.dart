@@ -1,12 +1,17 @@
 //https://math.stackexchange.com/questions/654315/how-to-convert-a-dot-product-of-two-vectors-to-the-angle-between-the-vectors
+
+// Dart imports:
 import 'dart:math';
 
-import 'package:flutter_animarker/core/i_lat_lng.dart';
-import 'package:flutter_animarker/helpers/math_util.dart';
-import 'package:flutter_animarker/models/lat_lng_info.dart';
+// Package imports:
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:vector_math/vector_math.dart';
+
+// Project imports:
+import 'package:flutter_animarker/core/i_lat_lng.dart';
+import 'package:flutter_animarker/helpers/math_util.dart';
+import 'package:flutter_animarker/models/lat_lng_info.dart';
 
 void main() {
 

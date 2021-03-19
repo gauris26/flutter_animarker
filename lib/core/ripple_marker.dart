@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/painting.dart';
+
+// Package imports:
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class RippleMarker extends Marker {

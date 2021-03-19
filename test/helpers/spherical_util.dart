@@ -1,8 +1,11 @@
+// Package imports:
+import 'package:flutter_test/flutter_test.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// Project imports:
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/helpers/spherical_util.dart';
 import 'package:flutter_animarker/models/lat_lng_info.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 void main() {
   ILatLng x1 = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(''));

@@ -1,9 +1,12 @@
+// Project imports:
 import 'package:flutter_animarker/core/i_lat_lng.dart';
+import 'package:flutter_animarker/infrastructure/location_dispatcher_impl.dart';
 
 typedef OnNewMarkerPosition = void Function(ILatLng latLng);
 
 abstract class ILocationDispatcher {
-  final double threshold;
+
+  double get threshold;
 
   bool get isEmpty;
 
@@ -15,7 +18,7 @@ abstract class ILocationDispatcher {
 
   List<ILatLng> get values;
 
-  ILocationDispatcher({this.threshold = 1.5});
+  factory ILocationDispatcher.queue({double threshold}) = LocationDispatcherImpl;
 
   ILatLng next();
 

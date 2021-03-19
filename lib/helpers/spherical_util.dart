@@ -1,13 +1,18 @@
 // Port of SphericalUtil from android-maps-utils (https://github.com/googlemaps/android-maps-utils)
 // https://docs.microsoft.com/en-us/bingmaps/articles/bing-maps-tile-system?redirectedfrom=MSDN
-import 'dart:math' as math;
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import 'math_util.dart';
+// Dart imports:
+import 'dart:math' as math;
+
+// Package imports:
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:vector_math/vector_math.dart';
+
+// Project imports:
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/helpers/extensions.dart';
 import 'package:flutter_animarker/models/lat_lng_info.dart';
+import 'math_util.dart';
 
 class SphericalUtil {
   static const double earthRadius = 6378137.0;
@@ -26,7 +31,6 @@ class SphericalUtil {
     final heading = math.atan2(x, y);
 
     return MathUtil.toDegrees(heading);
-    //return MathUtil.wrap(MathUtil.toDegrees(heading), -180, 180);
   }
 
   static double calculateZoomScale(double densityDpi, double zoomLevel, ILatLng target) {
@@ -100,7 +104,7 @@ class SphericalUtil {
     final lat = math.atan2(z, math.sqrt(x * x + y * y));
     final lng = math.atan2(y, x);
 
-    return LatLngInfo(lat.degrees, lng.degrees, from.markerId);
+    return LatLngInfo(lat.degrees, lng.degrees, from.markerId, ripple: from.ripple,);
   }
 
   static ILatLng vectorInterpolate(ILatLng from, ILatLng to, double t) {
@@ -145,7 +149,9 @@ class SphericalUtil {
     var matchedRangePct = (percent % step) / step;
 
     return lerpUnclamped(
-        results[matchedRangeStartIndex], results[matchedRangeStartIndex + 1], matchedRangePct);
+        results[matchedRangeStartIndex],
+      results[matchedRangeStartIndex + 1],
+      matchedRangePct,);
   }
 
   static double inverseLerp(double min, double max, double value) {

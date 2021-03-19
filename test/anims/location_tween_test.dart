@@ -1,8 +1,11 @@
+// Package imports:
+import 'package:flutter_test/flutter_test.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// Project imports:
 import 'package:flutter_animarker/anims/location_tween.dart';
 import 'package:flutter_animarker/flutter_map_marker_animation.dart';
 import 'package:flutter_animarker/helpers/spherical_util.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 /*double lerp(List<double> xs, List<double> ys, double x) {
   int index = binarySearch<double>(xs, x);

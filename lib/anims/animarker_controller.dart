@@ -1,16 +1,21 @@
+// Flutter imports:
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animarker/core/I_location_tween_factory.dart';
+
+// Package imports:
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// Project imports:
+import 'package:flutter_animarker/core/i_location_tween_factory.dart';
+import 'package:flutter_animarker/core/i_anim_location_manager.dart';
 import 'package:flutter_animarker/core/i_animarker_controller.dart';
 import 'package:flutter_animarker/core/i_animation_mode.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/core/i_location_dispatcher.dart';
-import 'package:flutter_animarker/core/i_anim_location_manager.dart';
 import 'package:flutter_animarker/flutter_map_marker_animation.dart';
 import 'package:flutter_animarker/helpers/spherical_util.dart';
 import 'package:flutter_animarker/infrastructure/animarker_location_listener.dart';
 import 'package:flutter_animarker/infrastructure/animarker_ripple_listener.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../helpers/extensions.dart';
 
 class AnimarkerController extends IAnimarkerController
@@ -40,9 +45,8 @@ class AnimarkerController extends IAnimarkerController
   late final Tween<double> _radiusTween;
 
   //Animations
-
   late final Animation<double> _radiusAnimation;
-  late final Animation<Color> _colorAnimation;
+  late final Animation<Color?> _colorAnimation;
 
   //Callbacks
   @override
@@ -52,7 +56,6 @@ class AnimarkerController extends IAnimarkerController
 
   //Variables
   double _zoomScale = 0.05;
-
   bool isResseting = false;
 
   //Getter
@@ -61,7 +64,7 @@ class AnimarkerController extends IAnimarkerController
   @override
   double get radiusValue => _radiusAnimation.value;
   @override
-  Color get colorValue => _colorAnimation.value;
+  Color get colorValue => _colorAnimation.value!;
   @override
   bool get isQueueEmpty => locationDispatcher.isEmpty;
   @override
@@ -93,18 +96,17 @@ class AnimarkerController extends IAnimarkerController
     required this.locationTweenFactory,
     required this.locationDispatcher,
     required this.onStopover,
-    bool isActiveTrip = true,
     this.purgeLimit = 10,
     this.rippleColor = Colors.red,
     this.duration = const Duration(milliseconds: 1000),
     this.rotationDuration = const Duration(milliseconds: 10000),
     this.rippleDuration = const Duration(milliseconds: 2000),
+    bool isActiveTrip = true,
   }) : _isActiveTrip = isActiveTrip {
     _onRippleAnimation = onRippleAnimation;
 
     _rippleAnimController = AnimationController(vsync: vsync, duration: rippleDuration);
 
-    //Tweens Init
     _radiusTween = Tween<double>(begin: 0, end: 1.0);
 
     _radiusAnimation = _radiusTween.animate(CurvedAnimation(
@@ -116,15 +118,13 @@ class AnimarkerController extends IAnimarkerController
     _colorAnimation = ColorTween(
       begin: rippleColor.withOpacity(1.0),
       end: rippleColor.withOpacity(0.0),
-    ).animate(CurvedAnimation(curve: Curves.ease, parent: _rippleAnimController))
-        as Animation<Color>;
+    ).animate(CurvedAnimation(curve: Curves.ease, parent: _rippleAnimController));
 
     tracker = <MarkerId, IAnimLocationManager>{};
   }
 
   @override
   void updateZoomLevel(double d, double r, double z) {
-
     tracker.forEach((k, v) {
       _zoomScale = SphericalUtil.calculateZoomScale(d, z, v.begin);
     });
@@ -135,19 +135,22 @@ class AnimarkerController extends IAnimarkerController
 
   @override
   void pushMarker(Marker marker) {
-    if (!_isActiveTrip && _previousPositions[marker.markerId] == marker.position) return;
+    if (!_isActiveTrip) return;
+    if (_previousPositions[marker.markerId] == marker.position) return;
 
-    var position = marker.toLatLngInfo();
-
-    locationDispatcher.push(position);
+    locationDispatcher.push(marker.toLatLngInfo());
 
     // Animation Marker Manager Factory
-    tracker[marker.markerId] ??= locationTweenFactory.create(
-                                  vsync: vsync,
-                                  markerId: marker.markerId,
-                                  onAnimCompleted: _animCompleted,
-                                  latLngListener: _latLngListener,
-                                )..play();
+    tracker[marker.markerId] ??= IAnimLocationManager.create(
+      vsync: vsync,
+      useRotation: true,
+      markerId: marker.markerId,
+      curve: Curves.linearToEaseOut,
+      onAnimCompleted: _animCompleted,
+      latLngListener: _latLngListener,
+    );
+
+    tracker[marker.markerId]!.play();
 
     _previousPositions[marker.markerId] = marker.position;
   }
@@ -158,16 +161,15 @@ class AnimarkerController extends IAnimarkerController
   }
 
   void _animCompleted(IAnimationMode anim) {
-
     if (locationDispatcher.isNotEmpty) {
-      if (locationDispatcher.length >= purgeLimit) {
+/*      if (locationDispatcher.length >= purgeLimit) {
         var lastValue = locationDispatcher.popLast;
-        anim.animatePoints(locationDispatcher.values, last: lastValue, curve: Curves.bounceInOut);
+        anim.animatePoints(locationDispatcher.values, last: lastValue);
 
         locationDispatcher.clear();
 
         return;
-      }
+      }*/
 
       ILatLng next;
 

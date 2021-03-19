@@ -1,5 +1,9 @@
-import 'package:flutter_animarker/core/i_lat_lng.dart';
+// Package imports:
+import 'package:flutter_animarker/helpers/spherical_util.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+// Project imports:
+import 'package:flutter_animarker/core/i_lat_lng.dart';
 
 final MarkerId defaultId = MarkerId('');
 
@@ -9,7 +13,7 @@ class LatLngInfo implements ILatLng {
   @override
   final double longitude;
   @override
-  final MarkerId? markerId;
+  final MarkerId markerId;
   @override
   final double bearing;
   @override
@@ -21,16 +25,22 @@ class LatLngInfo implements ILatLng {
   @override
   final double mapScale;
 
-  const LatLngInfo(this.latitude, this.longitude, this.markerId,
-      {this.bearing = 0, this.isStopover = false, this.ripple = false, this.mapScale = 0.5})
-      : isEmpty = false;
+  const LatLngInfo(
+    this.latitude,
+    this.longitude,
+    this.markerId, {
+    this.bearing = 0,
+    this.isStopover = false,
+    this.ripple = false,
+    this.mapScale = 0.5,
+  }) : isEmpty = false;
 
   const LatLngInfo.empty()
       : bearing = 0,
         isStopover = false,
         latitude = 0,
         longitude = 0,
-        markerId = null,
+        markerId = const MarkerId(''),
         ripple = false,
         mapScale = 0.5,
         isEmpty = true;
@@ -97,4 +107,7 @@ class LatLngInfo implements ILatLng {
       mapScale: mapScale ?? this.mapScale,
     );
   }
+
+  @override
+  double operator -(ILatLng other) => SphericalUtil.computeHeading(other, this).toDouble();
 }

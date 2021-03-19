@@ -1,8 +1,10 @@
+// Dart imports:
 import 'dart:collection';
+
+// Project imports:
+import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/core/i_location_dispatcher.dart';
 import 'package:flutter_animarker/helpers/spherical_util.dart';
-import 'package:flutter_animarker/models/lat_lng_info.dart';
-import 'package:flutter_animarker/core/i_lat_lng.dart';
 
 class LocationDispatcherImpl implements ILocationDispatcher {
   @override
@@ -22,7 +24,7 @@ class LocationDispatcherImpl implements ILocationDispatcher {
       return _thresholding(entry).remove();
     }
 
-    return LatLngInfo.empty();
+    return ILatLng.empty();
   }
 
   @override
@@ -41,8 +43,8 @@ class LocationDispatcherImpl implements ILocationDispatcher {
     var nextEntry = entry.nextEntry();
     var upcomingEntry = nextEntry?.nextEntry();
 
-    var next = nextEntry?.element ?? LatLngInfo.empty();
-    var upcoming = upcomingEntry?.element ?? LatLngInfo.empty();
+    var next = nextEntry?.element ?? ILatLng.empty();
+    var upcoming = upcomingEntry?.element ?? ILatLng.empty();
 
     if (!upcoming.isEmpty) {
       var currentBearing = SphericalUtil.computeHeading(current, next);
