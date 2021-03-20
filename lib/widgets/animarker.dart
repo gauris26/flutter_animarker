@@ -6,15 +6,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 
 // Project imports:
-import 'package:flutter_animarker/anims/animarker_controller.dart';
-import 'package:flutter_animarker/core/i_animarker_controller.dart';
-import 'package:flutter_animarker/core/performance_mode.dart';
+import '../helpers/extensions.dart';
+import '../flutter_map_marker_animation.dart';
 import 'package:flutter_animarker/helpers/extensions.dart';
+import 'package:flutter_animarker/core/performance_mode.dart';
 import 'package:flutter_animarker/helpers/google_map_helper.dart';
 import 'package:flutter_animarker/core/i_location_dispatcher.dart';
-import 'package:flutter_animarker/core/i_location_tween_factory.dart';
-import '../flutter_map_marker_animation.dart';
-import '../helpers/extensions.dart';
+import 'package:flutter_animarker/anims/animarker_controller.dart';
+import 'package:flutter_animarker/core/i_animarker_controller.dart';
 
 ///Google Maps widget wrapper for animation activities
 @immutable
@@ -75,10 +74,10 @@ class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
       rotationDuration: widget.rotationDuration,
       rippleDuration: widget.rippleDuration,
       rippleColor: widget.rippleColor,
+      useRotation: widget.useRotation,
       onMarkerAnimation: locationListener,
       onRippleAnimation: rippleListener,
       locationDispatcher: ILocationDispatcher.queue(threshold: widget.threshold),
-      locationTweenFactory: ILocationTweenFactory.factory(useRotation: widget.useRotation),
       onStopover: widget.onStopover,
     );
 

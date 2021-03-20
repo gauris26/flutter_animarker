@@ -9,6 +9,7 @@ import '../helpers/extensions.dart';
 mixin AnimarkerLocationListenerMixin on IAnimarkerController{
 
   void locationListener(ILatLng location) async {
+
     var marker = Marker(
       markerId: location.markerId,
       position: location.toLatLng,

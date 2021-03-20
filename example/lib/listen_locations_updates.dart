@@ -19,8 +19,7 @@ class FlutterMapMarkerAnimationRealTimeExample extends StatefulWidget {
   _FlutterMapMarkerAnimationExampleState createState() => _FlutterMapMarkerAnimationExampleState();
 }
 
-class _FlutterMapMarkerAnimationExampleState
-    extends State<FlutterMapMarkerAnimationRealTimeExample> {
+class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnimationRealTimeExample> {
   LatLng startPosition = LatLng(18.488213, -69.959186);
   LatLng startPosition2 = LatLng(18.488213, -69.959186);
 
@@ -117,8 +116,8 @@ class _FlutterMapMarkerAnimationExampleState
                     children: [
                       ElevatedButton(
                         style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                                ripple ? Colors.red : Colors.blue)),
+                            backgroundColor:
+                                MaterialStateProperty.all<Color>(ripple ? Colors.red : Colors.blue)),
                         onPressed: () => setState(() {
                           ripple = !ripple;
                         }),
@@ -126,11 +125,9 @@ class _FlutterMapMarkerAnimationExampleState
                       ),
                       ElevatedButton(
                         style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                                isActiveTrip ? Colors.red : Colors.blue)),
-                        onPressed: () => setState(() {
-                          isActiveTrip = !isActiveTrip;
-                        }),
+                            backgroundColor:
+                                MaterialStateProperty.all<Color>(isActiveTrip ? Colors.red : Colors.blue)),
+                        onPressed: () => setState(() => isActiveTrip = !isActiveTrip),
                         child: Text(isActiveTrip ? 'End trip' : 'Active trip'),
                       ),
                     ],

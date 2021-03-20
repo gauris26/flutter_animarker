@@ -25,9 +25,9 @@ class LocationTween extends Tween<ILatLng> with BearingHeadingMixin {
   double _step = 0;
 
   late bool _isMultipoint;
-  //late final _shouldBearing;
-
   bool get isMultipoint => _isMultipoint;
+
+  bool get isStop => begin == end || end.isEmpty;
 
   /// Create a tween whose [begin] and [end] values location points.
   LocationTween({
@@ -36,17 +36,15 @@ class LocationTween extends Tween<ILatLng> with BearingHeadingMixin {
     bool shouldBearing = true,
   })  : _begin = begin,
         _end = end,
-        //_shouldBearing = shouldBearing,
         _points = [],
         _isMultipoint = false;
 
   /// Interpolate over a setter of position as a single line, without stop at the end positions
-  LocationTween._multipoint({
+  LocationTween.multipoint({
     required List<ILatLng> points,
     bool shouldBearing = true,
   }) {
     _isMultipoint = true;
-    //_shouldBearing = shouldBearing;
     _points = points;
 
     if (_points.isNotEmpty) {
@@ -68,11 +66,6 @@ class LocationTween extends Tween<ILatLng> with BearingHeadingMixin {
     }
   }
 
-factory LocationTween.multipoint({
-  required List<ILatLng> points,
-  bool shouldBearing = true,
-}) => LocationTween._multipoint(points: points, shouldBearing: shouldBearing);
-
   @override
   ILatLng get begin => _begin;
 
@@ -92,16 +85,12 @@ factory LocationTween.multipoint({
   /// Interpolate two locations with planet spherical calculations at the given animation clock value.
   @override
   ILatLng lerp(double t) {
-    if (begin == end) return end;
+    if (isStop) return end;
 
     if (!_isMultipoint) {
-      print('Single');
+      //print('Single');
       var tPosition = SphericalUtil.interpolate(previousPosition, end, t);
 
-      /*if (_shouldBearing) {
-        tPosition = tPosition.copyWith(bearing: _bearing(tPosition));
-      }*/
-      //print('Bearing at ($t): ${tPosition.bearing}');
       _previousPosition = tPosition; //If it's being interpolated is not a stopover
 
       return tPosition;
@@ -126,18 +115,6 @@ factory LocationTween.multipoint({
 
     return lerp(t);
   }
-
-  ///Perform rotation of the marker from the angle between the given positions
-/*  double _bearing(ILatLng tPosition) {
-    //Resetting bearing to make object equal, just for comparison
-    var pre = previousPosition.copyWith(bearing: tPosition.bearing);
-
-    var bearing = performBearing(pre, tPosition);
-
-    _previousBearing = bearing;
-
-    return bearing;
-  }*/
 
   void reset() {
     _previousBearing = 0;

@@ -26,12 +26,13 @@ dependencies:
   cupertino_icons: ^1.0.0
   geolocator: ^7.0.1
   google_maps_flutter: ^2.0.1
-  google_maps_flutter_platform_interface: ^2.0.1
-  pedantic: ^1.11.0
+  google_maps_flutter_platform_interface: ^2.0.2
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  pedantic: ^1.11.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

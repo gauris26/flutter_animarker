@@ -76,8 +76,8 @@ extension LatLngEx on Marker {
     }
   }
 
-  ILatLng toLatLngInfo([double bearing = 0]) =>
-      LatLngInfo(position.latitude, position.longitude, markerId, bearing: bearing, ripple: isRipple);
+  ILatLng get toLatLngInfo =>
+      LatLngInfo(position.latitude, position.longitude, markerId, ripple: isRipple);
 }
 
 extension LocationTweenEx on LocationTween {

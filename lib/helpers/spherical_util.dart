@@ -39,7 +39,7 @@ class SphericalUtil {
     var mapwidth = 256.0 * math.pow(2, zoomLevel);
     var clipLatitude = math.min(math.max(target.latitude, minLatitude), maxLatitude);
     var angle = clipLatitude * math.pi / 180;
-    var angleRadians = MathUtil.toRadians(angle).toDouble();
+    var angleRadians = angle.radians;
     var groundResolution =
         (math.cos(angleRadians) * 2 * math.pi * SphericalUtil.earthRadius) / mapwidth;
     var mapScale = (groundResolution * dpi / 0.0254);
@@ -176,7 +176,7 @@ class SphericalUtil {
   static double angleLerp(double from, double to, double t) {
     var shortestAngle = angleShortestDistance(from, to);
 
-    var result = from * (1 - t) + shortestAngle * t;
+    var result = from + shortestAngle * t;
 
     //1e-6: the smallest value that is not stringified in scientific notation.
     //Prevent unwanted result [1e-6, -1e-6]

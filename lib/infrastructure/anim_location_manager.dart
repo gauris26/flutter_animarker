@@ -1,4 +1,6 @@
 // Flutter imports:
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -11,10 +13,10 @@ import 'package:flutter_animarker/anims/location_tween.dart';
 import 'package:flutter_animarker/helpers/extensions.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import '../flutter_map_marker_animation.dart';
+import 'package:flutter_animarker/helpers/spherical_util.dart';
 
 class AnimLocationManagerImpl implements IAnimLocationManager {
   late final AnimationController _controller;
-  late final AnimationController _bearingController;
 
   late final LatLngListener _latLngListener;
   late final OnAnimCompleted _onAnimCompleted;
@@ -23,29 +25,32 @@ class AnimLocationManagerImpl implements IAnimLocationManager {
   late final BearingTween _bearingTween;
 
   late final Animation<ILatLng> _locationAnimation;
-  //late final Animation<double> _bearingAnimation;
+  late final Animation<double> _bearingAnimation;
 
   late final ProxyAnimationGeneric<ILatLng> _proxyAnim;
   late final MarkerId _markerId;
 
   bool _isResseting = false;
-  //bool _isRessetingBearing = false;
+  double locationInterval = 0;
+  double prevBearing = double.infinity;
 
   final useRotation;
   final Duration duration;
   final Duration rotationDuration;
+  final double angleThreshold;
 
   AnimLocationManagerImpl({
     this.useRotation = true,
     ILatLng begin = const ILatLng.empty(),
     ILatLng end = const ILatLng.empty(),
     Curve curve = Curves.linear,
+    this.angleThreshold = 5.5,
     required MarkerId markerId,
     required TickerProvider vsync,
     required OnAnimCompleted onAnimCompleted,
     required LatLngListener latLngListener,
     this.duration = const Duration(milliseconds: 2000),
-    this.rotationDuration = const Duration(milliseconds: 10000),
+    this.rotationDuration = const Duration(milliseconds: 5000),
   }) {
     _markerId = markerId;
     _onAnimCompleted = onAnimCompleted;
@@ -57,48 +62,30 @@ class AnimLocationManagerImpl implements IAnimLocationManager {
     );
     _bearingTween = BearingTween.from(_locationTween);
 
-    var totalDuration = duration + rotationDuration;
-    _controller = AnimationController(vsync: vsync, duration: totalDuration);
-    //_bearingController = AnimationController(vsync: vsync, duration: rotationDuration);
+    var maxDuration = rotationDuration + duration;
 
+    _controller = AnimationController(vsync: vsync, duration: maxDuration);
+    _controller.addListener(_locationListener);
+    _controller.addStatusListener(_statusListener);
 
-    _locationAnimation = _locationTween.chain(parent).animate(
-      CurvedAnimation(curve: Interval(0.0, (duration.inMilliseconds / totalDuration.inMilliseconds).clamp(0.0, 1.0), curve: curve), parent: _controller),
-    )
-      /*..addListener(_locationListener)*/
-      ..addStatusListener(_statusListener);
+    locationInterval = (duration.inMilliseconds / maxDuration.inMilliseconds).clamp(0.0, 1.0).toDouble();
+    var bottom = (1 - locationInterval).clamp(0.0, 1.0);
 
+    _locationAnimation = _locationTween.animate(
+      CurvedAnimation(
+        curve: Interval(bottom, 1.0, curve: curve),
+        parent: _controller,
+      ),
+    );
 
-
-    /*TODO*/
     _bearingAnimation = _bearingTween.animate(
-      CurvedAnimation(curve: Curves.linearToEaseOut, parent: _controller),
-    )..addListener(_angleListener)
-    ..addStatusListener(_statusBearingListener);
+      CurvedAnimation(
+        curve: Interval(0.0, bottom, curve: Curves.decelerate),
+        parent: _controller,
+      ),
+    );
 
     _proxyAnim = ProxyAnimationGeneric<ILatLng>(_locationAnimation);
-  }
-
-  void _locationListener() => _latLngListener(value);
-
-  void _angleListener() => _latLngListener(value);
-
-  void _statusListener(AnimationStatus status) {
-    if (_isResseting) {
-      _isResseting = false;
-      return;
-    }
-
-    if (status.isCompletedOrDismissed) _onAnimCompleted(this);
-  }
-
-  void _statusBearingListener(AnimationStatus status) {
-    /*if (_isRessetingBearing) {
-      _isRessetingBearing = false;
-      return;
-    }*/
-
-    //if (status.isCompletedOrDismissed) _bearingController.resetAndForward();
   }
 
   @override
@@ -116,31 +103,6 @@ class AnimLocationManagerImpl implements IAnimLocationManager {
   @override
   ILatLng get value => _proxyAnim.value.copyWith(bearing: _bearingAnimation.value);
 
-  ///Triggered when a location update have been pop from the queue
-  @override
-  void animateTo(ILatLng next) {
-    //If isEmpty (no set) the "begin LatLng" field is ready for animation, delta location required
-    if (next.isEmpty) {
-      _locationTween.begin = next;
-      _locationTween.end = next;
-
-      _bearingTween.computeBearing(next, next);
-      return;
-    }
-
-    //Setting Location
-    _locationTween.begin = _locationTween.end;
-    _locationTween.end = next;
-
-    print('Delta: ${_locationTween.begin.toLatLng}, ${_locationTween.end.toLatLng}');
-    _bearingTween.computeBearing(_locationTween.begin, _locationTween.end);
-
-    _isResseting = true;
-    _isRessetingBearing = true;
-    _controller.resetAndForward();
-    _controller.resetAndForward(from: 0);
-  }
-
   @override
   bool get isAnimating => _controller.isAnimating;
 
@@ -150,18 +112,58 @@ class AnimLocationManagerImpl implements IAnimLocationManager {
   @override
   bool get isDismissed => _controller.isDismissed;
 
-  void _statusListenerPoints(AnimationStatus status) {
-    if (status == AnimationStatus.completed) {
-      _proxyAnim.parent!.removeStatusListener(_statusListenerPoints);
-      _proxyAnim.parent!.removeListener(_locationListener);
+  ///Entry point to start animation of location positions if is not a running animation
+  ///or the animation is completed or dismissed
+  @override
+  void forward(ILatLng from) async {
+    //Start animation
+    if (!from.isEmpty && !isAnimating && _controller.isCompletedOrDismissed) {
+      if (_locationTween.isStop) _locationTween.end = from;
       _isResseting = true;
-      _controller.reset();
-      _proxyAnim.parent = _locationAnimation
-        ..addListener(_locationListener)
-        ..addStatusListener(_statusListener);
-      _controller.resetAndForward();
-      _bearingController.resetAndForward();
+      await _controller.resetAndForward();
     }
+  }
+
+  ///Triggered when a location update have been pop from the queue
+  @override
+  void animateTo(ILatLng next) {
+    //If isEmpty (no set) the "begin LatLng" field is ready for animation, delta location required
+    if (next.isEmpty) {
+      _locationTween.begin = next;
+      _locationTween.end = next;
+
+      _bearingTween.computeBearing(0);
+      return;
+    }
+
+    var startBearing = _locationTween.end - _locationTween.begin;
+    var endBearing = next - _locationTween.begin;
+
+    //Setting Location
+    _locationTween.begin = _locationTween.end;
+    _locationTween.end = next;
+
+    var roof = 1.0 - locationInterval;
+    var from = roof;
+
+    var a = SphericalUtil.angleShortestDistance(startBearing, endBearing);
+
+    if (a.abs() > angleThreshold) {
+      var angle = _bearingTween.computeBearing(endBearing);
+
+      if (_bearingAnimation.value != prevBearing) {
+        var inverse = (1 / angle.abs());
+        from = min(inverse, roof);
+
+        prevBearing = _bearingAnimation.value;
+      } else {
+        print('Same bearing!');
+      }
+    }
+
+    _isResseting = true;
+
+    _controller.resetAndForward(from: from);
   }
 
   @override
@@ -171,35 +173,51 @@ class AnimLocationManagerImpl implements IAnimLocationManager {
     Curve curve = Curves.linear,
   }) {
     if (list.isNotEmpty) {
-      _locationAnimation.removeListener(_locationListener);
-      _locationAnimation.removeStatusListener(_statusListener);
-      _bearingAnimation.removeListener(_angleListener);
+      _controller.removeListener(_locationListener);
+      _controller.removeStatusListener(_statusListener);
 
       var locationTween = LocationTween.multipoint(points: list);
       _locationTween.begin = locationTween.end;
       _locationTween.end = last.isEmpty ? locationTween.end : last;
 
+      var newBearing = _locationTween.end - _locationTween.begin;
+
+      _bearingTween.computeBearing(newBearing);
       _isResseting = true;
       _locationTween.reset();
 
-      _proxyAnim.parent = locationTween.animate(CurvedAnimation(curve: curve, parent: _controller))
-        ..addListener(_locationListener)
-        ..addStatusListener(_statusListenerPoints);
+      _proxyAnim.parent = locationTween.animate(
+        CurvedAnimation(
+          curve: Interval(0.0, 1.0, curve: curve),
+          parent: _controller,
+        ),
+      );
 
-      _bearingAnimation.addListener(_angleListener);
+      _controller.addListener(_locationListener);
+      _controller.addStatusListener(_statusListenerPoints);
     }
   }
 
-  ///Entry point to start animation of location positions if is not a running animation
-  ///or the animation is completed or dismissed
-  @override
-  void play() async {
-    //Start animation
-    if (!isAnimating && _controller.isCompletedOrDismissed) {
+  void _locationListener() => _latLngListener(value);
+
+  void _statusListener(AnimationStatus status) {
+    if (_isResseting) {
+      _isResseting = false;
+      return;
+    }
+
+    if (status.isCompletedOrDismissed) _onAnimCompleted(this);
+  }
+
+  void _statusListenerPoints(AnimationStatus status) async {
+    if (status == AnimationStatus.completed) {
+      _proxyAnim.parent!.removeStatusListener(_statusListenerPoints);
+      _proxyAnim.parent!.removeListener(_locationListener);
       _isResseting = true;
-      _isRessetingBearing = true;
+      _proxyAnim.parent = _locationAnimation
+        ..addListener(_locationListener)
+        ..addStatusListener(_statusListener);
       await _controller.resetAndForward();
-      await _bearingController.resetAndForward();
     }
   }
 
@@ -207,9 +225,6 @@ class AnimLocationManagerImpl implements IAnimLocationManager {
   void dispose() {
     _controller.removeStatusListener(_statusListener);
     _controller.removeListener(_locationListener);
-    _bearingAnimation.removeListener(_angleListener);
-    _bearingController.removeStatusListener(_statusBearingListener);
-    _bearingController.dispose();
     _controller.dispose();
   }
 }

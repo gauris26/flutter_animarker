@@ -43,5 +43,5 @@ abstract class IAnimLocationManager implements IAnimationMode {
 
   void dispose();
 
-  void play();
+  void forward(ILatLng from);
 }

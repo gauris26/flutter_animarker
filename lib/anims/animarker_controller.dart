@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // Project imports:
-import 'package:flutter_animarker/core/i_location_tween_factory.dart';
 import 'package:flutter_animarker/core/i_anim_location_manager.dart';
 import 'package:flutter_animarker/core/i_animarker_controller.dart';
 import 'package:flutter_animarker/core/i_animation_mode.dart';
@@ -30,10 +29,9 @@ class AnimarkerController extends IAnimarkerController
   final TickerProvider vsync;
   final Duration rippleDuration;
   final Duration rotationDuration;
-  final ILocationTweenFactory locationTweenFactory;
   final ILocationDispatcher locationDispatcher;
   final Map<MarkerId, LatLng> _previousPositions = {};
-
+  final bool useRotation;
   //Late Variables
   late bool _isActiveTrip;
 
@@ -93,12 +91,12 @@ class AnimarkerController extends IAnimarkerController
     required RippleListener onRippleAnimation,
     required this.vsync,
     required this.onMarkerAnimation,
-    required this.locationTweenFactory,
+    required this.useRotation,
     required this.locationDispatcher,
     required this.onStopover,
     this.purgeLimit = 10,
     this.rippleColor = Colors.red,
-    this.duration = const Duration(milliseconds: 1000),
+    this.duration = const Duration(milliseconds: 2500),
     this.rotationDuration = const Duration(milliseconds: 10000),
     this.rippleDuration = const Duration(milliseconds: 2000),
     bool isActiveTrip = true,
@@ -138,19 +136,23 @@ class AnimarkerController extends IAnimarkerController
     if (!_isActiveTrip) return;
     if (_previousPositions[marker.markerId] == marker.position) return;
 
-    locationDispatcher.push(marker.toLatLngInfo());
+    //The make the marker move at the first item in the queue
+    if(locationDispatcher.isEmpty) locationListener(marker.toLatLngInfo);
+
+    locationDispatcher.push(marker.toLatLngInfo);
 
     // Animation Marker Manager Factory
     tracker[marker.markerId] ??= IAnimLocationManager.create(
-      vsync: vsync,
-      useRotation: true,
-      markerId: marker.markerId,
-      curve: Curves.linearToEaseOut,
-      onAnimCompleted: _animCompleted,
-      latLngListener: _latLngListener,
-    );
+                                    vsync: vsync,
+                                    duration: duration,
+                                    useRotation: useRotation,
+                                    markerId: marker.markerId,
+                                    curve: Curves.decelerate,
+                                    onAnimCompleted: _animCompleted,
+                                    latLngListener: _latLngListener,
+                                  );
 
-    tracker[marker.markerId]!.play();
+    tracker[marker.markerId]!.forward(marker.toLatLngInfo);
 
     _previousPositions[marker.markerId] = marker.position;
   }
@@ -161,15 +163,16 @@ class AnimarkerController extends IAnimarkerController
   }
 
   void _animCompleted(IAnimationMode anim) {
+    //print('Counter: ${DateTime.now().millisecondsSinceEpoch}');
     if (locationDispatcher.isNotEmpty) {
-/*      if (locationDispatcher.length >= purgeLimit) {
+      if (locationDispatcher.length >= purgeLimit) {
         var lastValue = locationDispatcher.popLast;
         anim.animatePoints(locationDispatcher.values, last: lastValue);
 
         locationDispatcher.clear();
 
         return;
-      }*/
+      }
 
       ILatLng next;
 
@@ -180,6 +183,7 @@ class AnimarkerController extends IAnimarkerController
       }
 
       anim.animateTo(next);
+
       if (locationDispatcher.isEmpty) _rippleAnimController.reset();
     }
   }
