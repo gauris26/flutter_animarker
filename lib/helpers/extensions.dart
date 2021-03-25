@@ -9,7 +9,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:vector_math/vector_math.dart';
 
 // Project imports:
-import 'package:flutter_animarker/anims/location_tween.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/core/ripple_marker.dart';
 import 'package:flutter_animarker/helpers/math_util.dart';
@@ -29,6 +28,7 @@ extension MarkerEx on Set<Marker> {
 extension AnimationStatusEx on AnimationStatus {
   bool get isCompletedOrDismissed => this == AnimationStatus.completed || this == AnimationStatus.dismissed;
 }
+
 extension GoogleMapLatLng on ILatLng {
   LatLng get toLatLng => LatLng(latitude, longitude);
 
@@ -41,13 +41,12 @@ extension GoogleMapLatLng on ILatLng {
   }
 
   Vector3 get vector {
-
-    var latRad = latitude*degrees2Radians ;
-    var lonRad = longitude*degrees2Radians;
+    var latRad = latitude * degrees2Radians;
+    var lonRad = longitude * degrees2Radians;
 
     //Polar to vector
-    var x = cos(lonRad)*cos(latRad);
-    var y = sin(lonRad)*cos(latRad);
+    var x = cos(lonRad) * cos(latRad);
+    var y = sin(lonRad) * cos(latRad);
     var z = sin(latRad);
 
     return Vector3(x, y, z);
@@ -61,7 +60,7 @@ extension Vector3Ex on Vector3 {
 extension AnimationControllerEx on AnimationController {
   bool get isCompletedOrDismissed => isCompleted || isDismissed;
 
-  TickerFuture resetAndForward({ double? from }) {
+  TickerFuture resetAndForward({double? from}) {
     reset();
     return forward(from: from);
   }
@@ -76,17 +75,17 @@ extension LatLngEx on Marker {
     }
   }
 
-  ILatLng get toLatLngInfo =>
-      LatLngInfo(position.latitude, position.longitude, markerId, ripple: isRipple);
+  ILatLng get toLatLngInfo => LatLngInfo.marker(this, ripple: isRipple);
 }
 
-extension LocationTweenEx on LocationTween {
-  Animation<ILatLng> animarker({
-    required Animation<double> controller,
+extension TweenEx<T> on Tween<T> {
+  Animation<T> animating({
     Curve curve = Curves.linear,
+    required Animation<double> controller,
     required VoidCallback listener,
+    required AnimationStatusListener statusListener,
   }) =>
-      animate(CurvedAnimation(curve: curve, parent: controller))..addListener(listener);
+      animate(CurvedAnimation(curve: curve, parent: controller))..addListener(listener)..addStatusListener(statusListener);
 }
 
 extension MapToSet on Map<MarkerId, Marker> {
@@ -99,22 +98,19 @@ extension CircleToSet on Map<CircleId, Circle> {
 
 extension LatLngInfoEx on LatLng {
   ILatLng toLatLngInfo(MarkerId markerId, [double bearing = 0]) =>
-      LatLngInfo(latitude, longitude, markerId, bearing: bearing);
+      LatLngInfo.position(this, markerId, bearing: bearing);
+
+  ILatLng get toDefaultLatLngInfo => LatLngInfo.position(this, MarkerId(''));
 
   Vector3 get vector {
-
-    var latRad = latitude*degrees2Radians ;
-    var lonRad = longitude*degrees2Radians;
+    var latRad = latitude * degrees2Radians;
+    var lonRad = longitude * degrees2Radians;
 
     //Polar to vector
-    var x = cos(lonRad)*cos(latRad);
-    var y = sin(lonRad)*cos(latRad);
+    var x = cos(lonRad) * cos(latRad);
+    var y = sin(lonRad) * cos(latRad);
     var z = sin(latRad);
 
     return Vector3(x, y, z);
   }
-}
-
-extension TweenEx<K extends Object, T extends Tween<K>> on T {
-  Animation<K> anim8({required Animation<double> parent, Curve curve = Curves.linear, }) => animate(CurvedAnimation(curve: curve, parent: parent));
 }

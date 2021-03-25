@@ -1,7 +1,7 @@
 // Package imports:
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
 // Project imports:
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/helpers/spherical_util.dart';
@@ -16,6 +16,10 @@ void main() {
   ILatLng x6 = LatLngInfo(18.447016157112476, -69.92433932762283, MarkerId(''));
 
   var list = [x1, x2, x3, x4, x5, x6];
+
+  test('Spherical Interpolation: Computational cost of trig functions', () {
+  });
+
 
   test('Spherical Interpolation', () {
     var start = DateTime.now().millisecondsSinceEpoch;

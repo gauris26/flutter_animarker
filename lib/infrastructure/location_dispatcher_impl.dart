@@ -28,7 +28,7 @@ class LocationDispatcherImpl implements ILocationDispatcher {
   }
 
   @override
-  List<ILatLng> get values => _locationQueue.toList();
+  List<ILatLng> get values => List<ILatLng>.unmodifiable(_locationQueue.toList(growable: true));
 
   @override
   ILatLng goTo(int index) {
@@ -47,6 +47,7 @@ class LocationDispatcherImpl implements ILocationDispatcher {
     var upcoming = upcomingEntry?.element ?? ILatLng.empty();
 
     if (!upcoming.isEmpty) {
+
       var currentBearing = SphericalUtil.computeHeading(current, next);
 
       var upComingBearing = SphericalUtil.computeHeading(next, upcoming);

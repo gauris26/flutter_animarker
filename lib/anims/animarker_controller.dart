@@ -1,43 +1,34 @@
 // Flutter imports:
-import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animarker/core/anilocation_task_description.dart';
+import 'package:flutter_animarker/core/animarker_controller_description.dart';
 
 // Package imports:
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // Project imports:
-import 'package:flutter_animarker/core/i_anim_location_manager.dart';
+import 'package:flutter_animarker/core/i_anilocation_task.dart';
 import 'package:flutter_animarker/core/i_animarker_controller.dart';
 import 'package:flutter_animarker/core/i_animation_mode.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
-import 'package:flutter_animarker/core/i_location_dispatcher.dart';
-import 'package:flutter_animarker/flutter_map_marker_animation.dart';
 import 'package:flutter_animarker/helpers/spherical_util.dart';
 import 'package:flutter_animarker/infrastructure/animarker_location_listener.dart';
 import 'package:flutter_animarker/infrastructure/animarker_ripple_listener.dart';
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 import '../helpers/extensions.dart';
 
 class AnimarkerController extends IAnimarkerController
     with AnimarkerRippleListenerMixin, AnimarkerLocationListenerMixin {
+  @override
+  final AnimarkerControllerDescription description;
   //Animation Controllers
   late final AnimationController _rippleAnimController;
-
-  //Final Variables
-  final Color rippleColor;
-  final Duration duration;
-  final int purgeLimit;
-  final TickerProvider vsync;
-  final Duration rippleDuration;
-  final Duration rotationDuration;
-  final ILocationDispatcher locationDispatcher;
   final Map<MarkerId, LatLng> _previousPositions = {};
-  final bool useRotation;
+
   //Late Variables
   late bool _isActiveTrip;
 
   //Late Final Variables
-  late final Map<MarkerId, IAnimLocationManager> tracker;
-  late final RippleListener _onRippleAnimation;
+  late final Map<MarkerId, IAnilocationTask> tracker;
 
   //Tweens
   late final Tween<double> _radiusTween;
@@ -45,12 +36,6 @@ class AnimarkerController extends IAnimarkerController
   //Animations
   late final Animation<double> _radiusAnimation;
   late final Animation<Color?> _colorAnimation;
-
-  //Callbacks
-  @override
-  final MarkerListener onMarkerAnimation;
-  @override
-  final OnStopover onStopover;
 
   //Variables
   double _zoomScale = 0.05;
@@ -63,17 +48,10 @@ class AnimarkerController extends IAnimarkerController
   double get radiusValue => _radiusAnimation.value;
   @override
   Color get colorValue => _colorAnimation.value!;
-  @override
-  bool get isQueueEmpty => locationDispatcher.isEmpty;
-  @override
-  bool get isQueueNotEmpty => locationDispatcher.isNotEmpty;
-  @override
-  // ignore: unnecessary_getters_setters
-  bool get isActiveTrip => _isActiveTrip;
 
   @override
   // ignore: unnecessary_getters_setters
-  RippleListener get onRippleAnimation => _onRippleAnimation;
+  bool get isActiveTrip => _isActiveTrip;
 
   @override
   AnimationController get rippleController => _rippleAnimController;
@@ -83,27 +61,12 @@ class AnimarkerController extends IAnimarkerController
   // ignore: unnecessary_getters_setters
   set isActiveTrip(bool value) => _isActiveTrip = value;
 
-  @override
-  // ignore: unnecessary_getters_setters
-  set onRippleAnimation(RippleListener value) => _onRippleAnimation = value;
-
   AnimarkerController({
-    required RippleListener onRippleAnimation,
-    required this.vsync,
-    required this.onMarkerAnimation,
-    required this.useRotation,
-    required this.locationDispatcher,
-    required this.onStopover,
-    this.purgeLimit = 10,
-    this.rippleColor = Colors.red,
-    this.duration = const Duration(milliseconds: 2500),
-    this.rotationDuration = const Duration(milliseconds: 10000),
-    this.rippleDuration = const Duration(milliseconds: 2000),
+    required this.description,
     bool isActiveTrip = true,
   }) : _isActiveTrip = isActiveTrip {
-    _onRippleAnimation = onRippleAnimation;
-
-    _rippleAnimController = AnimationController(vsync: vsync, duration: rippleDuration);
+    _rippleAnimController =
+        AnimationController(vsync: description.vsync, duration: description.rippleDuration);
 
     _radiusTween = Tween<double>(begin: 0, end: 1.0);
 
@@ -114,17 +77,17 @@ class AnimarkerController extends IAnimarkerController
       ..addStatusListener(rippleStatusListener);
 
     _colorAnimation = ColorTween(
-      begin: rippleColor.withOpacity(1.0),
-      end: rippleColor.withOpacity(0.0),
+      begin: description.rippleColor.withOpacity(1.0),
+      end: description.rippleColor.withOpacity(0.0),
     ).animate(CurvedAnimation(curve: Curves.ease, parent: _rippleAnimController));
 
-    tracker = <MarkerId, IAnimLocationManager>{};
+    tracker = <MarkerId, IAnilocationTask>{};
   }
 
   @override
   void updateZoomLevel(double d, double r, double z) {
-    tracker.forEach((k, v) {
-      _zoomScale = SphericalUtil.calculateZoomScale(d, z, v.begin);
+    _previousPositions.forEach((k, v) {
+      _zoomScale = SphericalUtil.calculateZoomScale(d, z, v.toDefaultLatLngInfo);
     });
 
     _radiusTween.end = r.clamp(0.0, 1.0);
@@ -136,21 +99,21 @@ class AnimarkerController extends IAnimarkerController
     if (!_isActiveTrip) return;
     if (_previousPositions[marker.markerId] == marker.position) return;
 
-    //The make the marker move at the first item in the queue
-    if(locationDispatcher.isEmpty) locationListener(marker.toLatLngInfo);
+    ///It make markers to move at the first item to draw in map, until another location updates is received
+    if (description.isQueueEmpty) locationListener(marker.toLatLngInfo);
 
-    locationDispatcher.push(marker.toLatLngInfo);
+    description.dispatcher.push(marker.toLatLngInfo);
 
     // Animation Marker Manager Factory
-    tracker[marker.markerId] ??= IAnimLocationManager.create(
-                                    vsync: vsync,
-                                    duration: duration,
-                                    useRotation: useRotation,
-                                    markerId: marker.markerId,
-                                    curve: Curves.decelerate,
-                                    onAnimCompleted: _animCompleted,
-                                    latLngListener: _latLngListener,
-                                  );
+    tracker[marker.markerId] ??= IAnilocationTask.create(
+      description: AnilocationTaskDescription.animarker(
+        description: description,
+        markerId: marker.markerId,
+        onAnimCompleted: _animCompleted,
+        latLngListener: _latLngListener,
+        curve: Curves.decelerate,
+      ),
+    );
 
     tracker[marker.markerId]!.forward(marker.toLatLngInfo);
 
@@ -164,27 +127,28 @@ class AnimarkerController extends IAnimarkerController
 
   void _animCompleted(IAnimationMode anim) {
     //print('Counter: ${DateTime.now().millisecondsSinceEpoch}');
-    if (locationDispatcher.isNotEmpty) {
-      if (locationDispatcher.length >= purgeLimit) {
-        var lastValue = locationDispatcher.popLast;
-        anim.animatePoints(locationDispatcher.values, last: lastValue);
-
-        locationDispatcher.clear();
-
+    if (description.isQueueNotEmpty) {
+      if (description.dispatcher.length >= description.purgeLimit) {
+        //print("Length 1: ${description.dispatcher.length}");
+        var lastValue = description.dispatcher.popLast;
+        //print("Length 2: ${description.dispatcher.values.length}");
+        anim.animatePoints(description.dispatcher.values, last: lastValue);
+        description.dispatcher.clear();
+        //print("Length 3: ${description.dispatcher.length}");
         return;
       }
 
       ILatLng next;
 
       if (_isActiveTrip) {
-        next = locationDispatcher.next();
+        next = description.dispatcher.next();
       } else {
-        next = locationDispatcher.goTo(locationDispatcher.length - 1);
+        next = description.dispatcher.goTo(description.dispatcher.length - 1);
       }
 
       anim.animateTo(next);
 
-      if (locationDispatcher.isEmpty) _rippleAnimController.reset();
+      if (description.isQueueEmpty) _rippleAnimController.reset();
     }
   }
 
@@ -194,7 +158,7 @@ class AnimarkerController extends IAnimarkerController
     tracker.clear();
     _radiusAnimation.removeStatusListener(rippleStatusListener);
     _previousPositions.clear();
-    locationDispatcher.dispose();
+    description.dispatcher.dispose();
     _rippleAnimController.dispose();
   }
 }

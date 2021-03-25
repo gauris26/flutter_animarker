@@ -25,13 +25,15 @@ mixin AnimarkerRippleListenerMixin on IAnimarkerController {
         strokeColor: colorValue,
       );
 
-      onRippleAnimation(circle);
+      if(description.onRippleAnimation != null){
+        description.onRippleAnimation!(circle);
+      }
     }
   }
 
   void rippleStatusListener(AnimationStatus status) async {
     if (rippleController.isCompleted && !rippleController.isDismissed) {
-      if (isQueueNotEmpty) {
+      if (description.isQueueNotEmpty) {
         Future.delayed(Duration(milliseconds: 500), () async => await rippleController.forward(from: 0));
       }
     }

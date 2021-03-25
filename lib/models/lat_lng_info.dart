@@ -35,6 +35,38 @@ class LatLngInfo implements ILatLng {
     this.mapScale = 0.5,
   }) : isEmpty = false;
 
+  LatLngInfo.marker(
+    Marker marker, {
+    this.bearing = 0,
+    this.isStopover = false,
+    this.ripple = false,
+    this.mapScale = 0.5,
+  })  : isEmpty = false,
+        latitude = marker.position.latitude,
+        longitude = marker.position.longitude,
+        markerId = marker.markerId;
+
+  const LatLngInfo.point(
+    this.latitude,
+    this.longitude, {
+    this.bearing = 0,
+    this.isStopover = false,
+    this.ripple = false,
+    this.mapScale = 0.5,
+  })  : isEmpty = false,
+        markerId = const MarkerId('');
+
+  LatLngInfo.position(
+    LatLng latLng,
+    this.markerId, {
+    this.bearing = 0,
+    this.isStopover = false,
+    this.ripple = false,
+    this.mapScale = 0.5,
+  })  : isEmpty = false,
+        latitude = latLng.latitude,
+        longitude = latLng.longitude;
+
   const LatLngInfo.empty()
       : bearing = 0,
         isStopover = false,

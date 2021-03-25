@@ -16,11 +16,13 @@ mixin AnimarkerLocationListenerMixin on IAnimarkerController{
       rotation: location.bearing,
     );
 
-    onMarkerAnimation(marker);
+    if(description.onMarkerAnimation != null){
+      description.onMarkerAnimation!(marker);
+    }
 
     //Notify if the marker has reached his end position
-    if (location.isStopover) {
-      await onStopover(location.toLatLng);
+    if(location.isStopover && description.onStopover != null){
+      await description.onStopover!(location.toLatLng);
     }
   }
 }

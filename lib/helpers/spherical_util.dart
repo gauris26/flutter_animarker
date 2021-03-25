@@ -3,6 +3,7 @@
 
 // Dart imports:
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 // Package imports:
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -26,8 +27,7 @@ class SphericalUtil {
     final toLng = MathUtil.toRadians(to.longitude);
     final dLng = toLng - fromLng;
     var x = math.sin(dLng) * math.cos(toLat);
-    var y =
-        math.cos(fromLat) * math.sin(toLat) - math.sin(fromLat) * math.cos(toLat) * math.cos(dLng);
+    var y = math.cos(fromLat) * math.sin(toLat) - math.sin(fromLat) * math.cos(toLat) * math.cos(dLng);
     final heading = math.atan2(x, y);
 
     return MathUtil.toDegrees(heading);
@@ -40,8 +40,7 @@ class SphericalUtil {
     var clipLatitude = math.min(math.max(target.latitude, minLatitude), maxLatitude);
     var angle = clipLatitude * math.pi / 180;
     var angleRadians = angle.radians;
-    var groundResolution =
-        (math.cos(angleRadians) * 2 * math.pi * SphericalUtil.earthRadius) / mapwidth;
+    var groundResolution = (math.cos(angleRadians) * 2 * math.pi * SphericalUtil.earthRadius) / mapwidth;
     var mapScale = (groundResolution * dpi / 0.0254);
 
     return 1 / mapScale;
@@ -104,7 +103,12 @@ class SphericalUtil {
     final lat = math.atan2(z, math.sqrt(x * x + y * y));
     final lng = math.atan2(y, x);
 
-    return LatLngInfo(lat.degrees, lng.degrees, from.markerId, ripple: from.ripple,);
+    return LatLngInfo(
+      lat.degrees,
+      lng.degrees,
+      from.markerId,
+      ripple: from.ripple,
+    );
   }
 
   static ILatLng vectorInterpolate(ILatLng from, ILatLng to, double t) {
@@ -126,11 +130,67 @@ class SphericalUtil {
     return Vector3(x, y, z);
   }
 
+  static Vector3 latLngtoVector3(ILatLng iLatLng) {
+    var latRad = iLatLng.latitude.radians;
+    var lonRad = iLatLng.longitude.radians;
+
+    var x = math.cos(lonRad) * math.cos(latRad);
+    var y = math.sin(lonRad) * math.cos(latRad);
+    var z = math.sin(latRad);
+
+    return Vector3(x, y, z);
+  }
+
   static ILatLng vectorToPolar(Vector3 i) {
     final lat = math.atan2(i.z, math.sqrt(i.x * i.x + i.y * i.y));
     final lng = math.atan2(i.y, i.x);
 
     return LatLngInfo(lat.degrees, lng.degrees, MarkerId(''));
+  }
+
+  static ILatLng vectorToPolarOptimized(Float32x4 vector) {
+    var xxxx = vector.shuffle(Float32x4.xxxx);
+    var yyyy = vector.shuffle(Float32x4.yyyy);
+
+    var powerX = xxxx * xxxx;
+    var powerY = yyyy * yyyy;
+
+    var sum = powerX + powerY;
+
+    var sqrt = sum.sqrt();
+
+    final lat = math.atan2(vector.z, sqrt.x);
+    final lng = math.atan2(vector.y, vector.x);
+
+    return LatLngInfo(lat.degrees, lng.degrees, MarkerId(''));
+  }
+
+  static Float32x4 vectorSlerpOptimized(
+      Float32x4List preList,
+      Float32x4 last,
+      double step,
+      double t,
+  ) {
+
+    var matchedRangeStartIndex = (t / step).toInt();
+
+    var length = preList.length - 1;
+
+    if (matchedRangeStartIndex == length) return last;
+
+    var modulus = t >= step ? (t - matchedRangeStartIndex * step) : t;
+
+    var segment = modulus / step;
+
+    return lerpUnclampedOptimized(
+      preList[matchedRangeStartIndex],
+      preList[matchedRangeStartIndex + 1],
+      Float32x4.splat(segment),
+    );
+  }
+
+  static Float32x4 lerpUnclampedOptimized(Float32x4 min, Float32x4 max, Float32x4 x) {
+    return min + (max - min) * x;
   }
 
   static Vector3 vectorSlerp(List<double> inputs, List<Vector3> results, double desiredInput) {
@@ -149,14 +209,20 @@ class SphericalUtil {
     var matchedRangePct = (percent % step) / step;
 
     return lerpUnclamped(
-        results[matchedRangeStartIndex],
+      results[matchedRangeStartIndex],
       results[matchedRangeStartIndex + 1],
-      matchedRangePct,);
+      matchedRangePct,
+    );
   }
 
   static double inverseLerp(double min, double max, double value) {
     if (min == max) return min;
     return (value - min) / (max - min);
+  }
+
+  static Float32x4 inverseLerpOptimized(Float32x4 min, Float32x4 max, Float32x4 delta, bool isEqualValue, Float32x4 value) {
+    if (isEqualValue) return min;
+    return (value - min) / delta;
   }
 
   static Vector3 lerpUnclamped(Vector3 min, Vector3 max, double x) {
@@ -185,12 +251,19 @@ class SphericalUtil {
     return result;
   }
 
+  static double angleLerpOptimized(Float32x4 shortestAngle, Float32x4 from, double t) {
+    var multiplier = Float32x4.splat(t);
+
+    var result = from + shortestAngle * multiplier;
+
+    return result.x;
+  }
+
   static double angleShortestDistance(double from, double to) {
     return ((to - from) + 180) % 360 - 180;
   }
 
-  static num computeDistanceBetween(ILatLng from, ILatLng to) =>
-      computeAngleBetween(from, to) * earthRadius;
+  static num computeDistanceBetween(ILatLng from, ILatLng to) => computeAngleBetween(from, to) * earthRadius;
 
   static double bearingBetweenLocations(LatLngInfo latLngFrom, LatLngInfo latLngTo) {
     var lat1 = latLngTo.latitude * math.pi / 180;
@@ -218,5 +291,26 @@ class SphericalUtil {
 
   static double zoom(mapPx, worldPx, fraction) {
     return math.log(mapPx / worldPx / fraction) / math.ln2;
+  }
+
+  static ILatLng vectorInterpolateOptimized(Float32x4 delta, Float32x4 min, double t) {
+    var multiplier = Float32x4.splat(t);
+
+    var value = min + delta * multiplier;
+
+    var xxxx = value.shuffle(Float32x4.xxxx);
+    var yyyy = value.shuffle(Float32x4.yyyy);
+
+    var powerX = xxxx * xxxx;
+    var powerY = yyyy * yyyy;
+
+    var sum = powerX + powerY;
+
+    var sqrt = sum.sqrt();
+
+    final lat = math.atan2(value.z, sqrt.x);
+    final lng = math.atan2(yyyy.y, xxxx.x);
+
+    return ILatLng.point(lat.degrees, lng.degrees);
   }
 }

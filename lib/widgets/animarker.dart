@@ -1,5 +1,6 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:flutter_animarker/core/animarker_controller_description.dart';
 
 // Package imports:
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -69,16 +70,18 @@ class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   @override
   void initState() {
     _animarkerController = AnimarkerController(
-      vsync: this,
-      duration: widget.duration,
-      rotationDuration: widget.rotationDuration,
-      rippleDuration: widget.rippleDuration,
-      rippleColor: widget.rippleColor,
-      useRotation: widget.useRotation,
-      onMarkerAnimation: locationListener,
-      onRippleAnimation: rippleListener,
-      locationDispatcher: ILocationDispatcher.queue(threshold: widget.threshold),
-      onStopover: widget.onStopover,
+      description: AnimarkerControllerDescription(
+        vsync: this,
+        duration: widget.duration,
+        rotationDuration: widget.rotationDuration,
+        rippleDuration: widget.rippleDuration,
+        rippleColor: widget.rippleColor,
+        useRotation: widget.useRotation,
+        onMarkerAnimation: locationListener,
+        onRippleAnimation: rippleListener,
+        dispatcher: ILocationDispatcher.queue(threshold: widget.threshold),
+        onStopover: widget.onStopover,
+      ),
     );
 
     child = widget.child;

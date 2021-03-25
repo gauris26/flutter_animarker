@@ -1,73 +1,59 @@
 // Flutter imports:
 import 'package:flutter/animation.dart';
-import 'package:flutter_animarker/flutter_map_marker_animation.dart';
+import 'package:flutter_animarker/core/i_interpolation_service_optimized.dart';
 
 // Project imports:
 import 'package:flutter_animarker/helpers/spherical_util.dart';
+import 'package:flutter_animarker/infrastructure/interpolators/angle_interpolator_impl.dart';
+
+import 'location_tween.dart';
 
 /// A tween with a angle values.
 class BearingTween extends Tween<double> {
-  //Get a track of previous interpolated angle in the timeline position (t)
-  // for preventing the animation swinging back (penduling from origin) to begin every tick
-  //double _previousAngle = double.infinity;
-  late double _begin;
-  late double _end;
+  final IInterpolationServiceOptimized<double> interpolator;
 
   /// Create a tween that calculate angle bearing/heading from given [begin] and [end] angle positions.
-  BearingTween({
-    double begin = 0,
-    double end = 0,
-  })  : _begin = begin,
-        _end = end;
+  BearingTween({required this.interpolator});
 
-  factory BearingTween.from(LocationTween tween) => BearingTween(
-        begin: 0,
-        end: tween.end - tween.begin,
-      );
+  factory BearingTween.from(LocationTween tween) =>
+      BearingTween(interpolator: AngleInterpolatorImpl.from(tween));
 
   //Getters
   @override
-  double? get begin => _begin;
+  double? get begin => interpolator.begin;
 
   @override
-  double get end => _end;
+  double get end => interpolator.end;
 
-  ///Re-compute Hearing/Bearing base on new location
-  double computeBearing(double newBearing) {
-    if (newBearing == _end) return 0;
+  @override
+  set begin(double? value) => interpolator.begin = value ?? 0;
 
-    _begin = _end;
-    _end = newBearing;
+  @override
+  set end(double? value) => interpolator.end = value ?? 0;
 
-    return SphericalUtil.angleShortestDistance(_begin, _end);
-  }
+  double get shortestAngleBetween =>
+      SphericalUtil.angleShortestDistance(interpolator.begin, interpolator.end);
 
-  ///Interpolates two angles at the given animation clock value.
+  ///Interpolates two angles at the given (t) position at timeline.
   @override
   double lerp(double t) {
-    if (_begin == _end) return 0;
+    if (interpolator.isStopped) return 0;
 
-    //if (_previousAngle.isInfinite) _previousAngle = _begin;
-
-    var angle = SphericalUtil.angleLerp(_begin, _end, t);
-    //print('Bearing: $angle ($t) -> ($_begin,$_end)');
-    //_previousAngle = angle;
-
-    return angle;
+    return interpolator.interpolate(t);
   }
 
   /// Returns interpolated angles for the current position (t) on timeline.
   @override
   double transform(double t) {
     assert(t >= 0 && t <= 1, 'value must between 0.0 and 1.0');
-    if (t == 0.0) return _begin;
-    if (t == 1.0) return _end;
+    if (t == 0.0) return interpolator.begin;
+    if (t == 1.0) return interpolator.end;
 
     return lerp(t);
   }
 
   @override
   String toString() {
-    return 'AngleTween{begin: $_begin, end: $_end}';
+    return 'AngleTween{begin: ${interpolator.begin}, end: ${interpolator.end}}';
   }
 }

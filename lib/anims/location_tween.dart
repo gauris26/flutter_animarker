@@ -1,123 +1,45 @@
 // Flutter imports:
 import 'package:flutter/animation.dart';
-
-// Package imports:
-import 'package:vector_math/vector_math.dart';
+import 'package:flutter_animarker/core/i_interpolation_service_optimized.dart';
 
 // Project imports:
-import 'package:flutter_animarker/core/bearing_heading_mixin.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
-import 'package:flutter_animarker/helpers/extensions.dart';
-import 'package:flutter_animarker/helpers/spherical_util.dart';
 
 /// A tween with a location values (latitude, Longitude).
-class LocationTween extends Tween<ILatLng> with BearingHeadingMixin {
-  //Begin-End Interpolation
-  late ILatLng _begin;
-  late ILatLng _end;
-  ILatLng _previousPosition = ILatLng.empty();
-  double _previousBearing = 0;
+class LocationTween extends Tween<ILatLng> {
+  final IInterpolationServiceOptimized<ILatLng> interpolator;
 
-  //Multipoint
-  late final List<ILatLng> _points;
-  final List<double> _ranges = [];
-  final List<Vector3> _results = [];
-  double _step = 0;
-
-  late bool _isMultipoint;
-  bool get isMultipoint => _isMultipoint;
-
-  bool get isStop => begin == end || end.isEmpty;
-
-  /// Create a tween whose [begin] and [end] values location points.
-  LocationTween({
-    required ILatLng begin,
-    required ILatLng end,
-    bool shouldBearing = true,
-  })  : _begin = begin,
-        _end = end,
-        _points = [],
-        _isMultipoint = false;
-
-  /// Interpolate over a setter of position as a single line, without stop at the end positions
-  LocationTween.multipoint({
-    required List<ILatLng> points,
-    bool shouldBearing = true,
-  }) {
-    _isMultipoint = true;
-    _points = points;
-
-    if (_points.isNotEmpty) {
-      _begin = _points[0];
-      _end = _points[_points.length - 1];
-
-      _step = 1 / (_points.length - 1);
-
-      for (num i = 0, x = 0; x <= 1; x += _step, i++) {
-        var index = i.toInt();
-
-        _ranges.insert(index, x.toDouble());
-
-        _results.insert(index, _points[index].vector);
-      }
-    } else {
-      _begin = ILatLng.empty();
-      _end = ILatLng.empty();
-    }
-  }
+  LocationTween({required this.interpolator});
 
   @override
-  ILatLng get begin => _begin;
+  ILatLng get begin => interpolator.begin;
 
   @override
-  set begin(ILatLng? value) => _begin = value!;
+  set begin(ILatLng? value) => interpolator.begin = value ?? ILatLng.empty();
 
   @override
-  ILatLng get end => _end;
+  ILatLng get end => interpolator.end;
 
   @override
-  set end(ILatLng? value) {
-    _end = value!;
-  }
-
-  ILatLng get previousPosition => _previousPosition.isEmpty ? begin : _previousPosition;
+  set end(ILatLng? value) => interpolator.end = value ?? ILatLng.empty();
 
   /// Interpolate two locations with planet spherical calculations at the given animation clock value.
   @override
   ILatLng lerp(double t) {
-    if (isStop) return end;
+    if (interpolator.isStopped) return end;
 
-    if (!_isMultipoint) {
-      //print('Single');
-      var tPosition = SphericalUtil.interpolate(previousPosition, end, t);
-
-      _previousPosition = tPosition; //If it's being interpolated is not a stopover
-
-      return tPosition;
-
-    } else {
-      print('Multipoint');
-      //Multipoint
-      var vector = SphericalUtil.vectorSlerp(_ranges, _results, t);
-
-      return vector.toPolar.copyWith(markerId: begin.markerId);
-    }
+    return interpolator.interpolate(t);
   }
 
   /// Returns the interpolated value for the current value of the given animation.
   @override
   ILatLng transform(double t) {
     //Setting bearing from previous position to avoid sudden flicking markers
-    if (t == 0.0) return begin.copyWith(bearing: _previousBearing);
+    if (t == 0.0) return begin;
 
     //Setting bearing from previous position to avoid sudden flicking markers
-    if (t == 1.0) return end.copyWith(bearing: _previousBearing, isStopover: true);
+    if (t == 1.0) return end.copyWith(isStopover: true);
 
     return lerp(t);
-  }
-
-  void reset() {
-    _previousBearing = 0;
-    _previousPosition = ILatLng.empty();
   }
 }
