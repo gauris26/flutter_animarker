@@ -5,8 +5,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-// Package imports:
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 import 'package:vector_math/vector_math.dart';
 
 // Project imports:
@@ -15,7 +14,7 @@ import 'package:flutter_animarker/helpers/extensions.dart';
 import 'package:flutter_animarker/models/lat_lng_info.dart';
 import 'math_util.dart';
 
-class SphericalUtil {
+abstract class SphericalUtil {
   static const double earthRadius = 6378137.0;
   static const double maxLatitude = 85.05112878;
   static const double minLatitude = -85.05112878;
@@ -165,13 +164,7 @@ class SphericalUtil {
     return LatLngInfo(lat.degrees, lng.degrees, MarkerId(''));
   }
 
-  static Float32x4 vectorSlerpOptimized(
-      Float32x4List preList,
-      Float32x4 last,
-      double step,
-      double t,
-  ) {
-
+  static Float32x4 vectorSlerpOptimized(Float32x4List preList, Float32x4 last, double step, double t) {
     var matchedRangeStartIndex = (t / step).toInt();
 
     var length = preList.length - 1;
@@ -220,7 +213,8 @@ class SphericalUtil {
     return (value - min) / (max - min);
   }
 
-  static Float32x4 inverseLerpOptimized(Float32x4 min, Float32x4 max, Float32x4 delta, bool isEqualValue, Float32x4 value) {
+  static Float32x4 inverseLerpOptimized(
+      Float32x4 min, Float32x4 max, Float32x4 delta, bool isEqualValue, Float32x4 value) {
     if (isEqualValue) return min;
     return (value - min) / delta;
   }

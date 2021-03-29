@@ -51,5 +51,5 @@ class LineLocationInterpolatorImpl<T extends ILatLng> extends IInterpolationServ
 
   @override
   @protected
-  T doInterpolate(double t) => SphericalUtil.interpolate(begin, end, t) as T;
+  T doInterpolate(double t) => SphericalUtil.vectorInterpolateOptimized(float32x4Delta, float32x4FromVector, t) as T;
 }

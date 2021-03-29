@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animarker/core/animarker_controller_description.dart';
 
 // Package imports:
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 
 // Project imports:
@@ -15,6 +14,8 @@ import 'package:flutter_animarker/helpers/google_map_helper.dart';
 import 'package:flutter_animarker/core/i_location_dispatcher.dart';
 import 'package:flutter_animarker/anims/animarker_controller.dart';
 import 'package:flutter_animarker/core/i_animarker_controller.dart';
+
+int _nextMapCreationId = 0;
 
 ///Google Maps widget wrapper for animation activities
 @immutable
@@ -32,11 +33,9 @@ class Animarker extends StatefulWidget {
   final Duration rippleDuration;
   final Duration rotationDuration;
   final PerformanceMode performanceMode;
-  final Future<GoogleMapController> controller;
 
   Animarker({
     required this.child,
-    required this.controller,
     required this.onStopover,
     this.threshold = 1.5,
     this.isActiveTrip = true,
@@ -58,6 +57,7 @@ class Animarker extends StatefulWidget {
 }
 
 class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
+  final _mapId = _nextMapCreationId++;
   //Animation Controllers
   late IAnimarkerController _animarkerController;
 
@@ -107,8 +107,7 @@ class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
     }
 
     if (oldWidget.radius != widget.radius || oldWidget.zoom != widget.zoom) {
-      widget.controller.then(
-          (value) => _animarkerController.updateZoomLevel(_devicePixelRatio, widget.radius, widget.zoom));
+      _animarkerController.updateZoomLevel(_devicePixelRatio, widget.radius, widget.zoom);
     }
 
     super.didUpdateWidget(oldWidget);
@@ -126,9 +125,7 @@ class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
 
     //Update the marker with animation
     _markers[marker.markerId] = marker;
-
-    var controller = await widget.controller;
-    await GoogleMapHelper.updateMarkers(controller.mapId, tempSet, _markers.set);
+    await GoogleMapHelper.updateMarkers(_mapId, tempSet, _markers.set);
   }
 
   void rippleListener(Circle circle) async {
@@ -136,15 +133,12 @@ class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
 
     _circles[circle.circleId] = circle;
 
-    var controller = await widget.controller;
-    await GoogleMapHelper.updateCircles(controller.mapId, tempCircles, _circles.set);
+    await GoogleMapHelper.updateCircles(_mapId, tempCircles, _circles.set);
   }
 
   @override
   void dispose() async {
     _animarkerController.dispose();
-    var controller = await widget.controller;
-    controller.dispose();
     super.dispose();
   }
 }

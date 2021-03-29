@@ -1,9 +1,9 @@
 // Flutter imports:
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 
 // Package imports:
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'animarker_controller_description.dart';
 

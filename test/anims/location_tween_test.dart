@@ -1,293 +1,230 @@
 // Package imports:
+import 'dart:typed_data';
+
+import 'package:flutter_animarker/helpers/spherical_util.dart';
 import 'package:flutter_test/flutter_test.dart';
-//import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-/*double lerp(List<double> xs, List<double> ys, double x) {
-  int index = binarySearch<double>(xs, x);
-
-  if (index >= 0) return ys[index];
-
-  index = ~index;
-
-  if (index == 0) return ys[0];
-
-  if (index == ys.length) return ys[ys.length - 1];
-
-  return lerpLinear(xs[index - 1], xs[index], ys[index - 1], ys[index], x);
-}
-
-double lerpSimple(double a, double b, double t) => a = (b - 1) * t;
-
-double lerpLinear(double x0, double x1, double y0, double y1, double x) {
-  double d = x1 - x0;
-  if (d == 0) return (y0 + y1) / 2;
-  return y0 + (x - x0) * (y1 - y0) / d;
-}*/
+import 'package:flutter_animarker/core/i_lat_lng.dart';
+import 'package:flutter_animarker/anims/location_tween.dart';
+import 'package:flutter_animarker/models/lat_lng_info.dart';
+import 'package:flutter_animarker/infrastructure/interpolators/line_location_interpolator_impl.dart';
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 
 void main() {
-
   group('Location Tween Interpolation', () {
-
-    test('Multi-point lerping LocationTween', () {
-
-     /* var t = 0.5;
-      ILatLng p1 = LatLngInfo(18.48817486792756 , - 69.95916740356776,  MarkerId(''));
-      ILatLng p2 = LatLngInfo(18.48883880652183 , -69.94596808528654 ,   MarkerId(''));
-      ILatLng p3 = LatLngInfo(18.48430279636411 , -69.94079341600313 ,   MarkerId(''));
-      ILatLng p4 = LatLngInfo(18.4658611180733  , -69.93044604942473 ,   MarkerId(''));
-      ILatLng p5 = LatLngInfo(18.451382274885972, -69.92247245553017 ,   MarkerId(''));
-      ILatLng p6 = LatLngInfo(18.447016157112476, -69.92433932762283 ,   MarkerId(''));
-
-      var locationTween = LocationTween.multipoint(points: [p1, p2, p3, p4, p5, p6]);
-
-      print(locationTween.lerp(t));*/
+    late MarkerId markerId;
+    late ILatLng begin;
+    late ILatLng end;
+    setUpAll(() {
+      markerId = MarkerId('MarkerId1');
+      begin = LatLngInfo(18.48817486792756, -69.95916740356776, markerId);
+      end = LatLngInfo(18.48883880652183, -69.94596808528654, markerId);
     });
 
-    test('Just after constructor initialization begin-end angle should keep their values', () {
-      /*ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(''));
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(''));
-
-      var locationTween = LocationTween(begin: beginLocation, end: endLocation);
+    test('Just after constructor initialization [begin, end] angle should keep their values', () {
+      var interpolation = LineLocationInterpolatorImpl(begin: begin, end: end);
+      var locationTween = LocationTween(interpolator: interpolation);
       var resultBegin = locationTween.begin;
       var resultEnd = locationTween.end;
 
-      expect(resultBegin, equals(beginLocation));
-      expect(resultEnd, equals(endLocation));*/
+      expect(resultBegin, equals(begin));
+      expect(resultEnd, equals(end));
     });
 
-    test('Ensure that [begin,end] angles have\'nt changed after calling lerp method', () {
-      /*ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(''));
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(''));
-      var t = 0.6;
-
-      var locationTween = LocationTween(begin: beginLocation, end: endLocation);
-      locationTween.lerp(t); //Calling lerp method for interpolation
+    test('Ensure that [begin, end] angles have\'nt changed after calling lerp method', () {
+      var t = 0.67854;
+      var interpolation = LineLocationInterpolatorImpl(begin: begin, end: end);
+      var locationTween = LocationTween(interpolator: interpolation);
+      locationTween.lerp(t); //Calling lerp() method for interpolation
       var resultBegin = locationTween.begin;
       var resultEnd = locationTween.end;
 
-      expect(resultBegin, equals(beginLocation));
-      expect(resultEnd, equals(endLocation));*/
+      expect(resultBegin, equals(begin));
+      expect(resultEnd, equals(end));
     });
 
-    test(
-        'If begin and end locations are equal the result should be empty, not matter (t) position on the timeline',
-        () {
-      /*ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(''));
-      ILatLng endLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(''));
+    test('''If begin and end locations are equal the result should be empty,
+        not matter (t) position on the timeline''', () {
       var t = 0.5;
-
-      var locationTween = LocationTween(begin: beginLocation, end: endLocation);
+      var interpolation = LineLocationInterpolatorImpl(begin: end, end: end);
+      var locationTween = LocationTween(interpolator: interpolation);
       var result = locationTween.lerp(t);
 
-      expect(result, equals(endLocation));*/
+      expect(result, equals(end));
     });
 
     test('lerp(t) should return the same begin location at 0.0 (t) position on the timeline', () {
-      /*ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(''));
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(''));
       var t = 0.0;
 
-      var locationTween = LocationTween(begin: beginLocation, end: endLocation);
+      var interpolation = LineLocationInterpolatorImpl(begin: begin, end: end);
+      var locationTween = LocationTween(interpolator: interpolation);
       var result = locationTween.lerp(t);
 
-      expect(result, equals(beginLocation));*/
+      expect(result, equals(begin));
     });
 
-    test(
-        'lerp(t) should return the same end location at 1.0 (t) position on the timeline, without rotation deactivated',
-        () {
-      /*ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(''));
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(''));
+    test('''lerp(t) should return the same end location at 1.0 (t) 
+           position on the timeline when is Stopper''', () {
       var t = 1.0;
 
-      var locationTween =
-          LocationTween(begin: beginLocation, end: endLocation, shouldBearing: false);
+      var endStopover = end.copyWith(isStopover: true);
+      var interpolation = LineLocationInterpolatorImpl(begin: begin, end: endStopover);
+      var locationTween = LocationTween(interpolator: interpolation);
       var result = locationTween.lerp(t);
 
-      expect(result, equals(endLocation));*/
+      expect(result, equals(endStopover));
     });
 
-    test(
-        'lerp(t) should return the same end location just the bearing filed updated at 1.0 (t) position on the timeline with rotation activated',
-        () {
-      /*ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(''));
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(''));
-      var t = 1.0;
-
-      var locationTween =
-          LocationTween(begin: beginLocation, end: endLocation, shouldBearing: false);
-      var result = locationTween.lerp(t);
-      var updateBearing = endLocation.copyWith(bearing: result.bearing);
-
-      expect(result, equals(updateBearing));*/
-    });
-
-    test(
-        'lerp(t) should return the middle point betwwen begin-end location at 1.0 (t) position on the timeline, without rotation deactivated',
-        () {
-      /*ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(''));
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(''));
-      ILatLng middleLocation = LatLngInfo(18.48850695153677, -69.95256775721292, MarkerId(''));
+    test('''lerp(t) should return the middle point between begin-end
+           location at 1.0 (t) position on the timeline''', () {
       var t = 0.5;
+      var middleLocation = begin.copyWith(latitude: 18.488506679751602, longitude: -69.95256710663962);
 
-      var locationTween =
-          LocationTween(begin: beginLocation, end: endLocation, shouldBearing: false);
+      var interpolation = LineLocationInterpolatorImpl(begin: begin, end: end);
+      var locationTween = LocationTween(interpolator: interpolation);
       var result = locationTween.lerp(t);
 
-      expect(result, equals(middleLocation));*/
+      expect(result, equals(middleLocation));
     });
 
-    test(
-        'lerp(t) should returns same result that source function interpolation (SphericalUtil.interpolate) returns, acting as control',
-        () {
-      /*ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(''));
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(''));
+    test('''lerp(t) should returns same result that source function interpolation
+           (SphericalUtil.interpolate) returns, acting as control''', () {
       var t = 0.5;
+      var fromVectorNorm = SphericalUtil.toVector3(begin.latitude, begin.longitude).normalized();
+      var toVectorNorm = SphericalUtil.toVector3(end.latitude, end.longitude).normalized();
+      var float32x4FromVector = Float32x4(fromVectorNorm.x, fromVectorNorm.y, fromVectorNorm.z, 0);
+      var float32x4ToVector = Float32x4(toVectorNorm.x, toVectorNorm.y, toVectorNorm.z, 0);
 
-      var locationTween =
-          LocationTween(begin: beginLocation, end: endLocation, shouldBearing: false);
+      //
+      var float32x4Delta = float32x4ToVector - float32x4FromVector;
+      var interpolation = LineLocationInterpolatorImpl(begin: begin, end: end);
+      var locationTween = LocationTween(interpolator: interpolation);
       var result = locationTween.lerp(t);
+      var control = SphericalUtil.vectorInterpolateOptimized(float32x4Delta, float32x4FromVector, t)
+          .copyWith(markerId: markerId);
 
-      var control = SphericalUtil.interpolate(beginLocation, endLocation, t);
-
-      expect(result, equals(control));*/
+      expect(result, equals(control));
     });
 
-    test('Location between begin-end, no inclusive, are not stopover', () {
-      /*ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(''));
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(''));
-      var t = Stream<double>.fromIterable([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]);
+    test('Location between [begin, end], no inclusive, are not stopover', () {
+      var t = Stream<double>.fromIterable([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99999999]);
 
-      var locationTween =
-          LocationTween(begin: beginLocation, end: endLocation, shouldBearing: false);
+      var interpolation = LineLocationInterpolatorImpl(begin: begin, end: end);
+      var locationTween = LocationTween(interpolator: interpolation);
 
       t.listen(expectAsync1<void, double>(
-        (t) {
+            (t) {
           var result = locationTween.lerp(t);
 
           expect(result.isStopover, isFalse);
         },
-        count: 9,
-      ));*/
+        count: 10,
+      ));
     });
 
-    test('Location between begin-end using transform(t), no inclusive, are not stopover', () {
-      //ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(''));
-      //ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(''));
-      //var t = Stream<double>.fromIterable([0.0, 1.0]);
-/*
-      var locationTween =
-          LocationTween(begin: beginLocation, end: endLocation, shouldBearing: false);
+    test('Location between begin-end using transform(t), no inclusive, just end position should stopover',
+            () {
+          var t = Stream<double>.fromIterable([0.0, 1.0]);
 
-      t.listen(expectAsync1<void, double>(
-        (t) {
-          var result = locationTween.transform(t);
+          var interpolation = LineLocationInterpolatorImpl(begin: begin, end: end);
+          var locationTween = LocationTween(interpolator: interpolation);
 
-          if (result == endLocation) {
-            expect(result.isStopover, isTrue);
-          } else if (result == beginLocation) {
-            expect(result.isStopover, isFalse);
-          } else {
-            Evaluation.fail();
-          }
-        },
-        count: 2,
-      ));*/
-    });
+          t.listen(expectAsync1<void, double>(
+                (t) {
+              var result = locationTween.transform(t);
 
-    test(
-        'The tween begin-end need to be swapple, to interpolate from the last position to the new one, and so on, without rotation',
-        () {
-      //ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(''));
-      //ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(''));
-      /*var t = 1.0;
+              if (result == end) {
+                expect(result.isStopover, isTrue);
+              } else if (result == begin) {
+                expect(result.isStopover, isFalse);
+              } else {
+                Evaluation.fail();
+              }
+            },
+            count: 2,
+          ));
+        });
 
-      var locationTween =
-          LocationTween(begin: beginLocation, end: endLocation, shouldBearing: false);
-
-      ILatLng newPosition =
-          LatLngInfo(18.48430279636411, -69.94079341600313, MarkerId('')); //new location updates
+    test('Test the different swap position ways: [begin-end] properties', () {
+      var interpolation = LineLocationInterpolatorImpl(begin: begin, end: end);
+      var locationTween = LocationTween(interpolator: interpolation);
+      var newPosition = LatLngInfo(18.48430279636411, -69.94079341600313, markerId); //new location updates
 
       locationTween.begin = locationTween.end;
       locationTween.end = newPosition;
 
-      expect(locationTween.begin, endLocation);
-      expect(locationTween.end, equals(newPosition));
+      var newBeginPosition = locationTween.begin;
+      var newEndPosition = locationTween.end;
 
-      ILatLng newPosition2 =
-          LatLngInfo(18.4658611180733, -69.93044604942473, MarkerId('')); //new location updates
-
-      locationTween.begin = locationTween.end;
-      locationTween.end = newPosition2;
-
-      expect(locationTween.begin, equals(newPosition));
-      expect(locationTween.end, equals(newPosition2));
-
-      var result = locationTween.lerp(t);
-
-      locationTween.begin = locationTween.end;
-      locationTween.end = result;
-
-      expect(locationTween.begin, newPosition2);
-      expect(locationTween.end, equals(result));*/
+      expect(newBeginPosition, equals(end));
+      expect(newEndPosition, equals(newPosition));
     });
 
-    test(
-        'The tween begin-end need to be swapple, to interpolate from the last position to the new one, and so on',
-        () {
-      /*ILatLng beginLocation = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(''));
-      ILatLng endLocation = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(''));
-      var t = 1.0;
+    test('Test the different swap position ways: .interpolator.swap()', () {
+      var interpolation = LineLocationInterpolatorImpl(begin: begin, end: end);
+      var locationTween = LocationTween(interpolator: interpolation);
+      var newPosition = LatLngInfo(18.48430279636411, -69.94079341600313, markerId); //new location updates
 
-      var locationTween = LocationTween(begin: beginLocation, end: endLocation);
+      locationTween.interpolator.swap(newPosition);
 
-      var bearing = locationTween.lerp(t).bearing;
-      print(bearing);
-      ILatLng newPosition =
-          LatLngInfo(18.48430279636411, -69.94079341600313, MarkerId('')); //new location updates
+      var newBeginPosition = locationTween.begin;
+      var newEndPosition = locationTween.end;
 
-      locationTween.begin = locationTween.end;
-      locationTween.end = newPosition;
+      expect(newBeginPosition, equals(end));
+      expect(newEndPosition, equals(newPosition));
+    });
 
-      var bearing2 = locationTween.lerp(t).bearing;
-      print(bearing2);
+    test('Test the different swap position ways: + operator', () {
+      var interpolation = LineLocationInterpolatorImpl(begin: begin, end: end);
+      var locationTween = LocationTween(interpolator: interpolation);
+      var newPosition = LatLngInfo(18.48430279636411, -69.94079341600313, markerId); //new location updates
 
-      expect(locationTween.begin, endLocation);
+      locationTween += newPosition;
+
+      var newBeginPosition = locationTween.begin;
+      var newEndPosition = locationTween.end;
+
+      expect(newBeginPosition, equals(end));
+      expect(newEndPosition, equals(newPosition));
+    });
+
+    test('''The tween begin-end need to be swappable, to be interpolated 
+          from the last position to a new one, and so on''', () {
+      var t = 0.0;
+      var interpolation = LineLocationInterpolatorImpl(begin: begin, end: end);
+      var locationTween = LocationTween(interpolator: interpolation);
+
+      var newPosition = LatLngInfo(18.48430279636411, -69.94079341600313, markerId); //new location updates
+
+      locationTween += newPosition;
+      locationTween.lerp(t);
+
+      expect(locationTween.begin, end);
       expect(locationTween.end, equals(newPosition));
 
-      ILatLng newPosition2 =
-          LatLngInfo(18.4658611180733, -69.93044604942473, MarkerId('')); //new location updates
+      var newPosition2 = LatLngInfo(18.4658611180733, -69.93044604942473, markerId); //new location updates
 
-      locationTween.begin = locationTween.end;
-      locationTween.end = newPosition2;
-
-      var bearing3 = locationTween.lerp(t).bearing;
-      print(bearing3);
+      locationTween += newPosition2;
+      locationTween.lerp(t);
 
       expect(locationTween.begin, equals(newPosition));
       expect(locationTween.end, equals(newPosition2));
 
-      ILatLng newPosition3 = LatLngInfo(18.451382274885972, -69.92247245553017, MarkerId(''));
+      ILatLng newPosition3 = LatLngInfo(18.451382274885972, -69.92247245553017, markerId);
 
-      locationTween.begin = locationTween.end;
-      locationTween.end = newPosition3;
-
-      var bearing4 = locationTween.lerp(t).bearing;
-      print(bearing4);
+      locationTween += newPosition3;
+      locationTween.lerp(t);
 
       expect(locationTween.begin, equals(newPosition2));
       expect(locationTween.end, equals(newPosition3));
 
       var result = locationTween.lerp(t);
 
-      locationTween.begin = locationTween.end;
-      locationTween.end = result;
+      locationTween += result;
 
-      var bearing5 = locationTween.lerp(t).bearing;
-      print(bearing5);
+      locationTween.lerp(t);
 
       expect(locationTween.begin, newPosition3);
-      expect(locationTween.end, equals(result));*/
+      expect(locationTween.end, equals(result));
     });
   });
 }

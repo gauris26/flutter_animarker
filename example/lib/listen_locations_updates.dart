@@ -145,8 +145,7 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
     if (!_controller.isCompleted) return;
 
     var controller = await _controller.future;
-    /*TODO*/
-    //var zoom = await controller.getZoomLevel();
+    var zoom = await controller.getZoomLevel();
 
     var camPosition = CameraPosition(
       zoom: zoom,

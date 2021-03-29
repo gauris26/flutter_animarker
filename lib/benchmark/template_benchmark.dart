@@ -32,7 +32,9 @@ class TemplateBenchmark extends BenchmarkBase {
   // The benchmark code.
   @override
   void run() {
-    for (var i = 0.0; i <= 1.0; i += step) {
+
+       for (var i = 0.0; i <= 1.0; i += step) {
+
       var vector = vectorSlerp(_preListFloat32x4, lastFloat32x4, _step, i.clamp(0.0, 1.0));
 
       var xxxx = vector.shuffle(Float32x4.xxxx);
@@ -82,13 +84,12 @@ main() {
 }
 
 /// vectorSlerp
-Float32x4 vectorSlerp(
-  Float32x4List preList,
-  Float32x4 last,
-  double step,
-  double t,
-) {
-  var matchedRangeStartIndex = (t / step).toInt();
+Float32x4 vectorSlerp(Float32x4List preList, Float32x4 last, double step, double t) {
+
+  //var matchedRangeStartIndex = t ~/ step;
+  //var matchedRangeStartIndex = (t / step).toInt();
+  //var matchedRangeStartIndex = (t / step).truncate();
+  var matchedRangeStartIndex = (Float32x4.splat(t) / Float32x4.splat(step)).x.truncate();
 
   var length = preList.length - 1;
 

@@ -28,7 +28,7 @@ class LocationTween extends Tween<ILatLng> {
   ILatLng lerp(double t) {
     if (interpolator.isStopped) return end;
 
-    return interpolator.interpolate(t);
+    return interpolator.interpolate(t).copyWith(markerId: end.markerId, isStopover: t == 1.0);
   }
 
   /// Returns the interpolated value for the current value of the given animation.
@@ -41,5 +41,10 @@ class LocationTween extends Tween<ILatLng> {
     if (t == 1.0) return end.copyWith(isStopover: true);
 
     return lerp(t);
+  }
+
+  LocationTween operator +(ILatLng end) {
+    interpolator.swap(end);
+    return this;
   }
 }

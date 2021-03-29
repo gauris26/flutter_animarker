@@ -1,9 +1,10 @@
 // Package imports:
 import 'package:flutter_animarker/helpers/spherical_util.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 
 // Project imports:
 import 'package:flutter_animarker/core/i_lat_lng.dart';
+import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 
 final MarkerId defaultId = MarkerId('');
 
