@@ -1,10 +1,9 @@
-// Import BenchmarkBase class.
-import 'dart:math' as math;
 import 'dart:typed_data';
-
+import 'dart:math' as math;
+import 'package:vector_math/vector_math.dart';
 import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:flutter_animarker/helpers/math_util.dart';
-import 'package:vector_math/vector_math.dart';
+
 
 LatLng x1 = LatLng(18.48817486792756, -69.95916740356776);
 LatLng x2 = LatLng(18.48883880652183, -69.94596808528654);
@@ -32,10 +31,9 @@ class TemplateBenchmark extends BenchmarkBase {
   // The benchmark code.
   @override
   void run() {
-
-       for (var i = 0.0; i <= 1.0; i += step) {
-
-      var vector = vectorSlerp(_preListFloat32x4, lastFloat32x4, _step, i.clamp(0.0, 1.0));
+    for (var i = 0.0; i <= 1.0; i += step) {
+      var vector = vectorSlerp(
+          _preListFloat32x4, lastFloat32x4, _step, i.clamp(0.0, 1.0));
 
       var xxxx = vector.shuffle(Float32x4.xxxx);
       var yyyy = vector.shuffle(Float32x4.yyyy);
@@ -61,12 +59,12 @@ class TemplateBenchmark extends BenchmarkBase {
     _preListFloat32x4 = Float32x4List(points.length);
 
     for (num i = 0, x = 0; x <= 1; x += _step, i++) {
-      var index = i.toDouble();
+      var index = i.toInt();
       var t = x.toDouble();
 
       var vector = latLngtoVector3(points[index.toInt()]);
 
-      _preListFloat32x4[index.toInt()] = Float32x4(vector.x, vector.y, vector.z, t);
+      _preListFloat32x4[index] = Float32x4(vector.x, vector.y, vector.z, t);
       //x => vector x, y => vector y, z => vector z, w => (t) position
     }
     lastFloat32x4 = _preListFloat32x4.last;
@@ -84,12 +82,13 @@ main() {
 }
 
 /// vectorSlerp
-Float32x4 vectorSlerp(Float32x4List preList, Float32x4 last, double step, double t) {
-
+Float32x4 vectorSlerp(
+    Float32x4List preList, Float32x4 last, double step, double t) {
+  // ignore: division_optimization
+  var matchedRangeStartIndex = (t / step).toInt();
   //var matchedRangeStartIndex = t ~/ step;
-  //var matchedRangeStartIndex = (t / step).toInt();
   //var matchedRangeStartIndex = (t / step).truncate();
-  var matchedRangeStartIndex = (Float32x4.splat(t) / Float32x4.splat(step)).x.truncate();
+  //var matchedRangeStartIndex = (Float32x4.splat(t) / Float32x4.splat(step)).x.truncate();
 
   var length = preList.length - 1;
 
@@ -117,7 +116,8 @@ class LatLng {
   }
 }
 
-Float32x4 latLngtoFloat32x4(Vector3 vector3) => Float32x4(vector3.x, vector3.y, vector3.z, 0);
+Float32x4 latLngtoFloat32x4(Vector3 vector3) =>
+    Float32x4(vector3.x, vector3.y, vector3.z, 0);
 
 Vector3 latLngtoVector3(LatLng iLatLng) {
   var latRad = iLatLng.latitude.radians;
@@ -135,7 +135,8 @@ extension DoubleEx on double {
   double get degrees => MathUtil.toDegrees(this).toDouble();
 }
 
-Float32x4 inverseLerp(Float32x4 min, Float32x4 max, Float32x4 delta, bool isEqualValue, Float32x4 value) {
+Float32x4 inverseLerp(Float32x4 min, Float32x4 max, Float32x4 delta,
+    bool isEqualValue, Float32x4 value) {
   var mask = min.equal(max);
   if (mask.flagX && mask.flagY && mask.flagZ) return min;
   return (value - min) / delta;

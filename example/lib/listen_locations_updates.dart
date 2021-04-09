@@ -81,7 +81,7 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
             return Stack(
               children: [
                 Animarker(
-                  controller: _controller.future,
+                  mapId: _controller.future.then<int>((value) => value.mapId),
                   isActiveTrip: isActiveTrip,
                   radius: 0.08,
                   zoom: zoom,
@@ -89,18 +89,19 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
                   duration: Duration(milliseconds: 2000),
                   onStopover: onStopover,
                   markers: <Marker>{
+
                     //Avoid sent duplicate MarkerId
                     ..._markers.values.toSet(),
                     /*RippleMarker(
-                      markerId: MarkerId("MarkerId1"),
-                      position: startPosition,
-                      ripple: true,
-                    ),
-                    RippleMarker(
-                      markerId: MarkerId("MarkerId3"),
-                      position: startPosition2,
-                      ripple: true,
-                    )*/
+                          markerId: MarkerId("MarkerId1"),
+                          position: startPosition,
+                          ripple: true,
+                        ),
+                        RippleMarker(
+                          markerId: MarkerId("MarkerId3"),
+                          position: startPosition2,
+                          ripple: true,
+                        )*/
                   },
                   child: GoogleMap(
                     mapType: MapType.normal,

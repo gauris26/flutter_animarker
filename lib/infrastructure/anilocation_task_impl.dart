@@ -2,15 +2,14 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_animarker/anims/bearing_tween.dart';
+import 'package:flutter_animarker/animation/bearing_tween.dart';
 import 'package:flutter_animarker/core/anilocation_task_description.dart';
 import 'package:flutter_animarker/infrastructure/interpolators/line_location_interpolator_impl.dart';
 
-
 // Project imports:
-import 'package:flutter_animarker/anims/proxy_location_animation.dart';
+import 'package:flutter_animarker/animation/proxy_location_animation.dart';
 import 'package:flutter_animarker/core/i_anilocation_task.dart';
-import 'package:flutter_animarker/anims/location_tween.dart';
+import 'package:flutter_animarker/animation/location_tween.dart';
 import 'package:flutter_animarker/helpers/extensions.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/helpers/spherical_util.dart';
@@ -41,7 +40,8 @@ class AnilocationTaskImpl implements IAnilocationTask {
 
     _bearingTween = BearingTween.from(_locationTween);
 
-    _controller = AnimationController(vsync: description.vsync, duration: description.maxDuration);
+    _controller = AnimationController(
+        vsync: description.vsync, duration: description.maxDuration);
     _controller.addListener(_locationListener);
     _controller.addStatusListener(_statusListener);
 
@@ -98,7 +98,8 @@ class AnilocationTaskImpl implements IAnilocationTask {
 
     var startFrom = 1.0 - description.locationInterval;
 
-    var shortestAngle = SphericalUtil.angleShortestDistance(startBearing, endBearing).abs();
+    var shortestAngle =
+        SphericalUtil.angleShortestDistance(startBearing, endBearing).abs();
 
     if (shortestAngle > description.angleThreshold) {
       _bearingTween.interpolator.swap(endBearing);
@@ -108,7 +109,6 @@ class AnilocationTaskImpl implements IAnilocationTask {
       var inverse = (1 / angle.abs());
 
       startFrom = min(inverse, startFrom);
-
     }
 
     _isResseting = true;
@@ -126,7 +126,8 @@ class AnilocationTaskImpl implements IAnilocationTask {
       _controller.removeListener(_locationListener);
       _controller.removeStatusListener(_statusListener);
 
-      var multiPoint = LocationTween(interpolator: PolynomialLocationInterpolator(points: list));
+      var multiPoint = LocationTween(
+          interpolator: PolynomialLocationInterpolator(points: list));
 
       _locationTween.interpolator.swap(last);
 
@@ -150,7 +151,9 @@ class AnilocationTaskImpl implements IAnilocationTask {
     }
   }
 
-  void _locationListener() => description.latLngListener != null ? description.latLngListener!(value) : null;
+  void _locationListener() => description.latLngListener != null
+      ? description.latLngListener!(value)
+      : null;
 
   void _statusListener(AnimationStatus status) {
     if (_isResseting) {
@@ -183,7 +186,8 @@ class AnilocationTaskImpl implements IAnilocationTask {
   }
 
   @override
-  ILatLng get value => _proxyAnim.value.copyWith(bearing: _bearingAnimation.value);
+  ILatLng get value =>
+      _proxyAnim.value.copyWith(bearing: _bearingAnimation.value);
 
   @override
   bool get isAnimating => _controller.isAnimating;

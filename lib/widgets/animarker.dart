@@ -12,15 +12,14 @@ import 'package:flutter_animarker/helpers/extensions.dart';
 import 'package:flutter_animarker/core/performance_mode.dart';
 import 'package:flutter_animarker/helpers/google_map_helper.dart';
 import 'package:flutter_animarker/core/i_location_dispatcher.dart';
-import 'package:flutter_animarker/anims/animarker_controller.dart';
+import 'package:flutter_animarker/animation/animarker_controller.dart';
 import 'package:flutter_animarker/core/i_animarker_controller.dart';
-
-int _nextMapCreationId = 0;
 
 ///Google Maps widget wrapper for animation activities
 @immutable
 class Animarker extends StatefulWidget {
   final double zoom;
+  final Future<int> mapId;
   final Widget child;
   final isActiveTrip;
   final double radius;
@@ -37,6 +36,7 @@ class Animarker extends StatefulWidget {
   Animarker({
     required this.child,
     required this.onStopover,
+    required this.mapId,
     this.threshold = 1.5,
     this.isActiveTrip = true,
     this.markers = const <Marker>{},
@@ -57,19 +57,19 @@ class Animarker extends StatefulWidget {
 }
 
 class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
-  final _mapId = _nextMapCreationId++;
   //Animation Controllers
-  late IAnimarkerController _animarkerController;
+  late IAnimarkerController _controller;
 
   //Variables
+  late int mapId;
   late Widget child;
+  double _devicePxRatio = 1.0;
   final Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
   final Map<CircleId, Circle> _circles = <CircleId, Circle>{};
-  double _devicePixelRatio = 1.0;
 
   @override
   void initState() {
-    _animarkerController = AnimarkerController(
+    _controller = AnimarkerController(
       description: AnimarkerControllerDescription(
         vsync: this,
         duration: widget.duration,
@@ -96,26 +96,20 @@ class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(Animarker oldWidget) {
     //Manage new markers updates after setState had gotten called
-    widget.markers.difference(_markers.set).forEach((marker) => _animarkerController.pushMarker(marker));
+    widget.markers.difference(_markers.set).forEach((marker) => _controller.pushMarker(marker));
 
-    if (oldWidget.performanceMode != widget.performanceMode) {
-      child = widget.child;
-    }
+    if (widget.performanceModeHasChanged(oldWidget)) child = widget.child;
 
-    if (oldWidget.isActiveTrip != widget.isActiveTrip) {
-      _animarkerController.isActiveTrip = widget.isActiveTrip;
-    }
+    if (widget.isActiveTripHasChanged(oldWidget)) _controller.isActiveTrip = widget.isActiveTrip;
 
-    if (oldWidget.radius != widget.radius || oldWidget.zoom != widget.zoom) {
-      _animarkerController.updateZoomLevel(_devicePixelRatio, widget.radius, widget.zoom);
-    }
+    if (widget.radiusOrZoomHasChanged(oldWidget)) _controller.updateZoomLevel(_devicePxRatio, widget.radius, widget.zoom);
 
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   void didChangeDependencies() {
-    _devicePixelRatio = MediaQuery.of(context).devicePixelRatio;
+    _devicePxRatio = MediaQuery.of(context).devicePixelRatio;
     super.didChangeDependencies();
   }
 
@@ -125,7 +119,8 @@ class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
 
     //Update the marker with animation
     _markers[marker.markerId] = marker;
-    await GoogleMapHelper.updateMarkers(_mapId, tempSet, _markers.set);
+
+    await widget.updateMarkers(tempSet, _markers.set);
   }
 
   void rippleListener(Circle circle) async {
@@ -133,12 +128,26 @@ class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
 
     _circles[circle.circleId] = circle;
 
-    await GoogleMapHelper.updateCircles(_mapId, tempCircles, _circles.set);
+    await widget.updateCircles(tempCircles, _circles.set);
   }
 
   @override
   void dispose() async {
-    _animarkerController.dispose();
+    _controller.dispose();
     super.dispose();
+  }
+}
+
+extension RadiosZoomEx on Animarker {
+  bool radiusOrZoomHasChanged(Animarker oldWidget) => oldWidget.radius != radius || oldWidget.zoom != zoom;
+  bool performanceModeHasChanged(Animarker oldWidget) => oldWidget.performanceMode != performanceMode;
+  bool isActiveTripHasChanged(Animarker oldWidget) => oldWidget.isActiveTrip != isActiveTrip;
+  Future<void> updateCircles(Set<Circle> previous, Set< Circle> current) async {
+    var mapId = await this.mapId;
+    await GoogleMapHelper.updateCircles(mapId, previous, current);
+  }
+  Future<void> updateMarkers(Set<Marker> previous, Set< Marker> current) async {
+    var mapId = await this.mapId;
+    await GoogleMapHelper.updateMarkers(mapId, previous, current);
   }
 }
