@@ -41,7 +41,10 @@ class AnilocationTaskImpl implements IAnilocationTask {
     _bearingTween = BearingTween.from(_locationTween);
 
     _controller = AnimationController(
-        vsync: description.vsync, duration: description.maxDuration);
+      vsync: description.vsync,
+      duration: description.maxDuration,
+    );
+
     _controller.addListener(_locationListener);
     _controller.addStatusListener(_statusListener);
 
@@ -72,9 +75,18 @@ class AnilocationTaskImpl implements IAnilocationTask {
   ///or the animation is completed or dismissed
   @override
   void forward(ILatLng from) async {
+    if (_locationTween.interpolator.isStopped && _locationTween.interpolator.end == from) {
+      _locationTween.interpolator.begin = from;
+      _bearingTween.interpolator.begin = 0;
+      return;
+    } else {
+      _locationTween.interpolator.swap(from);
+      var angle = _locationTween.end - _locationTween.begin;
+      _bearingTween.interpolator.swap(angle);
+    }
+
     //Start animation
     if (!from.isEmpty && !isAnimating && _controller.isCompletedOrDismissed) {
-      if (_locationTween.interpolator.isStopped) _locationTween.end = from;
       _isResseting = true;
       await _controller.resetAndForward();
     }
@@ -85,8 +97,12 @@ class AnilocationTaskImpl implements IAnilocationTask {
   void animateTo(ILatLng next) {
     //If isEmpty (no set) the "begin LatLng" field is ready for animation, delta location required
     if (next.isEmpty) {
-      _locationTween.interpolator.swap(next);
-      _bearingTween.interpolator.swap(0);
+      return;
+    }
+
+    if (_locationTween.interpolator.isStopped) {
+      _locationTween.interpolator.begin = next;
+      _bearingTween.interpolator.end = 0;
       return;
     }
 
@@ -98,8 +114,7 @@ class AnilocationTaskImpl implements IAnilocationTask {
 
     var startFrom = 1.0 - description.locationInterval;
 
-    var shortestAngle =
-        SphericalUtil.angleShortestDistance(startBearing, endBearing).abs();
+    var shortestAngle = SphericalUtil.angleShortestDistance(startBearing, endBearing).abs();
 
     if (shortestAngle > description.angleThreshold) {
       _bearingTween.interpolator.swap(endBearing);
@@ -117,17 +132,13 @@ class AnilocationTaskImpl implements IAnilocationTask {
   }
 
   @override
-  void animatePoints(
-    List<ILatLng> list, {
-    ILatLng last = const ILatLng.empty(),
-    Curve curve = Curves.linear,
-  }) {
+  void animatePoints(List<ILatLng> list,
+      {ILatLng last = const ILatLng.empty(), Curve curve = Curves.linear}) {
     if (list.isNotEmpty) {
       _controller.removeListener(_locationListener);
       _controller.removeStatusListener(_statusListener);
 
-      var multiPoint = LocationTween(
-          interpolator: PolynomialLocationInterpolator(points: list));
+      var multiPoint = LocationTween(interpolator: PolynomialLocationInterpolator(points: list));
 
       _locationTween.interpolator.swap(last);
 
@@ -136,32 +147,36 @@ class AnilocationTaskImpl implements IAnilocationTask {
       _bearingTween.interpolator.swap(newBearing);
 
       _isResseting = true;
-      /*TODO*/
-      //_locationTween.reset();
 
       _proxyAnim.parent = multiPoint.animate(
-        CurvedAnimation(
-          curve: Interval(0.0, 1.0, curve: curve),
-          parent: _controller,
-        ),
+        CurvedAnimation(curve: Interval(0.0, 1.0, curve: curve), parent: _controller),
       );
-
       _controller.addListener(_locationListener);
       _controller.addStatusListener(_statusListenerPoints);
     }
   }
 
-  void _locationListener() => description.latLngListener != null
-      ? description.latLngListener!(value)
-      : null;
+  void _locationListener() {
+    if (_isResseting) {
+      _isResseting = false;
+      return;
+    }
+
+    debugPrint('${value.bearing}: ${value.toLatLng} isStopover: ${value.isStopover} isRotation: ${_controller.value}');
+    if (description.latLngListener != null) {
+      description.latLngListener!(value);
+    }
+  }
 
   void _statusListener(AnimationStatus status) {
+    print(status);
     if (_isResseting) {
       _isResseting = false;
       return;
     }
 
     if (status.isCompletedOrDismissed && description.onAnimCompleted != null) {
+      print('onAnimCompleted');
       description.onAnimCompleted!(this);
     }
   }
@@ -186,8 +201,7 @@ class AnilocationTaskImpl implements IAnilocationTask {
   }
 
   @override
-  ILatLng get value =>
-      _proxyAnim.value.copyWith(bearing: _bearingAnimation.value);
+  ILatLng get value => _proxyAnim.value.copyWith(bearing: _bearingAnimation.value);
 
   @override
   bool get isAnimating => _controller.isAnimating;

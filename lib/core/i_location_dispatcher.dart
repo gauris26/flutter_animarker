@@ -1,10 +1,13 @@
 // Project imports:
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/infrastructure/location_dispatcher_impl.dart';
 
 typedef OnNewMarkerPosition = void Function(ILatLng latLng);
 
 abstract class ILocationDispatcher {
+
+  VoidCallback? onNewLocationPushed;
 
   double get threshold;
 

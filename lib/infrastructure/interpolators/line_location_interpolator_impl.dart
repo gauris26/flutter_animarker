@@ -10,7 +10,7 @@ class LineLocationInterpolatorImpl<T extends ILatLng> extends IInterpolationServ
   late T begin;
   @override
   late T end;
-  final ILatLng _previousPosition = ILatLng.empty();
+  //final ILatLng _previousPosition = ILatLng.empty();
   late Float32x4 float32x4FromVector;
   late Float32x4 float32x4Delta;
 
@@ -18,14 +18,14 @@ class LineLocationInterpolatorImpl<T extends ILatLng> extends IInterpolationServ
   LineLocationInterpolatorImpl({
     required T begin,
     required T end,
-  })  : begin = begin,
-        end = end, super.warmUp();
+  })   : begin = begin,
+        end = end,
+        super.warmUp();
 
   @override
   bool get isStopped => begin == end;
 
-  ILatLng get previousPosition => _previousPosition.isEmpty ? begin : _previousPosition;
-
+  //ILatLng get previousPosition => _previousPosition.isEmpty ? begin : _previousPosition;
 
   @override
   @protected
@@ -38,18 +38,25 @@ class LineLocationInterpolatorImpl<T extends ILatLng> extends IInterpolationServ
   @protected
   void doWarmUp() {
 
-    var fromVectorNormalized = SphericalUtil.toVector3(begin.latitude, begin.longitude).normalized();
+    var fromVectorNorm = SphericalUtil.toVector3(begin.latitude, begin.longitude).normalized();
 
-    var toVectorNormalized = SphericalUtil.toVector3(end.latitude, end.longitude).normalized();
+    float32x4FromVector = Float32x4(fromVectorNorm.x, fromVectorNorm.y, fromVectorNorm.z, 0);
 
-    float32x4FromVector = Float32x4(fromVectorNormalized.x, fromVectorNormalized.y, fromVectorNormalized.z, 0);
+    if (!isStopped) {
 
-    var float32x4ToVector = Float32x4(toVectorNormalized.x, toVectorNormalized.y, toVectorNormalized.z, 0);
+      var toVectorNorm = SphericalUtil.toVector3(end.latitude, end.longitude).normalized();
 
-    float32x4Delta = float32x4ToVector - float32x4FromVector;
+      var float32x4ToVector = Float32x4(toVectorNorm.x, toVectorNorm.y, toVectorNorm.z, 0);
+
+      float32x4Delta = float32x4ToVector - float32x4FromVector;
+
+    } else {
+      float32x4Delta = Float32x4.splat(0);
+    }
   }
 
   @override
   @protected
-  T doInterpolate(double t) => SphericalUtil.vectorInterpolateOptimized(float32x4Delta, float32x4FromVector, t) as T;
+  T doInterpolate(double t) =>
+      SphericalUtil.vectorInterpolateOptimized(float32x4Delta, float32x4FromVector, t) as T;
 }

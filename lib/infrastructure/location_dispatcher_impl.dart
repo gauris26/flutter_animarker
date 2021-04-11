@@ -2,6 +2,7 @@
 import 'dart:collection';
 
 // Project imports:
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/core/i_location_dispatcher.dart';
 import 'package:flutter_animarker/helpers/spherical_util.dart';
@@ -11,7 +12,7 @@ class LocationDispatcherImpl implements ILocationDispatcher {
   final threshold;
   final DoubleLinkedQueue<ILatLng> _locationQueue = DoubleLinkedQueue<ILatLng>();
 
-  LocationDispatcherImpl({this.threshold = 1.5});
+  LocationDispatcherImpl({this.threshold = 1.5, this.onNewLocationPushed});
 
   @override
   ILatLng get popLast => _locationQueue.removeLast();
@@ -47,7 +48,6 @@ class LocationDispatcherImpl implements ILocationDispatcher {
     var upcoming = upcomingEntry?.element ?? ILatLng.empty();
 
     if (!upcoming.isEmpty) {
-
       var currentBearing = SphericalUtil.computeHeading(current, next);
 
       var upComingBearing = SphericalUtil.computeHeading(next, upcoming);
@@ -63,7 +63,13 @@ class LocationDispatcherImpl implements ILocationDispatcher {
   }
 
   @override
-  void push(ILatLng latLng) => _locationQueue.addLast(latLng);
+  void push(ILatLng latLng) {
+    _locationQueue.addLast(latLng);
+
+    if (onNewLocationPushed != null) {
+      onNewLocationPushed!();
+    }
+  }
 
   @override
   bool get isEmpty => _locationQueue.isEmpty;
@@ -80,5 +86,6 @@ class LocationDispatcherImpl implements ILocationDispatcher {
   @override
   void clear() => _locationQueue.clear();
 
-
+  @override
+  final VoidCallback? onNewLocationPushed;
 }

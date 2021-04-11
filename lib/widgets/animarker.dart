@@ -1,4 +1,5 @@
 // Flutter imports:
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animarker/core/animarker_controller_description.dart';
 
@@ -19,13 +20,13 @@ import 'package:flutter_animarker/core/i_animarker_controller.dart';
 @immutable
 class Animarker extends StatefulWidget {
   final double zoom;
-  final Future<int> mapId;
-  final Widget child;
   final isActiveTrip;
+  final Widget child;
   final double radius;
   final double threshold;
   final bool useRotation;
   final Color rippleColor;
+  final Future<int> mapId;
   final Duration duration;
   final Set<Marker> markers;
   final OnStopover onStopover;
@@ -34,35 +35,36 @@ class Animarker extends StatefulWidget {
   final PerformanceMode performanceMode;
 
   Animarker({
+    Key? key,
     required this.child,
     required this.onStopover,
     required this.mapId,
+    this.zoom = 15.0,
+    this.radius = 0.5,
     this.threshold = 1.5,
+    this.useRotation = true,
     this.isActiveTrip = true,
+    this.rippleColor = Colors.red,
     this.markers = const <Marker>{},
-    this.duration = const Duration(milliseconds: 1000),
     this.performanceMode = PerformanceMode.better,
+    this.duration = const Duration(milliseconds: 1000),
     this.rippleDuration = const Duration(milliseconds: 2000),
     this.rotationDuration = const Duration(milliseconds: 10000),
-    this.radius = 0.5,
-    this.zoom = 15.0,
-    this.rippleColor = Colors.red,
-    this.useRotation = true,
   })  : assert(radius >= 0.0 && radius <= 1.0, 'Must choose values between 0.0 and 1.0 for radius scale'),
         assert(!markers.isAnyEmpty, 'Must choose a not empty MarkerId'),
-        assert(markers.markerIds.length == markers.length, 'Must choose a unique MarkerId per Marker item');
+        assert(markers.markerIds.length == markers.length, 'Must choose a unique MarkerId per Marker item'),
+        super(key: key);
 
   @override
-  _AnimarkerState createState() => _AnimarkerState();
+  AnimarkerState createState() => AnimarkerState();
 }
 
-class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
+class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   //Animation Controllers
   late IAnimarkerController _controller;
 
   //Variables
-  late int mapId;
-  late Widget child;
+  late Widget _child;
   double _devicePxRatio = 1.0;
   final Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
   final Map<CircleId, Circle> _circles = <CircleId, Circle>{};
@@ -73,36 +75,41 @@ class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
       description: AnimarkerControllerDescription(
         vsync: this,
         duration: widget.duration,
-        rotationDuration: widget.rotationDuration,
-        rippleDuration: widget.rippleDuration,
+        onStopover: widget.onStopover,
         rippleColor: widget.rippleColor,
         useRotation: widget.useRotation,
-        onMarkerAnimation: locationListener,
-        onRippleAnimation: rippleListener,
+        onRippleAnimation: _rippleListener,
+        onMarkerAnimation: _locationListener,
+        rippleDuration: widget.rippleDuration,
+        rotationDuration: widget.rotationDuration,
         dispatcher: ILocationDispatcher.queue(threshold: widget.threshold),
-        onStopover: widget.onStopover,
       ),
     );
 
-    child = widget.child;
-
+    _child = widget.child;
+    _markers.addAll(keyByMarkerId(widget.markers));
+    widget.markers.forEach((marker) => _controller.pushMarker(marker));
+    print('Start: ${DateTime.now().millisecondsSinceEpoch}');
     super.initState();
   }
 
   @override
-  Widget build(BuildContext context) =>
-      widget.performanceMode == PerformanceMode.better ? child : widget.child;
+  Widget build(BuildContext context) => widget.isPerformanceBetter ? _child : widget.child;
 
   @override
   void didUpdateWidget(Animarker oldWidget) {
-    //Manage new markers updates after setState had gotten called
-    widget.markers.difference(_markers.set).forEach((marker) => _controller.pushMarker(marker));
+    if(!setEquals(oldWidget.markers, widget.markers)){
+      //Manage new markers updates after setState had gotten called
+      widget.markers.difference(_markers.set).forEach((marker) => _controller.pushMarker(marker));
+    }
 
-    if (widget.performanceModeHasChanged(oldWidget)) child = widget.child;
+    if (widget.performanceModeHasChanged(oldWidget)) _child = widget.child;
 
     if (widget.isActiveTripHasChanged(oldWidget)) _controller.isActiveTrip = widget.isActiveTrip;
 
-    if (widget.radiusOrZoomHasChanged(oldWidget)) _controller.updateZoomLevel(_devicePxRatio, widget.radius, widget.zoom);
+    if (widget.radiusOrZoomHasChanged(oldWidget)) {
+      _controller.updateZoomLevel(_devicePxRatio, widget.radius, widget.zoom);
+    }
 
     super.didUpdateWidget(oldWidget);
   }
@@ -113,7 +120,8 @@ class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
     super.didChangeDependencies();
   }
 
-  void locationListener(Marker marker) async {
+  void _locationListener(Marker marker) async {
+    //print('End: ${DateTime.now().millisecondsSinceEpoch}');
     //Saving previous marker position
     var tempSet = _markers.set;
 
@@ -123,7 +131,7 @@ class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
     await widget.updateMarkers(tempSet, _markers.set);
   }
 
-  void rippleListener(Circle circle) async {
+  void _rippleListener(Circle circle) async {
     var tempCircles = _circles.set;
 
     _circles[circle.circleId] = circle;
@@ -132,7 +140,7 @@ class _AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   }
 
   @override
-  void dispose() async {
+  void dispose() {
     _controller.dispose();
     super.dispose();
   }
@@ -142,11 +150,13 @@ extension RadiosZoomEx on Animarker {
   bool radiusOrZoomHasChanged(Animarker oldWidget) => oldWidget.radius != radius || oldWidget.zoom != zoom;
   bool performanceModeHasChanged(Animarker oldWidget) => oldWidget.performanceMode != performanceMode;
   bool isActiveTripHasChanged(Animarker oldWidget) => oldWidget.isActiveTrip != isActiveTrip;
-  Future<void> updateCircles(Set<Circle> previous, Set< Circle> current) async {
+  bool get isPerformanceBetter => performanceMode == PerformanceMode.better;
+  Future<void> updateCircles(Set<Circle> previous, Set<Circle> current) async {
     var mapId = await this.mapId;
     await GoogleMapHelper.updateCircles(mapId, previous, current);
   }
-  Future<void> updateMarkers(Set<Marker> previous, Set< Marker> current) async {
+
+  Future<void> updateMarkers(Set<Marker> previous, Set<Marker> current) async {
     var mapId = await this.mapId;
     await GoogleMapHelper.updateMarkers(mapId, previous, current);
   }

@@ -61,7 +61,7 @@ extension AnimationControllerEx on AnimationController {
   bool get isCompletedOrDismissed => isCompleted || isDismissed;
 
   TickerFuture resetAndForward({double? from}) {
-    reset();
+    //reset();
     return forward(from: from);
   }
 }
