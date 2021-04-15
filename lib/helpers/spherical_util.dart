@@ -27,7 +27,7 @@ abstract class SphericalUtil {
     var y = math.cos(fromLat) * math.sin(toLat) - math.sin(fromLat) * math.cos(toLat) * math.cos(dLng);
     final heading = math.atan2(x, y);
 
-    return MathUtil.toDegrees(heading);
+    return (heading.degrees + 360) % 360;
   }
 
   static double calculateZoomScale(double densityDpi, double zoomLevel, ILatLng target) {
@@ -243,10 +243,10 @@ abstract class SphericalUtil {
     return result;
   }
 
-  static double angleLerpOptimized(Float32x4 shortestAngle, Float32x4 from, double t) {
+  static double angleLerpOptimized(Float32x4 angle, Float32x4 from, double t) {
     var multiplier = Float32x4.splat(t);
 
-    var result = from + shortestAngle * multiplier;
+    var result = from + angle * multiplier;
 
     return result.x;
   }

@@ -24,8 +24,8 @@ dependencies:
   flutter_animarker:
     path: ../
   cupertino_icons: ^1.0.0
-  geolocator: ^7.0.1
-  google_maps_flutter: ^2.0.1
+  geolocator: ^7.0.3
+  google_maps_flutter: ^2.0.3
   google_maps_flutter_platform_interface: ^2.0.2
 
 
@@ -42,3 +42,6 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/pin_marker_1.png

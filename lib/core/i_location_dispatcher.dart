@@ -1,13 +1,10 @@
 // Project imports:
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/infrastructure/location_dispatcher_impl.dart';
 
-typedef OnNewMarkerPosition = void Function(ILatLng latLng);
+typedef OnMarkerPosition = void Function(ILatLng latLng);
 
 abstract class ILocationDispatcher {
-
-  VoidCallback? onNewLocationPushed;
 
   double get threshold;
 
@@ -23,7 +20,11 @@ abstract class ILocationDispatcher {
 
   factory ILocationDispatcher.queue({double threshold}) = LocationDispatcherImpl;
 
-  ILatLng next();
+  ILatLng get last;
+
+  ILatLng get next;
+
+  ILatLng get peek;
 
   void push(ILatLng latLng);
 
@@ -31,5 +32,5 @@ abstract class ILocationDispatcher {
 
   void clear();
 
-  ILatLng goTo(int index);
+  /*ILatLng goTo(int index);*/
 }

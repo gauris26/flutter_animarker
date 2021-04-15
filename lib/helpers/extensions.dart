@@ -61,7 +61,7 @@ extension AnimationControllerEx on AnimationController {
   bool get isCompletedOrDismissed => isCompleted || isDismissed;
 
   TickerFuture resetAndForward({double? from}) {
-    //reset();
+    reset();
     return forward(from: from);
   }
 }
@@ -85,7 +85,23 @@ extension TweenEx<T> on Tween<T> {
     required VoidCallback listener,
     required AnimationStatusListener statusListener,
   }) =>
-      animate(CurvedAnimation(curve: curve, parent: controller))..addListener(listener)..addStatusListener(statusListener);
+      animate(CurvedAnimation(curve: curve, parent: controller))
+        ..addListener(listener)
+        ..addStatusListener(statusListener);
+
+  Animation<T> curvedAnimate({
+    Curve curve = Curves.linear,
+    required Animation<double> controller,
+  }) =>
+      animate(CurvedAnimation(curve:  curve, parent: controller));
+
+  Animation<T> intervalAnimate({
+    Curve curve = Curves.linear,
+    required double begin,
+    required double end,
+    required Animation<double> controller,
+  }) =>
+      animate(CurvedAnimation(curve: Interval(begin, end, curve: curve), parent: controller));
 }
 
 extension MapToSet on Map<MarkerId, Marker> {

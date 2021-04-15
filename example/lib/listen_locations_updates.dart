@@ -24,6 +24,7 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
   LatLng startPosition2 = LatLng(18.488213, -69.959186);
 
   late final StreamSubscription<Position> positionStream;
+  BitmapDescriptor pinLocationIcon = BitmapDescriptor.defaultMarker;
 
   final Completer<GoogleMapController> _controller = Completer();
 
@@ -37,6 +38,11 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
 
   @override
   void initState() {
+    BitmapDescriptor.fromAssetImage(ImageConfiguration(devicePixelRatio: 2.5), 'assets/pin_marker_1.png')
+        .then((onValue) {
+      pinLocationIcon = onValue;
+    });
+
     super.initState();
 
     positionStream = Geolocator.getPositionStream(
@@ -44,15 +50,16 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
       distanceFilter: 20,
     ).listen((Position p) async {
       setState(() {
-        var markerId = MarkerId('MarkerId2');
+        var markerId = MarkerId('MarkerId3');
         _markers[markerId] = RippleMarker(
           markerId: markerId,
+          icon: pinLocationIcon,
           position: LatLng(p.latitude, p.longitude),
           ripple: ripple,
         );
       });
 
-      /*await Future.delayed(Duration(milliseconds: min(1000, random.nextInt(1000) + 100)), () {
+      await Future.delayed(Duration(milliseconds: min(1000, random.nextInt(5000))), () {
         setState(() {
           startPosition = LatLng(p.latitude + 0.001, p.longitude + 0.001);
         });
@@ -62,7 +69,7 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
         setState(() {
           startPosition2 = LatLng(p.latitude - 0.01, p.longitude - 0.002);
         });
-      });*/
+      });
     });
   }
 
@@ -83,25 +90,25 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
                 Animarker(
                   mapId: _controller.future.then<int>((value) => value.mapId),
                   isActiveTrip: isActiveTrip,
-                  radius: 0.08,
+                  rippleRadius: 0.25,
+                  useRotation: false,
                   zoom: zoom,
                   performanceMode: PerformanceMode.better,
                   duration: Duration(milliseconds: 2000),
                   onStopover: onStopover,
                   markers: <Marker>{
-
                     //Avoid sent duplicate MarkerId
                     ..._markers.values.toSet(),
-                    /*RippleMarker(
-                          markerId: MarkerId("MarkerId1"),
-                          position: startPosition,
-                          ripple: true,
-                        ),
-                        RippleMarker(
-                          markerId: MarkerId("MarkerId3"),
+                    RippleMarker(
+                      icon: BitmapDescriptor.defaultMarker,
+                      markerId: MarkerId('MarkerId1'),
+                      position: startPosition,
+                      ripple: false,
+                    ),
+                    Marker(
+                          markerId: MarkerId('MarkerId2'),
                           position: startPosition2,
-                          ripple: true,
-                        )*/
+                        ),
                   },
                   child: GoogleMap(
                     mapType: MapType.normal,
@@ -145,7 +152,7 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
   Future<void> onStopover(LatLng latLng) async {
     if (!_controller.isCompleted) return;
 
-    var controller = await _controller.future;
+    /*var controller = await _controller.future;
     var zoom = await controller.getZoomLevel();
 
     var camPosition = CameraPosition(
@@ -155,7 +162,7 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
       target: latLng,
     );
 
-    await controller.animateCamera(CameraUpdate.newCameraPosition(camPosition));
+    await controller.animateCamera(CameraUpdate.newCameraPosition(camPosition));*/
   }
 
   @override

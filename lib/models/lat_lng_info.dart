@@ -21,6 +21,8 @@ class LatLngInfo implements ILatLng {
   final bool isEmpty;
   @override
   final double mapScale;
+  @override
+  bool get isNotEmpty => !isEmpty;
 
   const LatLngInfo(
     this.latitude,

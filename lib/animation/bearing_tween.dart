@@ -15,8 +15,8 @@ class BearingTween extends Tween<double> {
   /// Create a tween that calculate angle bearing/heading from given [begin] and [end] angle positions.
   BearingTween({required this.interpolator});
 
-  factory BearingTween.from(LocationTween tween) =>
-      BearingTween(interpolator: AngleInterpolatorImpl.from(tween));
+  factory BearingTween.from(LocationTween tween, {bool findShortestAngle = true}) =>
+      BearingTween(interpolator: AngleInterpolatorImpl.from(tween, findShortestAngle: findShortestAngle));
 
   //Getters
   @override
@@ -37,7 +37,7 @@ class BearingTween extends Tween<double> {
   ///Interpolates two angles at the given (t) position at timeline.
   @override
   double lerp(double t) {
-    if (interpolator.isStopped) return 0;
+    if (interpolator.isStopped) return interpolator.end;
 
     return interpolator.interpolate(t);
   }

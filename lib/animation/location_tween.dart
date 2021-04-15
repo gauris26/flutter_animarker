@@ -4,6 +4,7 @@ import 'package:flutter_animarker/core/i_interpolation_service_optimized.dart';
 
 // Project imports:
 import 'package:flutter_animarker/core/i_lat_lng.dart';
+import 'package:flutter_animarker/helpers/spherical_util.dart';
 
 /// A tween with a location values (latitude, Longitude).
 class LocationTween extends Tween<ILatLng> {
@@ -19,6 +20,8 @@ class LocationTween extends Tween<ILatLng> {
 
   @override
   ILatLng get end => interpolator.end;
+
+  bool get isRipple => interpolator.end.ripple && interpolator.end.ripple;
 
   @override
   set end(ILatLng? value) => interpolator.end = value ?? ILatLng.empty();
@@ -42,6 +45,9 @@ class LocationTween extends Tween<ILatLng> {
 
     return lerp(t);
   }
+
+  double get bearing => SphericalUtil.computeHeading(begin, end).toDouble();
+
 
   LocationTween operator +(ILatLng end) {
     interpolator.swap(end);

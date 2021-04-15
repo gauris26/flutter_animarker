@@ -8,7 +8,7 @@ typedef LatLngListener = void Function(ILatLng iLatLng);
 
 typedef OnAnimCompleted = void Function(IAnimationMode anim);
 
-abstract class IAnilocationTask implements IAnimationMode {
+abstract class IAnilocationTask implements IAnimationMode  {
   ILatLng get value;
 
   bool get isAnimating;
@@ -17,9 +17,15 @@ abstract class IAnilocationTask implements IAnimationMode {
 
   bool get isCompleted;
 
+  bool get isCompletedOrDismissed;
+
+  AnilocationTaskDescription get description;
+
   factory IAnilocationTask.create({required  AnilocationTaskDescription description}) = AnilocationTaskImpl;
 
-  void dispose();
+  Future<void> push(ILatLng latLng);
 
-  void forward(ILatLng from);
+  void updateRadius(double latLng);
+
+  void dispose();
 }

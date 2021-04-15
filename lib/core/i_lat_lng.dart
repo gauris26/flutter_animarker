@@ -15,6 +15,7 @@ abstract class  ILatLng {
   final bool isStopover = false;
   final bool ripple = false;
   final bool isEmpty = false;
+  bool get isNotEmpty;
 
 
   const factory ILatLng.empty() = LatLngInfo.empty;
