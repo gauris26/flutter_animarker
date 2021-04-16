@@ -8,6 +8,7 @@ import 'package:flutter_animarker/core/animarker_controller_description.dart';
 import 'package:flutter_animarker/core/i_anilocation_task.dart';
 import 'package:flutter_animarker/core/i_animarker_controller.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
+import 'package:flutter_animarker/helpers/extensions.dart';
 
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 import '../helpers/extensions.dart';
@@ -15,20 +16,18 @@ import '../helpers/extensions.dart';
 class AnimarkerController extends IAnimarkerController {
   @override
   final AnimarkerControllerDescription description;
-  //Animation Controllers
-
   //Late Final Variables
   late final Map<MarkerId, IAnilocationTask> tracker;
 
-  @override
-  late bool isActiveTrip;
+  bool _isActiveTrip = true;
+  bool _useRotation = true;
   double _radius = 0;
 
   AnimarkerController({
-    required this.description,
-    bool isActiveTrip = true,
-  })  : isActiveTrip = isActiveTrip,
-        tracker = <MarkerId, IAnilocationTask>{} {
+    required this.description
+  })  : tracker = <MarkerId, IAnilocationTask>{} {
+    _isActiveTrip = description.isActiveTrip;
+    _useRotation = description.useRotation;
     _radius = description.rippleRadius;
   }
 
@@ -38,8 +37,18 @@ class AnimarkerController extends IAnimarkerController {
   }
 
   @override
+  void updateActiveTrip(bool activeTrip) {
+    _isActiveTrip = activeTrip;
+  }
+
+  @override
+  void updateUseRotation(bool useRotation) {
+    _useRotation = useRotation;
+  }
+
+  @override
   Future<void> pushMarker(Marker marker) async {
-    if (!isActiveTrip) return;
+    if (!_isActiveTrip) return;
 
     // Animation Marker Manager Factory
     tracker[marker.markerId] ??= IAnilocationTask.create(
@@ -48,7 +57,7 @@ class AnimarkerController extends IAnimarkerController {
         begin: marker.toLatLngInfo,
         end: marker.toLatLngInfo,
         markerId: marker.markerId,
-        onAnimCompleted: _animCompleted,
+        onAnimCompleted: _animationCompleted,
         latLngListener: _locationListener,
         curve: description.curve,
       ),
@@ -62,17 +71,15 @@ class AnimarkerController extends IAnimarkerController {
     }
 
     task.updateRadius(_radius);
+    task.updateActiveTrip(_isActiveTrip);
+    task.updateUseRotation(_useRotation);
     await task.push(marker.toLatLngInfo);
   }
 
   void _locationListener(ILatLng location) async {
-    var marker = Marker(
-      markerId: location.markerId,
-      position: location.toLatLng,
-      rotation: location.bearing,
-    );
-
-    if (description.onMarkerAnimation != null) description.onMarkerAnimation!(marker, location.isStopover);
+    if (description.onMarkerAnimation != null) {
+      description.onMarkerAnimation!(location.fromJson, location.isStopover);
+    }
 
     //Notify if the marker has reached his end position
     if (location.isStopover && description.onStopover != null) {
@@ -80,11 +87,7 @@ class AnimarkerController extends IAnimarkerController {
     }
   }
 
-  Future<void> _animCompleted(AnilocationTaskDescription description) async {
-
-    /*if (!isActiveTrip) {
-      next = description.goTo(description.length - 1);
-    }*/
+  Future<void> _animationCompleted(AnilocationTaskDescription description) async {
 
     /*if (description.dispatcher.length >= description.purgeLimit) {
         var lastValue = description.dispatcher.popLast;

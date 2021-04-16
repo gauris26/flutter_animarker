@@ -1,1 +1,0 @@
-enum PerformanceMode { better, normal }

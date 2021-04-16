@@ -4,6 +4,7 @@ import 'package:flutter_animarker/widgets/animarker.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'extensions.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_animarker/flutter_map_marker_animation.dart';
 
@@ -32,6 +33,10 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
 
   bool isActiveTrip = true;
 
+  bool useRotation = true;
+
+  bool ripple = true;
+
   Random random = Random();
 
   final Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
@@ -59,7 +64,7 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
         );
       });
 
-      await Future.delayed(Duration(milliseconds: min(1000, random.nextInt(5000))), () {
+      /*await Future.delayed(Duration(milliseconds: min(1000, random.nextInt(5000))), () {
         setState(() {
           startPosition = LatLng(p.latitude + 0.001, p.longitude + 0.001);
         });
@@ -69,11 +74,11 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
         setState(() {
           startPosition2 = LatLng(p.latitude - 0.01, p.longitude - 0.002);
         });
-      });
+      });*/
     });
   }
 
-  bool ripple = true;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -91,15 +96,14 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
                   mapId: _controller.future.then<int>((value) => value.mapId),
                   isActiveTrip: isActiveTrip,
                   rippleRadius: 0.25,
-                  useRotation: false,
+                  useRotation: useRotation,
                   zoom: zoom,
-                  performanceMode: PerformanceMode.better,
                   duration: Duration(milliseconds: 2000),
                   onStopover: onStopover,
                   markers: <Marker>{
                     //Avoid sent duplicate MarkerId
                     ..._markers.values.toSet(),
-                    RippleMarker(
+                    /*RippleMarker(
                       icon: BitmapDescriptor.defaultMarker,
                       markerId: MarkerId('MarkerId1'),
                       position: startPosition,
@@ -108,7 +112,7 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
                     Marker(
                           markerId: MarkerId('MarkerId2'),
                           position: startPosition2,
-                        ),
+                        ),*/
                   },
                   child: GoogleMap(
                     mapType: MapType.normal,
@@ -123,20 +127,19 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton(
-                        style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all<Color>(ripple ? Colors.red : Colors.blue)),
-                        onPressed: () => setState(() {
-                          ripple = !ripple;
-                        }),
-                        child: Text(ripple ? 'End Ripple' : 'Active Ripple'),
+                        style: (ripple ? Colors.red : Colors.blue).buttonStyle,
+                        onPressed: () => setState(() => ripple = !ripple),
+                        child: Text(ripple ? 'Stop Ripple' : 'Start Ripple'),
                       ),
                       ElevatedButton(
-                        style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all<Color>(isActiveTrip ? Colors.red : Colors.blue)),
+                        style: (useRotation ? Colors.red : Colors.blue).buttonStyle,
+                        onPressed: () => setState(() => useRotation = !useRotation),
+                        child: Text(useRotation ? 'Stop Rotation' : 'Start Rotation'),
+                      ),
+                      ElevatedButton(
+                        style: (isActiveTrip ? Colors.red : Colors.blue).buttonStyle,
                         onPressed: () => setState(() => isActiveTrip = !isActiveTrip),
-                        child: Text(isActiveTrip ? 'End trip' : 'Active trip'),
+                        child: Text(isActiveTrip ? 'Stop trip' : 'Start trip'),
                       ),
                     ],
                   ),
@@ -152,17 +155,6 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
   Future<void> onStopover(LatLng latLng) async {
     if (!_controller.isCompleted) return;
 
-    /*var controller = await _controller.future;
-    var zoom = await controller.getZoomLevel();
-
-    var camPosition = CameraPosition(
-      zoom: zoom,
-      tilt: 0,
-      bearing: 30,
-      target: latLng,
-    );
-
-    await controller.animateCamera(CameraUpdate.newCameraPosition(camPosition));*/
   }
 
   @override
@@ -173,3 +165,5 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
     super.dispose();
   }
 }
+
+

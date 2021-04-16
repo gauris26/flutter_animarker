@@ -8,224 +8,111 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Angle Tween Interpolation', () {
-    test('''Transform should return begin angle at 0.0 position (t) on timeline,
-            either using shortest angle or not''', () {
-      var useShortestAngle = Stream<bool>.fromIterable([true, false]);
+    test('Transform should return begin angle at 0.0 position (t) on timeline', () {
       var beginAngle = 152.0;
       var endAngle = 345.0;
       var t = 0.0;
 
-      useShortestAngle.listen(
-        expectAsync1<void, bool>(
-          (value) {
-            var interpolator = AngleInterpolatorImpl(
-                begin: beginAngle, end: endAngle, findShortestAngle: value);
-            var angleTween = BearingTween(interpolator: interpolator);
-            var resultBegin = angleTween.transform(t);
+      var interpolator = AngleInterpolatorImpl(begin: beginAngle, end: endAngle);
+      var angleTween = BearingTween(interpolator: interpolator);
+      var resultBegin = angleTween.transform(t);
 
-            expect(resultBegin, equals(beginAngle));
-          },
-          count: 2,
-        ),
-      );
+      expect(resultBegin, equals(beginAngle));
     });
 
-    test(
-        'Transform should return end shortest angle at 1.0 position (t) on timeline',
-        () {
-      var useShortestAngle = Stream<bool>.fromIterable([true, false]);
+    test('Transform should return end angle at 1.0 position (t) on timeline', () {
       var beginAngle = 152.0;
       var endAngle = 345.0;
       var t = 1.0;
 
-      useShortestAngle.listen(
-        expectAsync1<void, bool>(
-          (value) {
-            var interpolator = AngleInterpolatorImpl(
-                begin: beginAngle, end: endAngle, findShortestAngle: value);
-            var angleTween = BearingTween(interpolator: interpolator);
-            var shortestAngle =
-                value ? ((endAngle - beginAngle) + 180) % 360 - 180 : endAngle;
-            var resultEnd = angleTween.transform(t);
-
-            expect(resultEnd, equals(shortestAngle));
-          },
-          count: 2,
-        ),
+      var interpolator = AngleInterpolatorImpl(
+        begin: beginAngle,
+        end: endAngle,
       );
+      var angleTween = BearingTween(interpolator: interpolator);
+      var resultEnd = angleTween.transform(t);
+
+      expect(resultEnd, equals(endAngle));
     });
 
-    test(
-        'Just after constructor initialization [begin-end] angle should keep their values',
-        () {
-      var useShortestAngle = Stream<bool>.fromIterable([true, false]);
+    test('Just after constructor initialization [begin-end] angle should keep their values', () {
       var beginAngle = 265.0;
       var endAngle = 352.0;
 
-      useShortestAngle.listen(
-        expectAsync1<void, bool>(
-          (value) {
-            var interpolator = AngleInterpolatorImpl(
-                begin: beginAngle, end: endAngle, findShortestAngle: value);
-            var angleTween = BearingTween(interpolator: interpolator);
-            var resultBegin = angleTween.begin;
-            var shortestAngle =
-                value ? ((endAngle - beginAngle) + 180) % 360 - 180 : endAngle;
-            var resultEnd = angleTween.end;
+      var interpolator = AngleInterpolatorImpl(begin: beginAngle, end: endAngle);
+      var angleTween = BearingTween(interpolator: interpolator);
+      var resultBegin = angleTween.begin;
+      var resultEnd = angleTween.end;
 
-            expect(resultBegin, equals(beginAngle));
-            expect(resultEnd, equals(shortestAngle));
-          },
-          count: 2,
-        ),
-      );
+      expect(resultBegin, equals(beginAngle));
+      expect(resultEnd, equals(endAngle));
     });
 
-    test(
-        'Ensure that [begin,end] angles have\'nt changed after calling lerp method',
-        () {
-      var useShortestAngle = Stream<bool>.fromIterable([true, false]);
+    test('Ensure that [begin,end] angles have\'nt changed after calling lerp method', () {
       var beginAngle = 85.0;
       var endAngle = 196.0;
       var t = 0.68;
 
-      useShortestAngle.listen(
-        expectAsync1<void, bool>(
-          (value) {
-            var interpolator = AngleInterpolatorImpl(
-                begin: beginAngle, end: endAngle, findShortestAngle: value);
-            var angleTween = BearingTween(interpolator: interpolator);
-            angleTween.lerp(t); //Calling lerp method for interpolation
-            var resultBegin = angleTween.begin;
-            var shortestAngle =
-                value ? ((endAngle - beginAngle) + 180) % 360 - 180 : endAngle;
-            var resultEnd = angleTween.end;
+      var interpolator = AngleInterpolatorImpl(begin: beginAngle, end: endAngle);
+      var angleTween = BearingTween(interpolator: interpolator);
+      angleTween.lerp(t); //Calling lerp method for interpolation
+      var resultBegin = angleTween.begin;
+      var resultEnd = angleTween.end;
 
-            expect(resultBegin, equals(beginAngle));
-            expect(resultEnd, equals(shortestAngle));
-          },
-          count: 2,
-        ),
-      );
+      expect(resultBegin, equals(beginAngle));
+      expect(resultEnd, equals(endAngle));
     });
 
     test(
-        'If begin and end angles are equal the result should be zero, not matter (t) position on the timeline',
+        'If [begin,end] angles are equal the result should the end angle, not matter (t) position on the timeline',
         () {
-      var useShortestAngle = Stream<bool>.fromIterable([true, false]);
-      var beginAngle = 180.0;
-      var endAngle = 180.0;
+      var beginAngle = 165.0;
+      var endAngle = 165.0;
       var t = 0.5;
 
-      useShortestAngle.listen(
-        expectAsync1<void, bool>(
-          (value) {
-            var interpolator = AngleInterpolatorImpl(
-                begin: beginAngle, end: endAngle, findShortestAngle: value);
-            var angleTween = BearingTween(interpolator: interpolator);
-            var result = angleTween.lerp(t);
+      var interpolator = AngleInterpolatorImpl(begin: beginAngle, end: endAngle);
+      var angleTween = BearingTween(interpolator: interpolator);
+      var result = angleTween.lerp(t);
 
-            expect(result, isZero);
-          },
-          count: 2,
-        ),
-      );
+      expect(result, endAngle);
     });
 
-    test(
-        'Lerp should return the same begin angle at 0.0 (t) position on the timeline',
-        () {
-      var useShortestAngle = Stream<bool>.fromIterable([true, false]);
+    test('Lerp should return the same begin angle at 0.0 (t) position on the timeline', () {
       var beginAngle = 90.0;
       var endAngle = 270.0;
       var t = 0.0;
 
-      useShortestAngle.listen(
-        expectAsync1<void, bool>(
-          (value) {
-            var interpolator = AngleInterpolatorImpl(
-                begin: beginAngle, end: endAngle, findShortestAngle: value);
-            var angleTween = BearingTween(interpolator: interpolator);
-            var result = angleTween.lerp(t);
+      var interpolator = AngleInterpolatorImpl(begin: beginAngle, end: endAngle);
+      var angleTween = BearingTween(interpolator: interpolator);
+      var result = angleTween.lerp(t);
 
-            expect(result, equals(beginAngle));
-          },
-          count: 2,
-        ),
-      );
+      expect(result, equals(beginAngle));
     });
 
-    test(
-        '''lerp(t) should return the shortest angle from begin to end angle at (t) position
+    test('''lerp(t) should return the shortest angle from begin to end angle at (t) position
             on the timeline, either clockwise ot counterclockwise''', () {
-      var useShortestAngle = Stream<bool>.fromIterable([true, false]);
       var beginAngle = 90.0;
       var endAngle = 355.0;
       var t = 1.0;
 
-      useShortestAngle.listen(
-        expectAsync1<void, bool>(
-          (value) {
-            var interpolator = AngleInterpolatorImpl(
-                begin: beginAngle, end: endAngle, findShortestAngle: value);
-            var angleTween = BearingTween(interpolator: interpolator);
-            var result = angleTween.lerp(t);
-            var shortestAngle =
-                value ? ((endAngle - beginAngle) + 180) % 360 - 180 : endAngle;
+      var interpolator = AngleInterpolatorImpl(begin: beginAngle, end: endAngle);
+      var angleTween = BearingTween(interpolator: interpolator);
+      var result = angleTween.lerp(t);
 
-            expect(result, equals(shortestAngle));
-          },
-          count: 2,
-        ),
-      );
+      expect(result, equals(endAngle));
     });
 
-    //
-    test(
-        '''lerp(t) should return counterclockwise angles if the delta (end-begin) is
-             greater than 180 degrees at 1.0 (t) position on the timeline''',
-        () {
-      var useShortestAngle = Stream<bool>.fromIterable([true, false]);
-      var beginAngle = 45.0;
-      var endAngle = 270.0;
-      var t = 1.0;
-
-      useShortestAngle.listen(
-        expectAsync1<void, bool>(
-          (value) {
-            var interpolator = AngleInterpolatorImpl(
-                begin: beginAngle, end: endAngle, findShortestAngle: value);
-            var angleTween = BearingTween(interpolator: interpolator);
-            var result = angleTween.lerp(t);
-
-            //After 180 degrees of difference the shortest angles are negative of counterclockwise for angles < 360 degrees
-            expect(result, value ? isNegative : isPositive);
-          },
-          count: 2,
-        ),
-      );
-    });
-
-    test('''lerp(t) should return zero when trying to interpolate between angles
-            less than 1e-6 (scientific notation)''', () {
-      var useShortestAngle = Stream<bool>.fromIterable([true, false]);
-      var beginAngle = 0.1;
-      var endAngle = 0.0;
+    test('''lerp(t) should return zero when trying to interpolate between
+            small angles less than 1e-6 (scientific notation)''', () {
+      var beginAngle = 0.00000001;
+      var endAngle = 0.000000003;
       var t = 0.5;
 
-      useShortestAngle.listen(
-        expectAsync1<void, bool>(
-          (value) {
-            var interpolator = AngleInterpolatorImpl(
-                begin: beginAngle, end: endAngle, findShortestAngle: value);
-            var angleTween = BearingTween(interpolator: interpolator);
-            var result = angleTween.lerp(t);
+      var interpolator = AngleInterpolatorImpl(begin: beginAngle, end: endAngle);
+      var angleTween = BearingTween(interpolator: interpolator);
+      var result = angleTween.lerp(t);
 
-            expect(result, isZero);
-          },
-          count: 2,
-        ),
-      );
+      expect(result, isZero);
     });
   });
 }

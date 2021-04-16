@@ -33,6 +33,9 @@ class AnilocationTaskImpl implements IAnilocationTask {
   late final ProxyAnimationGeneric<ILatLng> _proxyAnim;
 
   bool _isResseting = false;
+  bool _isActiveTrip = true;
+  bool _useRotation = true;
+  bool _isMultipointAnimation = false;
 
   @override
   AnilocationTaskDescription description;
@@ -45,24 +48,24 @@ class AnilocationTaskImpl implements IAnilocationTask {
       ),
     );
 
+    _isActiveTrip = description.isActiveTrip;
+    _useRotation = description.useRotation;
+
     _locationCtrller = AnimationController(vsync: description.vsync, duration: description.duration);
 
-    if (description.useRotation) {
-      _bearingTween = BearingTween.from(_locationTween, findShortestAngle: false);
-      _bearingCtrller = AnimationController(vsync: description.vsync, duration: description.duration);
+    _bearingTween = BearingTween.from(_locationTween);
+    _bearingCtrller = AnimationController(vsync: description.vsync, duration: description.duration);
 
-      _bearingAnimation = _bearingTween.curvedAnimate(
-        controller: _bearingCtrller,
-        curve: description.curve,
-      );
-    } else {
-      _bearingAnimation = AlwaysStoppedAnimation(0);
-    }
+    _bearingAnimation = _bearingTween.curvedAnimate(
+      controller: _bearingCtrller,
+      curve: description.curve,
+    );
 
     _rippleCtrller = AnimationController(
       vsync: description.vsync,
       duration: description.rippleDuration,
-    )..addStatusListener(rippleStatusListener)
+    )
+      ..addStatusListener(rippleStatusListener)
       ..addListener(rippleListener);
 
     _radiusTween = Tween<double>(begin: 0, end: description.rippleRadius);
@@ -83,13 +86,22 @@ class AnilocationTaskImpl implements IAnilocationTask {
     );
 
     _proxyAnim = ProxyAnimationGeneric<ILatLng>(_locationAnimation);
-    if (_locationTween.isRipple)_rippleCtrller.forward(from: 0);
+    if (_locationTween.isRipple) _rippleCtrller.forward(from: 0);
   }
 
   @override
   Future<void> push(ILatLng latLng) async {
-    description.push(latLng);
-    await _forward();
+    if (_isActiveTrip) {
+      if (!_isMultipointAnimation) {
+        description.push(latLng);
+        await _forward();
+      } else if (description.length >= description.purgeLimit) {
+        _isMultipointAnimation = true;
+        var temp = description.values;
+        description.clear();
+        animatePoints(temp, last: latLng);
+      }
+    }
   }
 
   ///Entry point to start animation of location positions if is not a running animation
@@ -109,8 +121,9 @@ class AnilocationTaskImpl implements IAnilocationTask {
       _isResseting = true;
       await Future.wait([
         _locationCtrller.resetAndForward(),
-        if (description.useRotation) _bearingCtrller.resetAndForward(),
-        if(_locationTween.isRipple && _rippleCtrller.isCompletedOrDismissed && !_rippleCtrller.isAnimating) _rippleCtrller.resetAndForward(),
+        if (_useRotation) _bearingCtrller.resetAndForward(),
+        if (_locationTween.isRipple && _rippleCtrller.isCompletedOrDismissed && !_rippleCtrller.isAnimating)
+          _rippleCtrller.resetAndForward(),
       ]);
     }
   }
@@ -118,7 +131,7 @@ class AnilocationTaskImpl implements IAnilocationTask {
   void _swappingValue(ILatLng from) {
     _locationTween.interpolator.swap(from);
 
-    if (description.useRotation) {
+    if (_useRotation) {
       double angle;
 
       final angleRad = SphericalUtil.computeAngleBetween(
@@ -141,7 +154,7 @@ class AnilocationTaskImpl implements IAnilocationTask {
     if (_locationTween.interpolator.isStopped && _locationTween.interpolator.end == from) {
       _locationTween.interpolator.begin = from;
 
-      if (description.useRotation) {
+      if (_useRotation) {
         _bearingTween.interpolator.begin = 0;
       }
 
@@ -152,32 +165,33 @@ class AnilocationTaskImpl implements IAnilocationTask {
   }
 
   @override
-  void animatePoints(List<ILatLng> list,
-      {ILatLng last = const ILatLng.empty(), Curve curve = Curves.linear}) {
+  void animatePoints(
+    List<ILatLng> list, {
+    ILatLng last = const ILatLng.empty(),
+    Curve curve = Curves.linear,
+  }) {
     if (list.isNotEmpty) {
-      _locationCtrller.removeListener(_locationListener);
       _locationCtrller.removeStatusListener(_statusListener);
 
       var multiPoint = LocationTween(interpolator: PolynomialLocationInterpolator(points: list));
 
-      _locationTween.interpolator.swap(last);
-
-      var newBearing = _locationTween.end - _locationTween.begin;
-
-      _bearingTween.interpolator.swap(newBearing);
+      _swappingValue(last);
 
       _isResseting = true;
 
-      _proxyAnim.parent = multiPoint.animate(
-        CurvedAnimation(curve: Interval(0.0, 1.0, curve: curve), parent: _locationCtrller),
-      );
-      _locationCtrller.addListener(_locationListener);
       _locationCtrller.addStatusListener(_statusListenerPoints);
+
+      _proxyAnim.parent = multiPoint.curvedAnimate(
+        curve: curve,
+        controller: _locationCtrller,
+      );
+
+      _locationCtrller.resetAndForward();
     }
   }
 
-  void rippleListener() {
-    var radius = (_radiusAnimation.value / 100) /*zoomScale*/;
+  void rippleListener() async {
+    var radius = (_radiusAnimation.value / 100);
     var color = _colorAnimation.value!;
 
     for (var wave = 3; wave >= 0; wave--) {
@@ -191,6 +205,8 @@ class AnilocationTaskImpl implements IAnilocationTask {
         strokeColor: color,
       );
 
+      await Future.delayed(Duration(milliseconds: 100));
+
       if (_locationTween.isRipple && description.onRippleAnimation != null) {
         description.onRippleAnimation!(circle);
       }
@@ -198,22 +214,23 @@ class AnilocationTaskImpl implements IAnilocationTask {
   }
 
   void rippleStatusListener(AnimationStatus status) async {
-    if (!_rippleCtrller.isAnimating && _rippleCtrller.isCompleted && description.isQueueEmpty) {
+    if (!_rippleCtrller.isAnimating &&
+        _rippleCtrller.isCompleted &&
+        !_rippleCtrller.isDismissed &&
+        description.isQueueEmpty) {
       var halfDuration = description.rippleDuration.inMilliseconds ~/ 2;
-      await Future.delayed(Duration(milliseconds: halfDuration), () async => await _rippleCtrller.forward(from: 0));
+      await Future.delayed(
+          Duration(milliseconds: halfDuration), () async => await _rippleCtrller.forward(from: 0));
     }
   }
 
   void _locationListener() {
-    //if (_locationCtrller.isCompleted && _locationCtrller.value == 1.0) return;
     if (_isResseting) {
       _isResseting = false;
       return;
     }
-
-    /*debugPrint('${value.markerId} ${value.bearing}: ${value.toLatLng} isStopover: ${value.isStopover} (t): ${_locationCtrller.value}');*/
-
     if (description.latLngListener != null) {
+      if (_isMultipointAnimation) print(value.toLatLng);
       description.latLngListener!(value);
     }
   }
@@ -237,13 +254,12 @@ class AnilocationTaskImpl implements IAnilocationTask {
 
   void _statusListenerPoints(AnimationStatus status) async {
     if (status == AnimationStatus.completed) {
-      _proxyAnim.parent!.removeStatusListener(_statusListenerPoints);
-      _proxyAnim.parent!.removeListener(_locationListener);
+      _isMultipointAnimation = false;
+      _locationCtrller.removeStatusListener(_statusListenerPoints);
+      _proxyAnim.parent = _locationAnimation;
+      _locationCtrller.addStatusListener(_statusListener);
       _isResseting = true;
-      _proxyAnim.parent = _locationAnimation
-        ..addListener(_locationListener)
-        ..addStatusListener(_statusListener);
-      await _locationCtrller.resetAndForward();
+      await _forward();
     }
   }
 
@@ -255,12 +271,8 @@ class AnilocationTaskImpl implements IAnilocationTask {
     _rippleCtrller.removeStatusListener(rippleStatusListener);
     _rippleCtrller.removeListener(rippleListener);
     _locationCtrller.dispose();
-
     _rippleCtrller.dispose();
-
-    if (description.useRotation) {
-      _bearingCtrller.dispose();
-    }
+    _bearingCtrller.dispose();
   }
 
   @override
@@ -280,8 +292,25 @@ class AnilocationTaskImpl implements IAnilocationTask {
 
   @override
   void updateRadius(double radius) {
-    if(_locationTween.isRipple){
+    if (_locationTween.isRipple) {
       _radiusTween.end = radius;
     }
+  }
+
+  @override
+  void updateActiveTrip(bool isActiveTrip) {
+    _isActiveTrip = isActiveTrip;
+
+    if (!_isActiveTrip) {
+      var last = description.last;
+      description.clear();
+      description.push(last);
+      _forward();
+    }
+  }
+
+  @override
+  void updateUseRotation(bool useRotation) {
+    _useRotation = useRotation;
   }
 }

@@ -3,7 +3,6 @@ import 'package:flutter/animation.dart';
 import 'package:flutter_animarker/core/i_interpolation_service_optimized.dart';
 
 // Project imports:
-import 'package:flutter_animarker/helpers/spherical_util.dart';
 import 'package:flutter_animarker/infrastructure/interpolators/angle_interpolator_impl.dart';
 
 import 'location_tween.dart';
@@ -15,8 +14,8 @@ class BearingTween extends Tween<double> {
   /// Create a tween that calculate angle bearing/heading from given [begin] and [end] angle positions.
   BearingTween({required this.interpolator});
 
-  factory BearingTween.from(LocationTween tween, {bool findShortestAngle = true}) =>
-      BearingTween(interpolator: AngleInterpolatorImpl.from(tween, findShortestAngle: findShortestAngle));
+  factory BearingTween.from(LocationTween tween) =>
+      BearingTween(interpolator: AngleInterpolatorImpl.from(tween));
 
   //Getters
   @override
@@ -30,9 +29,6 @@ class BearingTween extends Tween<double> {
 
   @override
   set end(double? value) => interpolator.end = value ?? 0;
-
-  double get shortestAngleBetween =>
-      SphericalUtil.angleShortestDistance(interpolator.begin, interpolator.end);
 
   ///Interpolates two angles at the given (t) position at timeline.
   @override

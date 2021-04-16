@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_animarker/flutter_map_marker_animation.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'
@@ -8,7 +11,8 @@ extension GoogleMapLatLng on ILatLng {
 }
 
 extension LatLngInfoEx on LatLng {
-  LatLngInfo toLatLngInfo(MarkerId markerId, [double bearing = 0]) => LatLngInfo(latitude, longitude, markerId, bearing: bearing);
+  LatLngInfo toLatLngInfo(MarkerId markerId, [double bearing = 0]) =>
+      LatLngInfo(latitude, longitude, markerId, bearing: bearing);
 
   CameraUpdate get cameraPosition => CameraUpdate.newCameraPosition(
         CameraPosition(
@@ -18,4 +22,8 @@ extension LatLngInfoEx on LatLng {
           target: LatLng(latitude, longitude),
         ),
       );
+}
+
+extension ColorEx on Color {
+  ButtonStyle get buttonStyle => ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(this));
 }

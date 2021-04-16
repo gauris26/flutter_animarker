@@ -19,7 +19,8 @@ class PolynomialLocationInterpolator<T extends ILatLng> extends IInterpolationSe
 
   PolynomialLocationInterpolator({required this.points}) : super.warmUp() {
     if (points.isNotEmpty) {
-      warmUp();
+      begin = points.first as T;
+      end = points.last as T;
     } else {
       begin = ILatLng.empty() as T;
       end = ILatLng.empty() as T;
@@ -33,20 +34,17 @@ class PolynomialLocationInterpolator<T extends ILatLng> extends IInterpolationSe
     return SphericalUtil.vectorToPolar(vector) as T;
   }*/
 
-  @override
+  /*@override
   T interpolate(double t) {
-    if (begin == end) return end;
-    if (t == 0.0) return begin;
-    if (t == 1.0) return end;
 
     var vector = SphericalUtil.vectorSlerpOptimized(_preListFloat32x4, _lastFloat32x4, _step, t);
-
-    return SphericalUtil.vectorToPolarOptimized(vector) as T;
-  }
+    var latLng = SphericalUtil.vectorToPolarOptimized(vector);
+    print(latLng);
+    return latLng as T;
+  }*/
 
   @override
   bool get isStopped => _isEmptyOrOnlyHasOneElementOrHasTwoEqualElements;
-
 
   bool get _isEmptyOrOnlyHasOneElementOrHasTwoEqualElements =>
       points.isEmpty || points.length == 1 || (points.length == 2 && begin == end);
@@ -54,8 +52,9 @@ class PolynomialLocationInterpolator<T extends ILatLng> extends IInterpolationSe
   @override
   T doInterpolate(double t) {
     var vector = SphericalUtil.vectorSlerpOptimized(_preListFloat32x4, _lastFloat32x4, _step, t);
-
-    return SphericalUtil.vectorToPolarOptimized(vector) as T;
+    var latLng = SphericalUtil.vectorToPolarOptimized(vector);
+    //debugPrint('($t): [${latLng.latitude},${latLng.longitude}]');
+    return latLng as T;
   }
 
   @protected
@@ -69,14 +68,14 @@ class PolynomialLocationInterpolator<T extends ILatLng> extends IInterpolationSe
 
     _preListFloat32x4 = Float32x4List(points.length);
 
-    for (num i = 0, x = 0; x <= 1; x += _step, i++) {
+    for (num i = 0, x = 0; i < points.length; x += _step, i++) {
       var index = i.toDouble();
       var t = x.toDouble();
 
       var vector = SphericalUtil.latLngtoVector3(points[index.toInt()]);
 
       _preListFloat32x4[index.toInt()] = Float32x4(vector.x, vector.y, vector.z, t);
-      //x => vector x, y => vector y, z => vector z, w => (t) position
+      //x => vector x | y => vector y | z => vector z | w => (t) position
     }
 
     _lastFloat32x4 = _preListFloat32x4.last;

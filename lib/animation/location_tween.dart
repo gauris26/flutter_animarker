@@ -1,5 +1,6 @@
 // Flutter imports:
 import 'package:flutter/animation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_animarker/core/i_interpolation_service_optimized.dart';
 
 // Project imports:
@@ -31,7 +32,11 @@ class LocationTween extends Tween<ILatLng> {
   ILatLng lerp(double t) {
     if (interpolator.isStopped) return end;
 
-    return interpolator.interpolate(t).copyWith(markerId: end.markerId, isStopover: t == 1.0);
+    return interpolator.interpolate(t).copyWith(
+          markerId: end.markerId,
+          isStopover: t == 1.0,
+          markerJson: begin.markerJson,
+        );
   }
 
   /// Returns the interpolated value for the current value of the given animation.
@@ -47,7 +52,6 @@ class LocationTween extends Tween<ILatLng> {
   }
 
   double get bearing => SphericalUtil.computeHeading(begin, end).toDouble();
-
 
   LocationTween operator +(ILatLng end) {
     interpolator.swap(end);

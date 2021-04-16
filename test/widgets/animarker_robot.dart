@@ -10,20 +10,11 @@ class AnimarkerRobot {
   int counter = 0;
   AnimarkerRobot(this.tester);
 
-/*  Future<void> expect(
-      Key? key,
-      Marker newMarker,
-      CameraPosition cameraPosition,
-      ) async {
-
-    var animarker = newBuild(key, newMarker, cameraPosition);
-  }*/
-
   Future<Animarker> newBuild(
     Key? key,
     Marker newMarker,
     CameraPosition cameraPosition,
-      bool useRotation,
+    bool useRotation,
   ) async {
     final completer = Completer<GoogleMapController>();
     var animarker = getNewAnimarker(key, completer, <Marker>{newMarker}, cameraPosition, useRotation);
@@ -49,7 +40,6 @@ class AnimarkerRobot {
         rippleRadius: 0.08,
         useRotation: useRotation,
         zoom: 15.0,
-        performanceMode: PerformanceMode.better,
         duration: Duration(milliseconds: 2000),
         onStopover: (latLng) async {},
         markers: markers,

@@ -11,7 +11,6 @@ import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platf
 import '../helpers/extensions.dart';
 import '../flutter_map_marker_animation.dart';
 import 'package:flutter_animarker/helpers/extensions.dart';
-import 'package:flutter_animarker/core/performance_mode.dart';
 import 'package:flutter_animarker/helpers/google_map_helper.dart';
 import 'package:flutter_animarker/animation/animarker_controller.dart';
 import 'package:flutter_animarker/core/i_animarker_controller.dart';
@@ -27,13 +26,13 @@ class Animarker extends StatefulWidget {
   final double threshold;
   final bool useRotation;
   final Color rippleColor;
+  final int purgeLimit;
   final Future<int> mapId;
   final Duration duration;
   final Set<Marker> markers;
   final OnStopover onStopover;
   final Duration rippleDuration;
   final Duration rotationDuration;
-  final PerformanceMode performanceMode;
 
   Animarker({
     Key? key,
@@ -43,12 +42,12 @@ class Animarker extends StatefulWidget {
     this.curve = Curves.linear,
     this.zoom = 15.0,
     this.rippleRadius = 0.5,
+    this.purgeLimit = 10,
     this.threshold = 1.5,
     this.useRotation = true,
     this.isActiveTrip = true,
     this.rippleColor = Colors.red,
     this.markers = const <Marker>{},
-    this.performanceMode = PerformanceMode.better,
     this.duration = const Duration(milliseconds: 1000),
     this.rippleDuration = const Duration(milliseconds: 2000),
     this.rotationDuration = const Duration(milliseconds: 10000),
@@ -66,7 +65,6 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   late IAnimarkerController _controller;
 
   //Variables
-  late Widget _child;
   double _devicePxRatio = 1.0;
   final Map<MarkerId, Marker> _markers = <MarkerId, Marker>{};
   final Map<CircleId, Circle> _circles = <CircleId, Circle>{};
@@ -77,13 +75,14 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   @override
   void initState() {
     _controller = AnimarkerController(
-      isActiveTrip: widget.isActiveTrip,
       description: AnimarkerControllerDescription(
         vsync: this,
         curve: widget.curve,
+        purgeLimit: widget.purgeLimit,
         duration: widget.duration,
         rippleRadius: widget.rippleRadius,
-        onStopover: widget.onStopover,
+        isActiveTrip: widget.isActiveTrip,
+        onStopover: _onStopover,
         rippleColor: widget.rippleColor,
         useRotation: widget.useRotation,
         onRippleAnimation: _rippleListener,
@@ -93,15 +92,14 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
       ),
     );
 
-    _child = widget.child;
     _markers.addAll(keyByMarkerId(widget.markers));
     widget.markers.forEach((marker) async => await _controller.pushMarker(marker));
-    midPoint = _calculateMidPoint();
+    if(widget.markers.isNotEmpty) midPoint = _calculateMidPoint();
     super.initState();
   }
 
   @override
-  Widget build(BuildContext context) => widget.isPerformanceBetter ? _child : widget.child;
+  Widget build(BuildContext context) => widget.child;
 
   @override
   void didUpdateWidget(Animarker oldWidget) {
@@ -112,9 +110,9 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
       });
     }
 
-    if (widget.performanceModeHasChanged(oldWidget)) _child = widget.child;
+    if (widget.isActiveTripHasChanged(oldWidget)) _controller.updateActiveTrip(widget.isActiveTrip);
 
-    if (widget.isActiveTripHasChanged(oldWidget)) _controller.isActiveTrip = widget.isActiveTrip;
+    if (widget.useRotationHasChanged(oldWidget)) _controller.updateUseRotation(widget.useRotation);
 
     if (widget.radiusOrZoomHasChanged(oldWidget) && widget.markers.isNotEmpty && midPoint.isNotEmpty) {
       _zoomScale = SphericalUtil.calculateZoomScale(_devicePxRatio, widget.zoom, midPoint);
@@ -131,16 +129,22 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
     super.didChangeDependencies();
   }
 
+
+
   void _locationListener(Marker marker, bool isStopover) async {
     //Update the marker with animation
-    var w = widget.markers.where((element) => element.markerId == marker.markerId).first;
-    _markers[marker.markerId] = marker.copyWith(iconParam: w.icon);
+    //var w = widget.markers.where((element) => element.markerId == marker.markerId).first;
+
+    _markers[marker.markerId] = marker;
     var temp = _previousMarkers;
     _previousMarkers = _markers.set;
 
     await widget.updateMarkers(temp, _markers.set);
+  }
 
-    if(isStopover) await animateCamera();
+  Future<void> _onStopover(LatLng latLng) async {
+    await widget.onStopover(latLng);
+    await _animateCamera();
   }
 
   ILatLng _calculateMidPoint(){
@@ -155,7 +159,7 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
 
     return ILatLng.point(sumLat/count, sumLng/count);
   }
-  Future<void> animateCamera() async {
+  Future<void> _animateCamera() async {
     midPoint = _calculateMidPoint();
 
     if(midPoint.isNotEmpty){
@@ -163,7 +167,6 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
       var camera = CameraPosition(
         zoom: widget.zoom,
         tilt: 0,
-        bearing: 30,
         target: midPoint.toLatLng,
       );
 
@@ -189,9 +192,9 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
 
 extension AnimarkerEx on Animarker {
   bool radiusOrZoomHasChanged(Animarker oldWidget) => oldWidget.rippleRadius != rippleRadius || oldWidget.zoom != zoom;
-  bool performanceModeHasChanged(Animarker oldWidget) => oldWidget.performanceMode != performanceMode;
   bool isActiveTripHasChanged(Animarker oldWidget) => oldWidget.isActiveTrip != isActiveTrip;
-  bool get isPerformanceBetter => performanceMode == PerformanceMode.better;
+  bool useRotationHasChanged(Animarker oldWidget) => oldWidget.useRotation != useRotation;
+
   Future<void> updateCircles(Set<Circle> previous, Set<Circle> current) async {
     var mapId = await this.mapId;
     await GoogleMapHelper.updateCircles(mapId, previous, current);

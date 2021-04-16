@@ -11,27 +11,27 @@ class AngleInterpolatorImpl extends IInterpolationServiceOptimized<double> {
   late double end;
   late Float32x4 shortestAngleFloat32x4;
   late Float32x4 fromFloat32x4;
-  final bool findShortestAngle;
 
-  AngleInterpolatorImpl(
-      {double begin = 0, double end = 0, this.findShortestAngle = true})
+  AngleInterpolatorImpl({double begin = 0, double end = 0})
       : begin = begin,
         end = end,
         super.warmUp();
 
-  factory AngleInterpolatorImpl.from(LocationTween tween, {bool findShortestAngle = true}) =>
-      AngleInterpolatorImpl(
+  factory AngleInterpolatorImpl.from(LocationTween tween) => AngleInterpolatorImpl(
         begin: 0,
         end: tween.end - tween.begin,
-        findShortestAngle: findShortestAngle
       );
 
   @override
-  bool get isStopped => begin == end /*|| _shortestAngle == 0*/;
+  bool get isStopped => begin == end;
+
+  double get delta => end - begin;
 
   @override
-  double doInterpolate(double t) => SphericalUtil.angleLerpOptimized(
-      shortestAngleFloat32x4, fromFloat32x4, t);
+  double doInterpolate(double t) {
+  if (delta.abs() < 1e-6) return 0;
+  return SphericalUtil.angleLerpOptimized(shortestAngleFloat32x4, fromFloat32x4, t);
+}
 
   @override
   void doSwap(double newValue) {
@@ -41,19 +41,9 @@ class AngleInterpolatorImpl extends IInterpolationServiceOptimized<double> {
 
   @override
   void doWarmUp() {
-
-    /*if (findShortestAngle) {
-      angle = SphericalUtil.angleShortestDistance(begin, end);
-    } else {
-      angle = end - begin;
-    }*/
-
-
-    var angle = end - begin;
-    print('Warm up: $angle ($begin - $end)');
-    if (angle.abs() < 1e-6) angle = 0;
-
-    shortestAngleFloat32x4 = Float32x4.splat(angle);
-    fromFloat32x4 = Float32x4.splat(begin);
+    if (delta.abs() > 1e-6) {
+      shortestAngleFloat32x4 = Float32x4.splat(delta);
+      fromFloat32x4 = Float32x4.splat(begin);
+    }
   }
 }

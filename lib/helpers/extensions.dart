@@ -30,6 +30,53 @@ extension AnimationStatusEx on AnimationStatus {
 }
 
 extension GoogleMapLatLng on ILatLng {
+/*  this.alpha = 1.0,
+  this.anchor = const Offset(0.5, 1.0),
+  this.consumeTapEvents = false,
+  this.draggable = false,
+  this.flat = false,
+  this.icon = BitmapDescriptor.defaultMarker,
+  this.infoWindow = InfoWindow.noText,
+  this.position = const LatLng(0.0, 0.0),
+  this.rotation = 0.0,
+  this.visible = true,
+  this.zIndex = 0.0,
+  this.onTap,
+  this.onDragEnd,*/
+
+  Marker get fromJson {
+    var bitmap = markerJson['icon'] != null
+        ? BitmapDescriptor.fromJson(markerJson['icon'])
+        : BitmapDescriptor.defaultMarker;
+
+    var infoWindow = markerJson['infoWindow'] != null
+        ? InfoWindow(
+            anchor: Offset(markerJson['infoWindow']['anchor']![0], markerJson['infoWindow']['anchor']![1]),
+            title: markerJson['infoWindow']['title'],
+            snippet: markerJson['infoWindow']['snippet'],
+          )
+        : InfoWindow.noText;
+
+    var anchor = markerJson['anchor'] != null
+        ? Offset(markerJson['anchor']![0], markerJson['anchor']![1])
+        : const Offset(0.5, 1.0);
+
+    return Marker(
+      markerId: markerId,
+      position: toLatLng,
+      rotation: bearing,
+      icon: bitmap,
+      alpha: markerJson['alpha'] ?? 1.0,
+      anchor: anchor,
+      flat: markerJson['flat'] ?? false,
+      consumeTapEvents: markerJson['consumeTapEvents'] ?? false,
+      draggable: markerJson['draggable'] ?? false,
+      visible: markerJson['visible'] ?? true,
+      zIndex: markerJson['zIndex'] ?? 0.0,
+      infoWindow: infoWindow,
+    );
+  }
+
   LatLng get toLatLng => LatLng(latitude, longitude);
 
   bool get isRipple {
@@ -93,7 +140,7 @@ extension TweenEx<T> on Tween<T> {
     Curve curve = Curves.linear,
     required Animation<double> controller,
   }) =>
-      animate(CurvedAnimation(curve:  curve, parent: controller));
+      animate(CurvedAnimation(curve: curve, parent: controller));
 
   Animation<T> intervalAnimate({
     Curve curve = Curves.linear,

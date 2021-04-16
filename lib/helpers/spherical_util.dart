@@ -248,7 +248,7 @@ abstract class SphericalUtil {
 
     var result = from + angle * multiplier;
 
-    return result.x;
+    return result.x.clamp(0, 360);
   }
 
   static double angleShortestDistance(double from, double to) {

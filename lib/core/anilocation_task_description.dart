@@ -16,6 +16,8 @@ class AnilocationTaskDescription {
   final ILatLng end;
   final Curve curve;
   final Duration duration;
+  final bool isActiveTrip;
+  final int purgeLimit;
   final Color rippleColor;
   final Duration rotationDuration;
   final Duration rippleDuration;
@@ -35,6 +37,7 @@ class AnilocationTaskDescription {
     required this.onRippleAnimation,
     required ILocationDispatcher dispatcher,
     this.useRotation = true,
+    this.purgeLimit = 10,
     this.begin = const ILatLng.empty(),
     this.end = const ILatLng.empty(),
     this.curve = Curves.linear,
@@ -42,6 +45,7 @@ class AnilocationTaskDescription {
     this.onAnimCompleted,
     this.rippleRadius = 0.5,
     this.latLngListener,
+    this.isActiveTrip = true,
     this.rippleColor = Colors.red,
     this.duration = const Duration(milliseconds: 2000),
     this.rippleDuration = const Duration(milliseconds: 2000),
@@ -68,6 +72,8 @@ class AnilocationTaskDescription {
       angleThreshold: angleThreshold,
       latLngListener: latLngListener,
       onAnimCompleted: onAnimCompleted,
+      purgeLimit: description.purgeLimit,
+      isActiveTrip: description.isActiveTrip,
       rippleRadius: description.rippleRadius,
       rippleColor: description.rippleColor,
       useRotation: description.useRotation,
@@ -79,19 +85,19 @@ class AnilocationTaskDescription {
   }
 
   ILatLng get next => _dispatcher.next;
+  ILatLng get last => _dispatcher.last;
   int get length => _dispatcher.length;
+  List<ILatLng> get values => _dispatcher.values;
   bool get isQueueEmpty => _dispatcher.isEmpty;
   bool get isQueueNotEmpty => _dispatcher.isNotEmpty;
+
+  void clear() => _dispatcher.clear();
 
   void push(ILatLng latLng) {
     if (latLng.isNotEmpty && _dispatcher.last != latLng) {
       _dispatcher.push(latLng);
     }
   }
-
-  /*void  goTo(int index) {
-    _dispatcher.goTo(_dispatcher.length - 1);
-  }*/
 
   void dispose() {
     _dispatcher.dispose();

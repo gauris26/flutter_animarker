@@ -18,7 +18,7 @@ void main() {
     var position3 = LatLng(18.488762442871334, -69.95493734402267);
     var position4 = LatLng(18.489169389997496, -69.95311340026335);
     var position5 = LatLng(18.489169389997497, -69.95311340026336);
-    var position6 = LatLng(18.489169389997497, -69.95311340026336);
+    //var position6 = LatLng(18.489169389997497, -69.95311340026336);
 
     var markerId = MarkerId('MarkerId1');
     const _kSantoDomingo = CameraPosition(target: position, zoom: 15);
@@ -39,13 +39,14 @@ void main() {
     expect(setEquals(animarkerElementState.widget.markers, <Marker>{marker}), isTrue);
 
     //Animarker 2
-
     var marker2 = marker.copyWith(positionParam: position2);
 
     animarkerElement.markNeedsBuild();
 
     var animarker2 = await animarkerRobot.newBuild(animarkerKey, marker2, _kSantoDomingo, false);
-    await tester.pumpAndSettle();
+
+    //await tester.pumpAndSettle();
+    await tester.pump(animarker2.duration);
 
     final animarkerElementState2 = animarkerElement.state as AnimarkerState;
 
@@ -60,7 +61,7 @@ void main() {
 
     var animarker3 = await animarkerRobot.newBuild(animarkerKey, marker3, _kSantoDomingo, false);
 
-    await tester.pumpAndSettle();
+    await tester.pump(animarker3.duration);
 
     final animarkerElementState3 = animarkerElement.state as AnimarkerState;
 
@@ -75,7 +76,7 @@ void main() {
 
     var animarker4 = await animarkerRobot.newBuild(animarkerKey, marker4, _kSantoDomingo, false);
 
-    await tester.pumpAndSettle();
+    await tester.pump(animarker4.duration);
 
     final animarkerElementState4 = animarkerElement.state as AnimarkerState;
 
@@ -90,13 +91,12 @@ void main() {
 
     var animarker5 = await animarkerRobot.newBuild(animarkerKey, marker5, _kSantoDomingo, false);
 
-    await tester.pumpAndSettle();
+    await tester.pump(animarker5.duration);
 
     final animarkerElementState5 = animarkerElement.state as AnimarkerState;
 
     expect(animarkerElementState5.widget, isNot(equals(animarker4)));
     expect(animarkerElementState5.widget, equals(animarker5));
     expect(setEquals(animarker5.markers, animarker4.markers), isFalse);
-
   });
 }

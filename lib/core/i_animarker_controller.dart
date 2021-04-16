@@ -8,13 +8,14 @@ import 'animarker_controller_description.dart';
 
 abstract class IAnimarkerController extends ILocationObservable{
   AnimarkerControllerDescription get description;
-  bool get isActiveTrip;
-
-  set isActiveTrip(bool active);
 
   Future<void> pushMarker(Marker marker);
 
   void updateRadius(double radius);
+
+  void updateActiveTrip(bool activeTrip);
+
+  void updateUseRotation(bool useRotation);
 
   void dispose();
 }

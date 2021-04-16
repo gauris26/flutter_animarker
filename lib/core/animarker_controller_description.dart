@@ -13,6 +13,7 @@ class AnimarkerControllerDescription {
   final bool useRotation;
   final double threshold;
   final int purgeLimit;
+  final isActiveTrip;
   final Color rippleColor;
   final double rippleRadius;
   final Curve curve;
@@ -26,6 +27,7 @@ class AnimarkerControllerDescription {
     required this.useRotation,
     required this.onMarkerAnimation,
     this.threshold = 1.5,
+    this.isActiveTrip = true,
     this.purgeLimit = 10,
     this.rippleRadius = 0.5,
     this.onRippleAnimation,

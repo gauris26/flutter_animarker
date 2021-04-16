@@ -61,7 +61,7 @@ void main() {
         var sum = xxxx * xxxx + yyyy * yyyy;
 
         var sqrt = sum.sqrt();
-        print(sqrt);
+
         final lat = atan2(vector.z, sqrt.x);
         final lng = atan2(vector.y, vector.x);
 

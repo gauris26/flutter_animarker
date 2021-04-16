@@ -5,8 +5,7 @@ import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platf
 
 // Package imports:
 
-
-abstract class  ILatLng {
+abstract class ILatLng {
   final double latitude = 0;
   final double longitude = 0;
   final double bearing = 0;
@@ -15,8 +14,8 @@ abstract class  ILatLng {
   final bool isStopover = false;
   final bool ripple = false;
   final bool isEmpty = false;
+  final Map<String, dynamic> markerJson = {};
   bool get isNotEmpty;
-
 
   const factory ILatLng.empty() = LatLngInfo.empty;
 
@@ -31,6 +30,7 @@ abstract class  ILatLng {
     bool ripple,
     bool isEmpty,
     double mapScale,
+    Map<String, dynamic>? markerJson,
   });
 
   //Delta operator, this object represents the end position

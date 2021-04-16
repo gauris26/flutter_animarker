@@ -28,4 +28,8 @@ abstract class IAnilocationTask implements IAnimationMode  {
   void updateRadius(double latLng);
 
   void dispose();
+
+  void updateActiveTrip(bool isActiveTrip);
+
+  void updateUseRotation(bool useRotation);
 }
