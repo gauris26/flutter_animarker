@@ -8,7 +8,7 @@ class RippleMarker extends Marker {
 
   const RippleMarker({
     required MarkerId markerId,
-    this.ripple = false,
+    this.ripple = true,
     double alpha = 1.0,
     anchor = const Offset(0.5, 1.0),
     bool consumeTapEvents = false,

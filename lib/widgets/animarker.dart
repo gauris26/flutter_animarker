@@ -30,16 +30,16 @@ class Animarker extends StatefulWidget {
   final Future<int> mapId;
   final Duration duration;
   final Set<Marker> markers;
-  final OnStopover onStopover;
+  final OnStopover? onStopover;
   final Duration rippleDuration;
   final Duration rotationDuration;
 
   Animarker({
     Key? key,
     required this.child,
-    required this.onStopover,
     required this.mapId,
     this.curve = Curves.linear,
+    this.onStopover,
     this.zoom = 15.0,
     this.rippleRadius = 0.5,
     this.purgeLimit = 10,
@@ -133,8 +133,6 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
 
   void _locationListener(Marker marker, bool isStopover) async {
     //Update the marker with animation
-    //var w = widget.markers.where((element) => element.markerId == marker.markerId).first;
-
     _markers[marker.markerId] = marker;
     var temp = _previousMarkers;
     _previousMarkers = _markers.set;
@@ -143,7 +141,9 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   }
 
   Future<void> _onStopover(LatLng latLng) async {
-    await widget.onStopover(latLng);
+    if(widget.onStopover != null){
+      await widget.onStopover!(latLng);
+    }
     await _animateCamera();
   }
 

@@ -164,7 +164,6 @@ class AnilocationTaskImpl implements IAnilocationTask {
     return true;
   }
 
-  @override
   void animatePoints(
     List<ILatLng> list, {
     ILatLng last = const ILatLng.empty(),

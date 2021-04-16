@@ -39,7 +39,6 @@ class SimpleMarkerAnimationExampleState extends State<SimpleMarkerAnimationExamp
       title: 'Google Maps Markers Animation Example',
       home: Animarker(
         curve: Curves.ease,
-        rippleRadius: 0.2,
         mapId: controller.future.then<int>((value) => value.mapId), //Grab Google Map Id
         markers: markers.values.toSet(),
         child: GoogleMap(
@@ -53,11 +52,32 @@ class SimpleMarkerAnimationExampleState extends State<SimpleMarkerAnimationExamp
   }
 
   void newLocationUpdate(LatLng latLng) {
-    var marker = RippleMarker(markerId: kMarkerId, position: latLng);
+    var marker = Marker(markerId: kMarkerId, position: latLng);
     setState(() => markers[kMarkerId] = marker);
   }
-}
 
-void main() {
-  runApp(SimpleMarkerAnimationExample());
+  Widget f() {
+    return Animarker(
+      rippleRadius: 0.5,
+      rippleColor: Colors.teal,
+      rippleDuration: Duration(milliseconds: 2500),
+      mapId: controller.future.then<int>((value) => value.mapId), //Grab Google Map Id
+      //
+      markers: <Marker>{
+        RippleMarker(
+          icon: BitmapDescriptor.defaultMarker,
+          markerId: MarkerId('MarkerId1'),
+          position: LatLng(0, 0),
+          ripple: false,
+        )
+      },
+      //
+      child: GoogleMap(
+        mapType: MapType.normal,
+        initialCameraPosition: kSantoDomingo,
+        onMapCreated: (gController) =>
+            controller.complete(gController), //Complete the future GoogleMapController
+      ),
+    );
+  }
 }
