@@ -24,6 +24,7 @@ This package only animate the marker's changes. Both Geolocation and Google Maps
 ## Screenshots
 
   ![](arts/marker_animation.gif)
+  ![](arts/multi_markers.gif)
 
 ## Example
 ```dart
@@ -75,8 +76,12 @@ class SimpleMarkerAnimationExampleState extends State<SimpleMarkerAnimationExamp
   }
 
   void newLocationUpdate(LatLng latLng) {
-    var marker = Marker(markerId: kMarkerId, position: latLng);
-    setState(() => markers[kMarkerId] = marker);
+     var marker = RippleMarker(
+       markerId: kMarkerId,
+       position: latLng,
+       ripple: true,
+     );
+     setState(() => markers[kMarkerId] = marker);
   }
 }
  ```

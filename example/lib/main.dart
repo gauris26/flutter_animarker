@@ -2,13 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animarker/flutter_map_marker_animation.dart';
+import 'package:flutter_map_marker_animation_example/listen_locations_updates.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 //Setting dummies values
 const kStartPosition = LatLng(18.488213, -69.959186);
 const kSantoDomingo = CameraPosition(target: kStartPosition, zoom: 15);
 const kMarkerId = MarkerId('MarkerId1');
-const kDuration = Duration(seconds: 2);
+const kDuration = Duration(seconds: 4);
 const kLocations = [
   kStartPosition,
   LatLng(18.488101, -69.957995),
@@ -38,8 +39,9 @@ class SimpleMarkerAnimationExampleState extends State<SimpleMarkerAnimationExamp
     return MaterialApp(
       title: 'Google Maps Markers Animation Example',
       home: Animarker(
-        curve: Curves.ease,
+        curve: Curves.bounceOut,
         rippleRadius: 0.2,
+        duration: Duration(milliseconds: 2300),
         mapId: controller.future.then<int>((value) => value.mapId), //Grab Google Map Id
         markers: markers.values.toSet(),
         child: GoogleMap(
@@ -53,11 +55,15 @@ class SimpleMarkerAnimationExampleState extends State<SimpleMarkerAnimationExamp
   }
 
   void newLocationUpdate(LatLng latLng) {
-    var marker = RippleMarker(markerId: kMarkerId, position: latLng);
+    var marker = RippleMarker(
+      markerId: kMarkerId,
+      position: latLng,
+      ripple: true,
+    );
     setState(() => markers[kMarkerId] = marker);
   }
 }
 
 void main() {
-  runApp(SimpleMarkerAnimationExample());
+  runApp(FlutterMapMarkerAnimationRealTimeExample());
 }

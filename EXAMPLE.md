@@ -4,7 +4,7 @@ Sometimes you need more than place a *Marker*📍 at map canvas 🌍, you need t
 
 This package will help you to animate *Markers*' position changes and more.
 
-# Example
+# Working Example
 
 ```dart
 //Setting dummies values

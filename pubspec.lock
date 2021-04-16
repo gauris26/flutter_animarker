@@ -30,7 +30,7 @@ packages:
     source: hosted
     version: "2.5.0"
   benchmark_harness:
-    dependency: "direct main"
+    dependency: "direct dev"
     description:
       name: benchmark_harness
       url: "https://pub.dartlang.org"

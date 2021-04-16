@@ -64,7 +64,7 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
         );
       });
 
-      /*await Future.delayed(Duration(milliseconds: min(1000, random.nextInt(5000))), () {
+      await Future.delayed(Duration(milliseconds: min(1000, random.nextInt(5000))), () {
         setState(() {
           startPosition = LatLng(p.latitude + 0.001, p.longitude + 0.001);
         });
@@ -74,9 +74,10 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
         setState(() {
           startPosition2 = LatLng(p.latitude - 0.01, p.longitude - 0.002);
         });
-      });*/
+      });
     });
   }
+
 
 
   @override
@@ -103,16 +104,16 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
                   markers: <Marker>{
                     //Avoid sent duplicate MarkerId
                     ..._markers.values.toSet(),
-                    /*RippleMarker(
+                    RippleMarker(
                       icon: BitmapDescriptor.defaultMarker,
                       markerId: MarkerId('MarkerId1'),
                       position: startPosition,
                       ripple: false,
                     ),
                     Marker(
-                          markerId: MarkerId('MarkerId2'),
-                          position: startPosition2,
-                        ),*/
+                      markerId: MarkerId('MarkerId2'),
+                      position: startPosition2,
+                    ),
                   },
                   child: GoogleMap(
                     mapType: MapType.normal,
@@ -154,7 +155,6 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
 
   Future<void> onStopover(LatLng latLng) async {
     if (!_controller.isCompleted) return;
-
   }
 
   @override
@@ -165,5 +165,3 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
     super.dispose();
   }
 }
-
-

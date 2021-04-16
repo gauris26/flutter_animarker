@@ -224,12 +224,12 @@ class AnilocationTaskImpl implements IAnilocationTask {
   }
 
   void _locationListener() {
-    if (_isResseting) {
+    //print('${value.toLatLng} isStopover: ${value.isStopover}');
+    /*if (_isResseting) {
       _isResseting = false;
       return;
-    }
+    }*/
     if (description.latLngListener != null) {
-      if (_isMultipointAnimation) print(value.toLatLng);
       description.latLngListener!(value);
     }
   }
