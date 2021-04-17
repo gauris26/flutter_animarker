@@ -36,7 +36,7 @@
 - Remove Google Maps dependencies
 - Added multiple markers at same time functionality
 
-# 3.1.1-alpha
+# 3.1.1+2-alpha
 
 **BREAKING**: The library will use now a better reactive Flutter approach
  - Marker's position animation
