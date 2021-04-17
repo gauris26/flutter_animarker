@@ -4,7 +4,7 @@ Sometimes you need more than place a *Marker*📍 at map canvas 🌍, you need t
 
 This package will help you to animate *Markers*' position changes and more.
 
-This version v3.0.0-alpha includes many useful features, namely:
+This version v3.0.0-beta includes many useful features, namely:
 
  - Marker's position animation
  - Multiple markers' animations at the same time
@@ -23,7 +23,7 @@ This package only animate the marker's changes. Both Geolocation and Google Maps
 
 ## Screenshots
 
-<img src="arts/marker_animation.gif" alt="Marker" width="200"/> <img src="arts/multi_markers.gif" alt="Multi" width="200"/>
+![](arts/marker_animation.gif ) ![](arts/multi_markers.gif)
 
 ## Example
 ```dart
@@ -36,7 +36,7 @@ const kLocations = [
   kStartPosition,
   LatLng(18.488101, -69.957995),
   LatLng(18.489210, -69.952459),
-  LatLng(18.487307, -69.952759),
+  LatLng(18.487307, -69.952759)
 ];
 
 class SimpleMarkerAnimationExample extends StatefulWidget {
@@ -146,9 +146,10 @@ Animarker(
  // Other properties
 )
 
+```
+
 ## License
 
-```
  BSD-3-Clause License   Copyright 2020  Gauris Javier. All rights
   reserved.
    Redistribution and use in source and binary forms, with or without

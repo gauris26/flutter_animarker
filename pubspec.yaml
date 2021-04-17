@@ -1,12 +1,11 @@
 name: flutter_animarker
 description: Solution to move a Marker smoothly throught Google Maps in Flutter.
-version: 3.1.1+2-alpha
+version: 3.1.1-alpha.1
 homepage: https://github.com/gauris26/flutter_animarker
 repository: https://github.com/gauris26/flutter_animarker
 publish_to: https://pub.dev
 environment:
   sdk: '>=2.12.0 <3.0.0'
-  flutter: ">=1.16.3 <2.0.0"
 
 dependencies:
   flutter:
@@ -22,5 +21,3 @@ dev_dependencies:
   dart_test_matchers: ^0.1.0
   google_maps_flutter: ^2.0.3
   benchmark_harness: ^2.0.0
-
-flutter: null
