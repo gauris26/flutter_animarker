@@ -4,7 +4,7 @@ Sometimes you need more than place a *Marker*📍 at map canvas 🌍, you need t
 
 This package will help you to animate *Markers*' position changes and more.
 
-This version v3.0.0-beta includes many useful features, namely:
+This version v3.0.0-alpha includes many useful features, namely:
 
  - Marker's position animation
  - Multiple markers' animations at the same time

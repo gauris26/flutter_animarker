@@ -1,3 +1,6 @@
+# 3.1.1-alpha.2
+    - Trying with HTML Markup to resize image
+
 # 3.1.1-alpha.1
     - Minor: GIF image resizing
 
