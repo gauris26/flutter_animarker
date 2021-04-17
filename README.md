@@ -36,7 +36,7 @@ const kLocations = [
   kStartPosition,
   LatLng(18.488101, -69.957995),
   LatLng(18.489210, -69.952459),
-  LatLng(18.487307, -69.952759)
+  LatLng(18.487307, -69.952759),
 ];
 
 class SimpleMarkerAnimationExample extends StatefulWidget {
