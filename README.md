@@ -23,8 +23,7 @@ This package only animate the marker's changes. Both Geolocation and Google Maps
 
 ## Screenshots
 
-  ![](arts/marker_animation.gif)
-  ![](arts/multi_markers.gif)
+  ![](arts/marker_animation.gif=60x63) ![](arts/multi_markers.gif=60x63)
 
 ## Example
 ```dart
@@ -130,7 +129,7 @@ Animarker(
 ```
 This way ```useRotation = true```, you control globally if *Marker* should rotate or not.
 
-## Using Curves and Duration
+## Using Curve and Duration
 
 Just like a normal *Flutter* animation, you can set a ```Curve``` o ```Duration``` to get the desire effect or result. So flexible, right?
 
@@ -147,9 +146,10 @@ Animarker(
  // Other properties
 )
 
+```
+
 ## License
 
-```
  BSD-3-Clause License   Copyright 2020  Gauris Javier. All rights
   reserved.
    Redistribution and use in source and binary forms, with or without
