@@ -23,6 +23,7 @@ This package only animate the marker's changes. Both Geolocation and Google Maps
 
 ## Screenshots
 
+<img src="arts/marker_animation.gif" alt="Marker Animation" width="200"/>
 ![](arts/marker_animation.gif =250x250) ![](arts/multi_markers.gif =250x250)
 
 ## Example
