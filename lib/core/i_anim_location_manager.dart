@@ -1,7 +1,6 @@
-import 'i_animation_mode.dart';
 import 'i_lat_lng.dart';
 
-abstract class IAnimLocationManager implements IAnimationMode {
+abstract class IAnimLocationManager {
 
   ILatLng get begin;
   set begin (ILatLng value);
