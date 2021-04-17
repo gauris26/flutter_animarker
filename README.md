@@ -23,7 +23,7 @@ This package only animate the marker's changes. Both Geolocation and Google Maps
 
 ## Screenshots
 
-![](arts/marker_animation.gif ) ![](arts/multi_markers.gif)
+<img src="https://raw.githubusercontent.com/gauris26/flutter_animarker/d61ac4f420f030f4e002fa287282628d901cff26/arts/marker_animation.gif" width="200"/> <img src="https://raw.githubusercontent.com/gauris26/flutter_animarker/d61ac4f420f030f4e002fa287282628d901cff26/arts/multi_markers.gif" width="200"/>
 
 ## Example
 ```dart
