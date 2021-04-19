@@ -1,3 +1,8 @@
+# 3.1.2-beta.1
+    - Add extended documentation for Animarker properties
+    - Fix: Solve flicking issue when user location is moving fast
+    - Fix: Autostart animation when the source of location changes stop.
+
 # 3.1.1-alpha.2
     - Trying with HTML Markup to resize image
 
