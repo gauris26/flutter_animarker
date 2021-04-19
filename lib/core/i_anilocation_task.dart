@@ -6,7 +6,6 @@ import 'i_lat_lng.dart';
 
 typedef LatLngListener = void Function(ILatLng iLatLng);
 
-
 abstract class IAnilocationTask {
   ILatLng get value;
 
@@ -20,7 +19,8 @@ abstract class IAnilocationTask {
 
   AnilocationTaskDescription get description;
 
-  factory IAnilocationTask.create({required  AnilocationTaskDescription description}) = AnilocationTaskImpl;
+  factory IAnilocationTask.create(
+      {required AnilocationTaskDescription description}) = AnilocationTaskImpl;
 
   Future<void> push(ILatLng latLng);
 

@@ -6,7 +6,7 @@ import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platf
 
 import 'animarker_controller_description.dart';
 
-abstract class IAnimarkerController extends ILocationObservable{
+abstract class IAnimarkerController extends ILocationObservable {
   AnimarkerControllerDescription get description;
 
   Future<void> pushMarker(Marker marker);

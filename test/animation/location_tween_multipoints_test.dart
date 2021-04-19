@@ -17,12 +17,18 @@ void main() {
     late double step;
 
     setUpAll(() {
-      ILatLng x1 = LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(''));
-      ILatLng x2 = LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(''));
-      ILatLng x3 = LatLngInfo(18.48430279636411, -69.94079341600313, MarkerId(''));
-      ILatLng x4 = LatLngInfo(18.4658611180733, -69.93044604942473, MarkerId(''));
-      ILatLng x5 = LatLngInfo(18.451382274885972, -69.92247245553017, MarkerId(''));
-      ILatLng x6 = LatLngInfo(18.447016157112476, -69.92433932762283, MarkerId(''));
+      ILatLng x1 =
+          LatLngInfo(18.48817486792756, -69.95916740356776, MarkerId(''));
+      ILatLng x2 =
+          LatLngInfo(18.48883880652183, -69.94596808528654, MarkerId(''));
+      ILatLng x3 =
+          LatLngInfo(18.48430279636411, -69.94079341600313, MarkerId(''));
+      ILatLng x4 =
+          LatLngInfo(18.4658611180733, -69.93044604942473, MarkerId(''));
+      ILatLng x5 =
+          LatLngInfo(18.451382274885972, -69.92247245553017, MarkerId(''));
+      ILatLng x6 =
+          LatLngInfo(18.447016157112476, -69.92433932762283, MarkerId(''));
 
       multipoints = [x1, x2, x3, x4, x5, x6];
       step = 1 / (multipoints.length - 1);
@@ -69,8 +75,10 @@ void main() {
       }
 
       for (var i = 0; i < 1; i++) {
-        expect(results[i].latitude, moreOrLessEquals(multipoints[i].latitude, epsilon: 1e-5));
-        expect(results[i].longitude, moreOrLessEquals(multipoints[i].longitude, epsilon: 1e-5));
+        expect(results[i].latitude,
+            moreOrLessEquals(multipoints[i].latitude, epsilon: 1e-5));
+        expect(results[i].longitude,
+            moreOrLessEquals(multipoints[i].longitude, epsilon: 1e-5));
       }
     });
   });

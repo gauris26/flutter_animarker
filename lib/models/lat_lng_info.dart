@@ -153,5 +153,6 @@ class LatLngInfo implements ILatLng {
   }
 
   @override
-  double operator -(ILatLng other) => SphericalUtil.computeHeading(other, this).toDouble();
+  double operator -(ILatLng other) =>
+      SphericalUtil.computeHeading(other, this).toDouble();
 }

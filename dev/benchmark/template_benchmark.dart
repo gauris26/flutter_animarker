@@ -4,7 +4,6 @@ import 'package:vector_math/vector_math.dart';
 import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:flutter_animarker/helpers/math_util.dart';
 
-
 LatLng x1 = LatLng(18.48817486792756, -69.95916740356776);
 LatLng x2 = LatLng(18.48883880652183, -69.94596808528654);
 LatLng x3 = LatLng(18.48430279636411, -69.94079341600313);

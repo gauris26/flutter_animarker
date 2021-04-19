@@ -10,7 +10,8 @@ import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platf
 import 'animarker_robot.dart';
 
 void main() {
-  testWidgets('Test Animarker animation after rebuild', (WidgetTester tester) async {
+  testWidgets('Test Animarker animation after rebuild',
+      (WidgetTester tester) async {
     const animarkerKey = Key('Animarker');
     var animarkerRobot = AnimarkerRobot(tester);
     const position = LatLng(18.488141761655367, -69.9591860021479);
@@ -29,21 +30,25 @@ void main() {
     );
 
     //Animarker 1
-    var animarker = await animarkerRobot.newBuild(animarkerKey, marker, _kSantoDomingo, false);
+    var animarker = await animarkerRobot.newBuild(
+        animarkerKey, marker, _kSantoDomingo, false);
 
-    final animarkerElement = tester.element<StatefulElement>(find.byKey(animarkerKey));
+    final animarkerElement =
+        tester.element<StatefulElement>(find.byKey(animarkerKey));
     final animarkerElementState = animarkerElement.state as AnimarkerState;
 
     expect(animarkerElementState.widget, equals(animarker));
     expect(animarkerElement.renderObject!.attached, isTrue);
-    expect(setEquals(animarkerElementState.widget.markers, <Marker>{marker}), isTrue);
+    expect(setEquals(animarkerElementState.widget.markers, <Marker>{marker}),
+        isTrue);
 
     //Animarker 2
     var marker2 = marker.copyWith(positionParam: position2);
 
     animarkerElement.markNeedsBuild();
 
-    var animarker2 = await animarkerRobot.newBuild(animarkerKey, marker2, _kSantoDomingo, false);
+    var animarker2 = await animarkerRobot.newBuild(
+        animarkerKey, marker2, _kSantoDomingo, false);
 
     //await tester.pumpAndSettle();
     await tester.pump(animarker2.duration);
@@ -59,7 +64,8 @@ void main() {
 
     animarkerElement.markNeedsBuild();
 
-    var animarker3 = await animarkerRobot.newBuild(animarkerKey, marker3, _kSantoDomingo, false);
+    var animarker3 = await animarkerRobot.newBuild(
+        animarkerKey, marker3, _kSantoDomingo, false);
 
     await tester.pump(animarker3.duration);
 
@@ -74,7 +80,8 @@ void main() {
 
     animarkerElement.markNeedsBuild();
 
-    var animarker4 = await animarkerRobot.newBuild(animarkerKey, marker4, _kSantoDomingo, false);
+    var animarker4 = await animarkerRobot.newBuild(
+        animarkerKey, marker4, _kSantoDomingo, false);
 
     await tester.pump(animarker4.duration);
 
@@ -89,7 +96,8 @@ void main() {
 
     animarkerElement.markNeedsBuild();
 
-    var animarker5 = await animarkerRobot.newBuild(animarkerKey, marker5, _kSantoDomingo, false);
+    var animarker5 = await animarkerRobot.newBuild(
+        animarkerKey, marker5, _kSantoDomingo, false);
 
     await tester.pump(animarker5.duration);
 

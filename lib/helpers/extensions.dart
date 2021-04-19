@@ -26,7 +26,8 @@ extension MarkerEx on Set<Marker> {
 }
 
 extension AnimationStatusEx on AnimationStatus {
-  bool get isCompletedOrDismissed => this == AnimationStatus.completed || this == AnimationStatus.dismissed;
+  bool get isCompletedOrDismissed =>
+      this == AnimationStatus.completed || this == AnimationStatus.dismissed;
 }
 
 extension GoogleMapLatLng on ILatLng {
@@ -51,7 +52,8 @@ extension GoogleMapLatLng on ILatLng {
 
     var infoWindow = markerJson['infoWindow'] != null
         ? InfoWindow(
-            anchor: Offset(markerJson['infoWindow']['anchor']![0], markerJson['infoWindow']['anchor']![1]),
+            anchor: Offset(markerJson['infoWindow']['anchor']![0],
+                markerJson['infoWindow']['anchor']![1]),
             title: markerJson['infoWindow']['title'],
             snippet: markerJson['infoWindow']['snippet'],
           )
@@ -148,7 +150,8 @@ extension TweenEx<T> on Tween<T> {
     required double end,
     required Animation<double> controller,
   }) =>
-      animate(CurvedAnimation(curve: Interval(begin, end, curve: curve), parent: controller));
+      animate(CurvedAnimation(
+          curve: Interval(begin, end, curve: curve), parent: controller));
 }
 
 extension MapToSet on Map<MarkerId, Marker> {

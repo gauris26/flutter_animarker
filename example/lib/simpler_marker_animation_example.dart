@@ -18,13 +18,16 @@ const kLocations = [
 
 class SimpleMarkerAnimationExample extends StatefulWidget {
   @override
-  SimpleMarkerAnimationExampleState createState() => SimpleMarkerAnimationExampleState();
+  SimpleMarkerAnimationExampleState createState() =>
+      SimpleMarkerAnimationExampleState();
 }
 
-class SimpleMarkerAnimationExampleState extends State<SimpleMarkerAnimationExample> {
+class SimpleMarkerAnimationExampleState
+    extends State<SimpleMarkerAnimationExample> {
   final markers = <MarkerId, Marker>{};
   final controller = Completer<GoogleMapController>();
-  final stream = Stream.periodic(kDuration, (count) => kLocations[count]).take(kLocations.length);
+  final stream = Stream.periodic(kDuration, (count) => kLocations[count])
+      .take(kLocations.length);
 
   @override
   void initState() {
@@ -39,13 +42,14 @@ class SimpleMarkerAnimationExampleState extends State<SimpleMarkerAnimationExamp
       title: 'Google Maps Markers Animation Example',
       home: Animarker(
         curve: Curves.ease,
-        mapId: controller.future.then<int>((value) => value.mapId), //Grab Google Map Id
+        mapId: controller.future
+            .then<int>((value) => value.mapId), //Grab Google Map Id
         markers: markers.values.toSet(),
         child: GoogleMap(
           mapType: MapType.normal,
           initialCameraPosition: kSantoDomingo,
-          onMapCreated: (gController) =>
-              controller.complete(gController), //Complete the future GoogleMapController
+          onMapCreated: (gController) => controller
+              .complete(gController), //Complete the future GoogleMapController
         ),
       ),
     );
@@ -61,7 +65,8 @@ class SimpleMarkerAnimationExampleState extends State<SimpleMarkerAnimationExamp
       rippleRadius: 0.5,
       rippleColor: Colors.teal,
       rippleDuration: Duration(milliseconds: 2500),
-      mapId: controller.future.then<int>((value) => value.mapId), //Grab Google Map Id
+      mapId: controller.future
+          .then<int>((value) => value.mapId), //Grab Google Map Id
       //
       markers: <Marker>{
         RippleMarker(
@@ -75,8 +80,8 @@ class SimpleMarkerAnimationExampleState extends State<SimpleMarkerAnimationExamp
       child: GoogleMap(
         mapType: MapType.normal,
         initialCameraPosition: kSantoDomingo,
-        onMapCreated: (gController) =>
-            controller.complete(gController), //Complete the future GoogleMapController
+        onMapCreated: (gController) => controller
+            .complete(gController), //Complete the future GoogleMapController
       ),
     );
   }

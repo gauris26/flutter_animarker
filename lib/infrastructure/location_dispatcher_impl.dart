@@ -47,14 +47,6 @@ class LocationDispatcherImpl extends ILocationObservable implements ILocationDis
     return ILatLng.empty();
   }
 
-  /*@override
-  ILatLng goTo(int index) {
-    var location = _locationQueue.skip(index);
-    _locationQueue.clear();
-    _locationQueue.addAll(location);
-    return location;
-  }*/
-
   DoubleLinkedQueueEntry<ILatLng> _thresholding(DoubleLinkedQueueEntry<ILatLng> entry) {
     var current = entry.element;
 
@@ -65,6 +57,7 @@ class LocationDispatcherImpl extends ILocationObservable implements ILocationDis
     var upcoming = upcomingEntry?.element ?? ILatLng.empty();
 
     if (upcoming.isNotEmpty) {
+
       var currentBearing = SphericalUtil.computeHeading(current, next);
 
       var upComingBearing = SphericalUtil.computeHeading(next, upcoming);
@@ -78,6 +71,10 @@ class LocationDispatcherImpl extends ILocationObservable implements ILocationDis
 
     return entry;
   }
+
+  //18.48929081120453, -69.89494440471275
+  //18.49165140537235, -69.89136097328296 -  90 - 55°22'40"
+  //18.493594783213393, -69.88852858962134 - 90 - 54°16'45"
 
   @override
   void push(ILatLng latLng) {

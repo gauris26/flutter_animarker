@@ -6,6 +6,8 @@ typedef OnMarkerPosition = void Function(ILatLng latLng);
 
 abstract class ILocationDispatcher {
 
+  factory ILocationDispatcher.queue({double threshold}) = LocationDispatcherImpl;
+
   double get threshold;
 
   bool get isEmpty;
@@ -18,8 +20,6 @@ abstract class ILocationDispatcher {
 
   List<ILatLng> get values;
 
-  factory ILocationDispatcher.queue({double threshold}) = LocationDispatcherImpl;
-
   ILatLng get last;
 
   ILatLng get next;
@@ -31,6 +31,4 @@ abstract class ILocationDispatcher {
   void dispose();
 
   void clear();
-
-  /*ILatLng goTo(int index);*/
 }

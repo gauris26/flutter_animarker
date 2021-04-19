@@ -17,10 +17,12 @@ const CameraPosition _kSantoDomingo = CameraPosition(
 
 class FlutterMapMarkerAnimationRealTimeExample extends StatefulWidget {
   @override
-  _FlutterMapMarkerAnimationExampleState createState() => _FlutterMapMarkerAnimationExampleState();
+  _FlutterMapMarkerAnimationExampleState createState() =>
+      _FlutterMapMarkerAnimationExampleState();
 }
 
-class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnimationRealTimeExample> {
+class _FlutterMapMarkerAnimationExampleState
+    extends State<FlutterMapMarkerAnimationRealTimeExample> {
   LatLng startPosition = LatLng(18.488213, -69.959186);
   LatLng startPosition2 = LatLng(18.488213, -69.959186);
 
@@ -43,7 +45,8 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
 
   @override
   void initState() {
-    BitmapDescriptor.fromAssetImage(ImageConfiguration(devicePixelRatio: 2.5), 'assets/pin_marker_1.png')
+    BitmapDescriptor.fromAssetImage(ImageConfiguration(devicePixelRatio: 2.5),
+            'assets/pin_marker_1.png')
         .then((onValue) {
       pinLocationIcon = onValue;
     });
@@ -64,21 +67,21 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
         );
       });
 
-      await Future.delayed(Duration(milliseconds: min(1000, random.nextInt(5000))), () {
+      await Future.delayed(
+          Duration(milliseconds: min(1000, random.nextInt(5000))), () {
         setState(() {
           startPosition = LatLng(p.latitude + 0.001, p.longitude + 0.001);
         });
       });
 
-      await Future.delayed(Duration(milliseconds: min(1000, random.nextInt(1000) + 100)), () {
+      await Future.delayed(
+          Duration(milliseconds: min(1000, random.nextInt(1000) + 100)), () {
         setState(() {
           startPosition2 = LatLng(p.latitude - 0.01, p.longitude - 0.002);
         });
       });
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +121,8 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
                   child: GoogleMap(
                     mapType: MapType.normal,
                     initialCameraPosition: _kSantoDomingo,
-                    onMapCreated: (controller) => _controller.complete(controller),
+                    onMapCreated: (controller) =>
+                        _controller.complete(controller),
                     onCameraMove: (ca) => setState(() => zoom = ca.zoom),
                   ),
                 ),
@@ -133,13 +137,18 @@ class _FlutterMapMarkerAnimationExampleState extends State<FlutterMapMarkerAnima
                         child: Text(ripple ? 'Stop Ripple' : 'Start Ripple'),
                       ),
                       ElevatedButton(
-                        style: (useRotation ? Colors.red : Colors.blue).buttonStyle,
-                        onPressed: () => setState(() => useRotation = !useRotation),
-                        child: Text(useRotation ? 'Stop Rotation' : 'Start Rotation'),
+                        style: (useRotation ? Colors.red : Colors.blue)
+                            .buttonStyle,
+                        onPressed: () =>
+                            setState(() => useRotation = !useRotation),
+                        child: Text(
+                            useRotation ? 'Stop Rotation' : 'Start Rotation'),
                       ),
                       ElevatedButton(
-                        style: (isActiveTrip ? Colors.red : Colors.blue).buttonStyle,
-                        onPressed: () => setState(() => isActiveTrip = !isActiveTrip),
+                        style: (isActiveTrip ? Colors.red : Colors.blue)
+                            .buttonStyle,
+                        onPressed: () =>
+                            setState(() => isActiveTrip = !isActiveTrip),
                         child: Text(isActiveTrip ? 'Stop trip' : 'Start trip'),
                       ),
                     ],

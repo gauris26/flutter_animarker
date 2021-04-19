@@ -24,20 +24,25 @@ abstract class SphericalUtil {
     final toLng = MathUtil.toRadians(to.longitude);
     final dLng = toLng - fromLng;
     var x = math.sin(dLng) * math.cos(toLat);
-    var y = math.cos(fromLat) * math.sin(toLat) - math.sin(fromLat) * math.cos(toLat) * math.cos(dLng);
+    var y = math.cos(fromLat) * math.sin(toLat) -
+        math.sin(fromLat) * math.cos(toLat) * math.cos(dLng);
     final heading = math.atan2(x, y);
 
     return (heading.degrees + 360) % 360;
   }
 
-  static double calculateZoomScale(double densityDpi, double zoomLevel, ILatLng target) {
+  static double calculateZoomScale(
+      double densityDpi, double zoomLevel, ILatLng target) {
     var dpi = densityDpi * 160;
 
     var mapwidth = 256.0 * math.pow(2, zoomLevel);
-    var clipLatitude = math.min(math.max(target.latitude, minLatitude), maxLatitude);
+    var clipLatitude =
+        math.min(math.max(target.latitude, minLatitude), maxLatitude);
     var angle = clipLatitude * math.pi / 180;
     var angleRadians = angle.radians;
-    var groundResolution = (math.cos(angleRadians) * 2 * math.pi * SphericalUtil.earthRadius) / mapwidth;
+    var groundResolution =
+        (math.cos(angleRadians) * 2 * math.pi * SphericalUtil.earthRadius) /
+            mapwidth;
     var mapScale = (groundResolution * dpi / 0.0254);
 
     return 1 / mapScale;
@@ -49,11 +54,14 @@ abstract class SphericalUtil {
 
     if (begin.latitude < end.latitude && begin.longitude < end.longitude) {
       return MathUtil.toDegrees(math.atan(lng / lat)) as double /*+ 90*/;
-    } else if (begin.latitude >= end.latitude && begin.longitude < end.longitude) {
+    } else if (begin.latitude >= end.latitude &&
+        begin.longitude < end.longitude) {
       return ((90 - MathUtil.toDegrees(math.atan(lng / lat))) + 90) /*+ 45*/;
-    } else if (begin.latitude >= end.latitude && begin.longitude >= end.longitude) {
+    } else if (begin.latitude >= end.latitude &&
+        begin.longitude >= end.longitude) {
       return (MathUtil.toDegrees(math.atan(lng / lat)) + 180) /*- 90*/;
-    } else if (begin.latitude < end.latitude && begin.longitude >= end.longitude) {
+    } else if (begin.latitude < end.latitude &&
+        begin.longitude >= end.longitude) {
       return ((90 - MathUtil.toDegrees(math.atan(lng / lat))) + 270) /*+ 90*/;
     }
 
@@ -92,8 +100,10 @@ abstract class SphericalUtil {
     final b = math.sin(fraction * angle) / sinAngle;
 
     // Converts from polar to vector and interpolate.
-    final x = a * cosFromLat * math.cos(fromLng) + b * cosToLat * math.cos(toLng);
-    final y = a * cosFromLat * math.sin(fromLng) + b * cosToLat * math.sin(toLng);
+    final x =
+        a * cosFromLat * math.cos(fromLng) + b * cosToLat * math.cos(toLng);
+    final y =
+        a * cosFromLat * math.sin(fromLng) + b * cosToLat * math.sin(toLng);
     final z = a * math.sin(fromLat) + b * math.sin(toLat);
 
     // Converts interpolated vector back to polar.
@@ -162,7 +172,8 @@ abstract class SphericalUtil {
     return LatLngInfo(lat.degrees, lng.degrees, MarkerId(''));
   }
 
-  static Float32x4 vectorSlerpOptimized(Float32x4List preList, Float32x4 last, double step, double t) {
+  static Float32x4 vectorSlerpOptimized(
+      Float32x4List preList, Float32x4 last, double step, double t) {
     var matchedRangeStartIndex = t ~/ step;
 
     var length = preList.length - 1;
@@ -180,11 +191,13 @@ abstract class SphericalUtil {
     );
   }
 
-  static Float32x4 lerpUnclampedOptimized(Float32x4 min, Float32x4 max, Float32x4 x) {
+  static Float32x4 lerpUnclampedOptimized(
+      Float32x4 min, Float32x4 max, Float32x4 x) {
     return min + (max - min) * x;
   }
 
-  static Vector3 vectorSlerp(List<double> inputs, List<Vector3> results, double desiredInput) {
+  static Vector3 vectorSlerp(
+      List<double> inputs, List<Vector3> results, double desiredInput) {
     var n = inputs.length;
     var inputMin = inputs[0];
     var inputMax = inputs[n - 1];
@@ -211,8 +224,8 @@ abstract class SphericalUtil {
     return (value - min) / (max - min);
   }
 
-  static Float32x4 inverseLerpOptimized(
-      Float32x4 min, Float32x4 max, Float32x4 delta, bool isEqualValue, Float32x4 value) {
+  static Float32x4 inverseLerpOptimized(Float32x4 min, Float32x4 max,
+      Float32x4 delta, bool isEqualValue, Float32x4 value) {
     if (isEqualValue) return min;
     return (value - min) / delta;
   }
@@ -255,9 +268,11 @@ abstract class SphericalUtil {
     return ((to - from) + 180) % 360 - 180;
   }
 
-  static num computeDistanceBetween(ILatLng from, ILatLng to) => computeAngleBetween(from, to) * earthRadius;
+  static num computeDistanceBetween(ILatLng from, ILatLng to) =>
+      computeAngleBetween(from, to) * earthRadius;
 
-  static double bearingBetweenLocations(LatLngInfo latLngFrom, LatLngInfo latLngTo) {
+  static double bearingBetweenLocations(
+      LatLngInfo latLngFrom, LatLngInfo latLngTo) {
     var lat1 = latLngTo.latitude * math.pi / 180;
     var long1 = latLngTo.longitude * math.pi / 180;
     var lat2 = latLngFrom.latitude * math.pi / 180;
@@ -266,7 +281,8 @@ abstract class SphericalUtil {
     var dLon = (long2 - long1);
 
     var y = math.sin(dLon) * math.cos(lat2);
-    var x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(dLon);
+    var x = math.cos(lat1) * math.sin(lat2) -
+        math.sin(lat1) * math.cos(lat2) * math.cos(dLon);
 
     var brng = math.atan2(y, x);
 
@@ -285,7 +301,8 @@ abstract class SphericalUtil {
     return math.log(mapPx / worldPx / fraction) / math.ln2;
   }
 
-  static ILatLng vectorInterpolateOptimized(Float32x4 delta, Float32x4 min, double t) {
+  static ILatLng vectorInterpolateOptimized(
+      Float32x4 delta, Float32x4 min, double t) {
     var multiplier = Float32x4.splat(t);
 
     var value = min + delta * multiplier;

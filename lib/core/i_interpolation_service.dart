@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
 abstract class IInterpolationService<T> {
-
   IInterpolationService.warmUp() {
     doWarmUp();
   }
@@ -26,20 +25,19 @@ abstract class IInterpolationService<T> {
 
 //Template Method Patterns
 mixin IWarmUp<T> on IInterpolationService<T> {
-
-  void swap(T newValue){
+  void swap(T newValue) {
     doSwap(newValue);
     warmUp();
   }
 
-  void warmUp(){
+  void warmUp() {
     doWarmUp();
   }
 
-  T interpolate(double t){
-    if(begin == end) return end;
-    if(t == 0.0) return begin;
-    if(t == 1.0) return end;
+  T interpolate(double t) {
+    if (begin == end) return end;
+    if (t == 0.0) return begin;
+    if (t == 1.0) return end;
 
     return doInterpolate(t);
   }

@@ -19,7 +19,8 @@ abstract class ILatLng {
 
   const factory ILatLng.empty() = LatLngInfo.empty;
 
-  const factory ILatLng.point(double latitude, double longitude) = LatLngInfo.point;
+  const factory ILatLng.point(double latitude, double longitude) =
+      LatLngInfo.point;
 
   ILatLng copyWith({
     double latitude,

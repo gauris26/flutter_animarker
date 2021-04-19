@@ -17,7 +17,8 @@ class AngleInterpolatorImpl extends IInterpolationServiceOptimized<double> {
         end = end,
         super.warmUp();
 
-  factory AngleInterpolatorImpl.from(LocationTween tween) => AngleInterpolatorImpl(
+  factory AngleInterpolatorImpl.from(LocationTween tween) =>
+      AngleInterpolatorImpl(
         begin: 0,
         end: tween.end - tween.begin,
       );
@@ -29,9 +30,10 @@ class AngleInterpolatorImpl extends IInterpolationServiceOptimized<double> {
 
   @override
   double doInterpolate(double t) {
-  if (delta.abs() < 1e-6) return 0;
-  return SphericalUtil.angleLerpOptimized(shortestAngleFloat32x4, fromFloat32x4, t);
-}
+    if (delta.abs() < 1e-6) return 0;
+    return SphericalUtil.angleLerpOptimized(
+        shortestAngleFloat32x4, fromFloat32x4, t);
+  }
 
   @override
   void doSwap(double newValue) {

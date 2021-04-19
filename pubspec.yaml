@@ -1,5 +1,5 @@
 name: flutter_animarker
-description: Solution to move a Marker smoothly throught Google Maps in Flutter.
+description: Marker Animation solution for Google Maps.
 version: 3.1.1-alpha.2
 homepage: https://github.com/gauris26/flutter_animarker
 repository: https://github.com/gauris26/flutter_animarker

@@ -17,9 +17,8 @@ class AnilocationTaskDescription {
   final Curve curve;
   final Duration duration;
   final bool isActiveTrip;
-  final int purgeLimit;
+  final int runExpressAfter;
   final Color rippleColor;
-  final Duration rotationDuration;
   final Duration rippleDuration;
   final double rippleRadius;
   final double angleThreshold;
@@ -30,14 +29,13 @@ class AnilocationTaskDescription {
   final RippleListener? onRippleAnimation;
   final ILocationDispatcher _dispatcher;
 
-
   const AnilocationTaskDescription({
     required this.vsync,
     required this.markerId,
     required this.onRippleAnimation,
     required ILocationDispatcher dispatcher,
     this.useRotation = true,
-    this.purgeLimit = 10,
+    this.runExpressAfter = 10,
     this.begin = const ILatLng.empty(),
     this.end = const ILatLng.empty(),
     this.curve = Curves.linear,
@@ -49,7 +47,6 @@ class AnilocationTaskDescription {
     this.rippleColor = Colors.red,
     this.duration = const Duration(milliseconds: 2000),
     this.rippleDuration = const Duration(milliseconds: 2000),
-    this.rotationDuration = const Duration(milliseconds: 5000),
   }) : _dispatcher = dispatcher;
 
   factory AnilocationTaskDescription.animarker({
@@ -72,15 +69,14 @@ class AnilocationTaskDescription {
       angleThreshold: angleThreshold,
       latLngListener: latLngListener,
       onAnimCompleted: onAnimCompleted,
-      purgeLimit: description.purgeLimit,
+      runExpressAfter: description.runExpressAfter,
       isActiveTrip: description.isActiveTrip,
       rippleRadius: description.rippleRadius,
       rippleColor: description.rippleColor,
       useRotation: description.useRotation,
       rippleDuration: description.rippleDuration,
-      rotationDuration: description.rotationDuration,
       onRippleAnimation: description.onRippleAnimation,
-      dispatcher: ILocationDispatcher.queue(threshold: description.threshold),
+      dispatcher: ILocationDispatcher.queue(threshold: description.angleThreshold),
     );
   }
 

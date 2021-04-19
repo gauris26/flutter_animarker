@@ -26,6 +26,28 @@ This package only animate the marker's changes. Both Geolocation and Google Maps
 <img src="https://raw.githubusercontent.com/gauris26/flutter_animarker/d61ac4f420f030f4e002fa287282628d901cff26/arts/marker_animation.gif" width="200"/> <img src="https://raw.githubusercontent.com/gauris26/flutter_animarker/d61ac4f420f030f4e002fa287282628d901cff26/arts/multi_markers.gif" width="200"/>
 
 ## Example
+
+```dart
+Animarker(
+ ...
+	curve: Curves.bounceInOut,
+	duration: Duration(milliseconds: 2000),
+	markers: <Marker>{
+		RippleMarker(
+			markerId: MarkerId('MarkerId2'),
+			position: LatLng(0, 0),
+			ripple: true,
+	 ),
+	},
+	child: GoogleMap(
+		...
+		onMapCreated: (gController) => controller.complete(gController), //Complete the future GoogleMapController
+		...
+	),
+)
+
+```
+
 ```dart
 //Setting dummies values
 const kStartPosition = LatLng(18.488213, -69.959186);
@@ -67,8 +89,7 @@ class SimpleMarkerAnimationExampleState extends State<SimpleMarkerAnimationExamp
         child: GoogleMap(
           mapType: MapType.normal,
           initialCameraPosition: kSantoDomingo,
-          onMapCreated: (gController) =>
-              controller.complete(gController), //Complete the future GoogleMapController
+          onMapCreated: (gController) => controller.complete(gController), //Complete the future GoogleMapController
         ),
       ),
     );
@@ -104,7 +125,8 @@ Animarker(
  //Non-ripple marker
  Marker(
 	 markerId: MarkerId('MarkerId2'),
-	 position: LatLng(0, 0), )
+	 position: LatLng(0, 0),
+ ),
  },
  // Other properties
 )
@@ -122,14 +144,15 @@ Animarker(
  markers: <Marker>{
  Marker(
 	 markerId: MarkerId('MarkerId2'),
-	 position: LatLng(0, 0), )
+	 position: LatLng(0, 0),
+ )
  },
  // Other properties
 )
 ```
 This way ```useRotation = true```, you control globally if *Marker* should rotate or not.
 
-## Using Curves and Duration
+## Using Curve and Duration
 
 Just like a normal *Flutter* animation, you can set a ```Curve``` o ```Duration``` to get the desire effect or result. So flexible, right?
 
@@ -141,7 +164,8 @@ Animarker(
  markers: <Marker>{
  Marker(
 	 markerId: MarkerId('MarkerId2'),
-	 position: LatLng(0, 0), )
+	 position: LatLng(0, 0),
+ )
  },
  // Other properties
 )

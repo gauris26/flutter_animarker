@@ -25,5 +25,6 @@ extension LatLngInfoEx on LatLng {
 }
 
 extension ColorEx on Color {
-  ButtonStyle get buttonStyle => ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(this));
+  ButtonStyle get buttonStyle =>
+      ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(this));
 }

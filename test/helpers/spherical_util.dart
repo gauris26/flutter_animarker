@@ -17,9 +17,7 @@ void main() {
 
   var list = [x1, x2, x3, x4, x5, x6];
 
-  test('Spherical Interpolation: Computational cost of trig functions', () {
-  });
-
+  test('Spherical Interpolation: Computational cost of trig functions', () {});
 
   test('Spherical Interpolation', () {
     var start = DateTime.now().millisecondsSinceEpoch;
@@ -31,9 +29,9 @@ void main() {
 
     var end = DateTime.now().millisecondsSinceEpoch;
 
-    var delta = end-start;
+    var delta = end - start;
 
-    print('Spherical Interpolation: ${delta/10000} $i');
+    print('Spherical Interpolation: ${delta / 10000} $i');
   });
 
   test('Spherical Interpolation Vector', () {
@@ -43,8 +41,8 @@ void main() {
 
     var end = DateTime.now().millisecondsSinceEpoch;
 
-    var delta = end-start;
+    var delta = end - start;
 
-    print('Spherical Interpolation Vector: ${delta/10000} $i');
+    print('Spherical Interpolation Vector: ${delta / 10000} $i');
   });
 }

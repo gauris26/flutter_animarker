@@ -23,9 +23,8 @@ class AnimarkerController extends IAnimarkerController {
   bool _useRotation = true;
   double _radius = 0;
 
-  AnimarkerController({
-    required this.description
-  })  : tracker = <MarkerId, IAnilocationTask>{} {
+  AnimarkerController({required this.description})
+      : tracker = <MarkerId, IAnilocationTask>{} {
     _isActiveTrip = description.isActiveTrip;
     _useRotation = description.useRotation;
     _radius = description.rippleRadius;
@@ -66,13 +65,14 @@ class AnimarkerController extends IAnimarkerController {
     var task = tracker[marker.markerId]!;
 
     ///It makes markers to move at the first item to draw in map, until another location updates is received
-    if (task.description.isQueueEmpty) {
+    if (task.description.isQueueEmpty && !task.isAnimating && task.isCompletedOrDismissed) {
       _locationListener(marker.toLatLngInfo);
     }
 
     task.updateRadius(_radius);
     task.updateActiveTrip(_isActiveTrip);
     task.updateUseRotation(_useRotation);
+
     await task.push(marker.toLatLngInfo);
   }
 
@@ -87,8 +87,8 @@ class AnimarkerController extends IAnimarkerController {
     }
   }
 
-  Future<void> _animationCompleted(AnilocationTaskDescription description) async {
-
+  Future<void> _animationCompleted(
+      AnilocationTaskDescription description) async {
     /*if (description.dispatcher.length >= description.purgeLimit) {
         var lastValue = description.dispatcher.popLast;
         anim.animatePoints(description.dispatcher.values, last: lastValue);
