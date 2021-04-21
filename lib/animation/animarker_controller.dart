@@ -65,7 +65,9 @@ class AnimarkerController extends IAnimarkerController {
     var task = tracker[marker.markerId]!;
 
     ///It makes markers to move at the first item to draw in map, until another location updates is received
-    if (task.description.isQueueEmpty && !task.isAnimating && task.isCompletedOrDismissed) {
+    if (task.description.isQueueEmpty &&
+        !task.isAnimating &&
+        task.isCompletedOrDismissed) {
       _locationListener(marker.toLatLngInfo);
     }
 

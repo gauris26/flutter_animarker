@@ -1,5 +1,9 @@
 # Google Maps Marker Animation - Overview
 
+<a href="https://pub.dev/packages/flutter_animarker">
+    <img src="https://img.shields.io/badge/pub-3.1.2--beta.1-blue" alt="pub package"/>
+</a>
+
 Sometimes you need more than place a *Marker*📍 at map canvas 🌍, you need to smoothly move through **Google Maps**.
 
 This package will help you to animate *Markers*' position changes and more.

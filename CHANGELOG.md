@@ -1,3 +1,6 @@
+# 3.1.3-beta.2
+    - Added a flag to control when animate Google Maps Camera.
+
 # 3.1.2-beta.1
     - Add extended documentation for Animarker properties
     - Fix: Solve flicking issue when user location is moving fast

@@ -97,9 +97,8 @@ class AnilocationTaskImpl implements IAnilocationTask {
         await _forward();
       } else if (description.length > description.runExpressAfter) {
         _isMultipointAnimation = true;
-        var temp = description.values;
         description.clear();
-        animatePoints(temp, last: latLng);
+        animatePoints(last: latLng);
       }
     }
   }
@@ -108,25 +107,24 @@ class AnilocationTaskImpl implements IAnilocationTask {
   ///or the animation is completed or dismissed
   Future<void> _forward() async {
     //Start animation
-    if (description.isQueueNotEmpty && !isAnimating && _locationCtrller.isCompletedOrDismissed) {
-      var next = description.next;
+    var canMoveForward = description.isQueueNotEmpty && !isAnimating && _locationCtrller.isCompletedOrDismissed;
 
+    if (canMoveForward) {
+
+      var next = description.next;
 
       var wasBeginLocationSet = _settingBeginLocation(next);
 
       if (!wasBeginLocationSet) return;
 
-      //Swapping values
       _swappingValue(next);
-
-      //print("resetAndForward; [${_locationTween.begin.toLatLng}, ${_locationTween.end.toLatLng}]");
 
       _isResseting = true;
       await Future.wait([
         _locationCtrller.resetAndForward(),
         //if (_useRotation) _bearingCtrller.resetAndForward(),
-        if (_locationTween.isRipple && _rippleCtrller.isCompletedOrDismissed && !_rippleCtrller.isAnimating)
-          _rippleCtrller.resetAndForward(),
+       /* if (_locationTween.isRipple && _rippleCtrller.isCompletedOrDismissed && !_rippleCtrller.isAnimating)
+          _rippleCtrller.resetAndForward(),*/
       ]);
     }
   }
@@ -167,15 +165,12 @@ class AnilocationTaskImpl implements IAnilocationTask {
     return true;
   }
 
-  void animatePoints(
-    List<ILatLng> list, {
-    ILatLng last = const ILatLng.empty(),
-    Curve curve = Curves.linear,
-  }) {
-    if (list.isNotEmpty) {
+  void animatePoints({ILatLng last = const ILatLng.empty()}) {
+    if (description.isQueueNotEmpty) {
       _locationCtrller.removeStatusListener(_statusListener);
 
-      var multiPoint = LocationTween(interpolator: PolynomialLocationInterpolator(points: list));
+      var interpolator = PolynomialLocationInterpolator(points: description.values);
+      var multiPoint = LocationTween(interpolator: interpolator);
 
       _swappingValue(last);
 
@@ -184,7 +179,7 @@ class AnilocationTaskImpl implements IAnilocationTask {
       _locationCtrller.addStatusListener(_statusListenerPoints);
 
       _proxyAnim.parent = multiPoint.curvedAnimate(
-        curve: curve,
+        curve: description.curve,
         controller: _locationCtrller,
       );
 
@@ -221,6 +216,7 @@ class AnilocationTaskImpl implements IAnilocationTask {
         !_rippleCtrller.isDismissed &&
         description.isQueueEmpty) {
       var halfDuration = description.rippleDuration.inMilliseconds ~/ 2;
+      print('_rippleStatusListener');
       await Future.delayed(
           Duration(milliseconds: halfDuration), () async => await _rippleCtrller.forward(from: 0));
     }
@@ -228,10 +224,6 @@ class AnilocationTaskImpl implements IAnilocationTask {
 
   void _locationListener() {
     //debugPrint('${value.toLatLng} (t): ${_locationCtrller.value} isStopover: ${value.isStopover} Length: ${description.length}');
-    /*if (_isResseting) {
-      _isResseting = false;
-      return;
-    }*/
     if (description.latLngListener != null) {
       description.latLngListener!(value);
     }
@@ -250,6 +242,7 @@ class AnilocationTaskImpl implements IAnilocationTask {
       }
 
       if (_locationTween.isRipple && description.isQueueEmpty) {
+        print('_statusListener');
         _rippleCtrller.reset();
       }
     }
@@ -269,6 +262,7 @@ class AnilocationTaskImpl implements IAnilocationTask {
   @override
   void updateRadius(double radius) {
     if (_locationTween.isRipple) {
+      print('updateRadius');
       _radiusTween.end = radius;
     }
   }

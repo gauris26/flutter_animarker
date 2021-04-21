@@ -8,10 +8,12 @@ import 'package:flutter_animarker/helpers/spherical_util.dart';
 
 import 'i_location_observable.dart';
 
-class LocationDispatcherImpl extends ILocationObservable implements ILocationDispatcher {
+class LocationDispatcherImpl extends ILocationObservable
+    implements ILocationDispatcher {
   @override
   final threshold;
-  final DoubleLinkedQueue<ILatLng> _locationQueue = DoubleLinkedQueue<ILatLng>();
+  final DoubleLinkedQueue<ILatLng> _locationQueue =
+      DoubleLinkedQueue<ILatLng>();
 
   LocationDispatcherImpl({this.threshold = 1.5});
 
@@ -47,7 +49,8 @@ class LocationDispatcherImpl extends ILocationObservable implements ILocationDis
     return ILatLng.empty();
   }
 
-  DoubleLinkedQueueEntry<ILatLng> _thresholding(DoubleLinkedQueueEntry<ILatLng> entry) {
+  DoubleLinkedQueueEntry<ILatLng> _thresholding(
+      DoubleLinkedQueueEntry<ILatLng> entry) {
     var current = entry.element;
 
     var nextEntry = entry.nextEntry();
@@ -57,7 +60,6 @@ class LocationDispatcherImpl extends ILocationObservable implements ILocationDis
     var upcoming = upcomingEntry?.element ?? ILatLng.empty();
 
     if (upcoming.isNotEmpty) {
-
       var currentBearing = SphericalUtil.computeHeading(current, next);
 
       var upComingBearing = SphericalUtil.computeHeading(next, upcoming);
@@ -98,5 +100,6 @@ class LocationDispatcherImpl extends ILocationObservable implements ILocationDis
   bool get isNotEmpty => _locationQueue.isNotEmpty;
 
   @override
-  List<ILatLng> get values => List<ILatLng>.unmodifiable(_locationQueue.toList(growable: true));
+  List<ILatLng> get values =>
+      List<ILatLng>.unmodifiable(_locationQueue.toList(growable: true));
 }

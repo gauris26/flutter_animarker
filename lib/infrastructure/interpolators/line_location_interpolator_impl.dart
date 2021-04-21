@@ -19,7 +19,7 @@ class LineLocationInterpolatorImpl<T extends ILatLng>
   LineLocationInterpolatorImpl({
     required T begin,
     required T end,
-  })   : begin = begin,
+  })  : begin = begin,
         end = end,
         super.warmUp();
 

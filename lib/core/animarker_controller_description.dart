@@ -19,7 +19,6 @@ class AnimarkerControllerDescription {
   final double rippleRadius;
   final Curve curve;
   final Duration duration;
-  //final Duration rotationDuration;
   final Duration rippleDuration;
 
   const AnimarkerControllerDescription({
@@ -36,12 +35,11 @@ class AnimarkerControllerDescription {
     this.rippleColor = Colors.red,
     this.duration = const Duration(milliseconds: 2500),
     this.rippleDuration = const Duration(milliseconds: 2000),
-    //this.rotationDuration = const Duration(milliseconds: 5000),
   });
 
   factory AnimarkerControllerDescription.animarker(
     Animarker animarker, {
-      required TickerProvider vsync,
+    required TickerProvider vsync,
     OnStopover? onStopover,
     RippleListener? onRippleAnimation,
     MarkerListener? onMarkerAnimation,
@@ -57,7 +55,6 @@ class AnimarkerControllerDescription {
         rippleColor: animarker.rippleColor,
         rippleDuration: animarker.rippleDuration,
         rippleRadius: animarker.rippleRadius,
-        //rotationDuration: animarker.rotationDuration,
         angleThreshold: animarker.angleThreshold,
         useRotation: animarker.useRotation,
         vsync: vsync,

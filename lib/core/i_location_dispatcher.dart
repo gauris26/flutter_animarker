@@ -5,8 +5,8 @@ import 'package:flutter_animarker/infrastructure/location_dispatcher_impl.dart';
 typedef OnMarkerPosition = void Function(ILatLng latLng);
 
 abstract class ILocationDispatcher {
-
-  factory ILocationDispatcher.queue({double threshold}) = LocationDispatcherImpl;
+  factory ILocationDispatcher.queue({double threshold}) =
+      LocationDispatcherImpl;
 
   double get threshold;
 

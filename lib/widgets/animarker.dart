@@ -276,6 +276,9 @@ class Animarker extends StatefulWidget {
   /// ```
   final Duration rippleDuration;
 
+
+  final bool shouldAnimateCamera;
+
   Animarker({
     Key? key,
     required this.child,
@@ -292,10 +295,12 @@ class Animarker extends StatefulWidget {
     this.markers = const <Marker>{},
     this.duration = const Duration(milliseconds: 1000),
     this.rippleDuration = const Duration(milliseconds: 2000),
+    this.shouldAnimateCamera = true,
   })  : assert(rippleRadius >= 0.0 && rippleRadius <= 1.0,
             'Must choose values between [0.0, 1.0] for radius scale'),
         assert(!markers.isAnyEmpty, 'Must choose a not empty MarkerId'),
-        assert(markers.markerIds.length == markers.length, 'Must choose a unique MarkerId per Marker'),
+        assert(markers.markerIds.length == markers.length,
+            'Must choose a unique MarkerId per Marker'),
         super(key: key);
 
   @override
@@ -316,7 +321,6 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
 
   @override
   void initState() {
-
     _controller = AnimarkerController(
       description: AnimarkerControllerDescription.animarker(
         widget,
@@ -328,7 +332,8 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
     );
 
     _markers.addAll(keyByMarkerId(widget.markers));
-    widget.markers.forEach((marker) async => await _controller.pushMarker(marker));
+    widget.markers
+        .forEach((marker) async => await _controller.pushMarker(marker));
     if (widget.markers.isNotEmpty) midPoint = _calculateMidPoint();
     super.initState();
   }
@@ -353,10 +358,11 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
       _controller.updateUseRotation(widget.useRotation);
     }
 
-    if (widget.radiusOrZoomHasChanged(oldWidget) && midPoint.isNotEmpty) {
-      _zoomScale = SphericalUtil.calculateZoomScale(_devicePxRatio, widget.zoom, midPoint);
+/*    if (widget.radiusOrZoomHasChanged(oldWidget) && midPoint.isNotEmpty) {
+      _zoomScale = SphericalUtil.calculateZoomScale(
+          _devicePxRatio, widget.zoom, midPoint);
       _controller.updateRadius(widget.rippleRadius);
-    }
+    }*/
 
     super.didUpdateWidget(oldWidget);
   }
@@ -364,7 +370,8 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     _devicePxRatio = MediaQuery.of(context).devicePixelRatio;
-    _zoomScale = SphericalUtil.calculateZoomScale(_devicePxRatio, widget.zoom, midPoint);
+    _zoomScale =
+        SphericalUtil.calculateZoomScale(_devicePxRatio, widget.zoom, midPoint);
     super.didChangeDependencies();
   }
 
@@ -381,7 +388,9 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
     if (widget.onStopover != null) {
       await widget.onStopover!(latLng);
     }
-    await _animateCamera();
+    if(widget.shouldAnimateCamera){
+      await _animateCamera();
+    }
   }
 
   ILatLng _calculateMidPoint() {
@@ -414,7 +423,8 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   void _rippleListener(Circle circle) async {
     var tempCircles = _circles.set;
 
-    _circles[circle.circleId] = circle.copyWith(radiusParam: circle.radius / _zoomScale);
+    _circles[circle.circleId] =
+        circle.copyWith(radiusParam: circle.radius / _zoomScale);
 
     await widget.updateCircles(tempCircles, _circles.set);
   }
@@ -428,9 +438,12 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
 
 extension AnimarkerEx on Animarker {
   bool radiusOrZoomHasChanged(Animarker oldWidget) =>
-      (oldWidget.rippleRadius != rippleRadius || oldWidget.zoom != zoom) && markers.isNotEmpty;
-  bool isActiveTripHasChanged(Animarker oldWidget) => oldWidget.isActiveTrip != isActiveTrip;
-  bool useRotationHasChanged(Animarker oldWidget) => oldWidget.useRotation != useRotation;
+      (oldWidget.rippleRadius != rippleRadius || oldWidget.zoom != zoom) &&
+      markers.isNotEmpty;
+  bool isActiveTripHasChanged(Animarker oldWidget) =>
+      oldWidget.isActiveTrip != isActiveTrip;
+  bool useRotationHasChanged(Animarker oldWidget) =>
+      oldWidget.useRotation != useRotation;
 
   Future<void> updateCircles(Set<Circle> previous, Set<Circle> current) async {
     var mapId = await this.mapId;
@@ -444,6 +457,7 @@ extension AnimarkerEx on Animarker {
 
   Future<void> animateCamera(CameraUpdate cameraUpdate) async {
     var mapId = await this.mapId;
-    await GoogleMapsFlutterPlatform.instance.animateCamera(cameraUpdate, mapId: mapId);
+    await GoogleMapsFlutterPlatform.instance
+        .animateCamera(cameraUpdate, mapId: mapId);
   }
 }
