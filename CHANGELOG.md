@@ -1,3 +1,10 @@
+# 3.2.0
+    - onTap() marker function support added
+    - Added a flag to control when animate Google Maps Camera.
+    - Add extended documentation for Animarker properties
+    - Fix: Solve flicking issue when user location is moving fast
+    - Fix: Autostart animation when the source of location changes stop.
+
 # 3.2.0-beta.3
     - onTap() marker function support added
 

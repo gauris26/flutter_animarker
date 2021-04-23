@@ -1,7 +1,7 @@
 # Google Maps Marker Animation - Overview
 
 <a href="https://pub.dev/packages/flutter_animarker">
-    <img src="https://img.shields.io/badge/pub-3.1.2--beta.1-blue" alt="pub package"/>
+    <img src="https://img.shields.io/badge/pub-3.2.0-blue" alt="pub package"/>
 </a>
 
 Sometimes you need more than place a *Marker*📍 at map canvas 🌍, you need to smoothly move through **Google Maps**.
@@ -27,7 +27,7 @@ This package only animate the marker's changes. Both Geolocation and Google Maps
 
 ## Screenshots
 
-<img src="https://raw.githubusercontent.com/gauris26/flutter_animarker/d61ac4f420f030f4e002fa287282628d901cff26/arts/marker_animation.gif" width="200"/> <img src="https://raw.githubusercontent.com/gauris26/flutter_animarker/d61ac4f420f030f4e002fa287282628d901cff26/arts/multi_markers.gif" width="200"/>
+<img src="https://raw.githubusercontent.com/gauris26/flutter_animarker/d61ac4f420f030f4e002fa287282628d901cff26/arts/marker_animation.gif" width="300"/> <img src="https://raw.githubusercontent.com/gauris26/flutter_animarker/d61ac4f420f030f4e002fa287282628d901cff26/arts/multi_markers.gif" width="300"/>
 
 ## Example
 

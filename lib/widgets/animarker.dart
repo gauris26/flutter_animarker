@@ -373,15 +373,15 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
     _zoomScale =
         SphericalUtil.calculateZoomScale(_devicePxRatio, widget.zoom, midPoint);
 
-    var mapId =  await widget.mapId;
+    var mapId = await widget.mapId;
 
     GoogleMapsFlutterPlatform.instance
         .onMarkerTap(mapId: mapId)
         .listen((MarkerTapEvent e) {
       var value = keyByMarkerId(widget.markers)[e.value];
-          if(value != null && value.onTap != null) {
-            value.onTap!();
-          }
+      if (value != null && value.onTap != null) {
+        value.onTap!();
+      }
     });
 
     super.didChangeDependencies();

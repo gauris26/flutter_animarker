@@ -221,7 +221,7 @@ class AnilocationTaskImpl implements IAnilocationTask {
         !_rippleCtrller.isDismissed &&
         description.isQueueEmpty) {
       var halfDuration = description.rippleDuration.inMilliseconds ~/ 2;
-      print('_rippleStatusListener');
+      //print('_rippleStatusListener');
       await Future.delayed(Duration(milliseconds: halfDuration),
           () async => await _rippleCtrller.forward(from: 0));
     }
