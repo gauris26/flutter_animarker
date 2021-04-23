@@ -50,7 +50,8 @@ class AnilocationTaskImpl implements IAnilocationTask {
     _isActiveTrip = description.isActiveTrip;
     _useRotation = description.useRotation;
 
-    _locationCtrller = AnimationController(vsync: description.vsync, duration: description.duration);
+    _locationCtrller = AnimationController(
+        vsync: description.vsync, duration: description.duration);
 
     _bearingTween = BearingTween.from(_locationTween);
     //_bearingCtrller = AnimationController(vsync: description.vsync, duration: description.duration);
@@ -69,7 +70,8 @@ class AnilocationTaskImpl implements IAnilocationTask {
 
     _radiusTween = Tween<double>(begin: 0, end: description.rippleRadius);
 
-    _radiusAnimation = _radiusTween.curvedAnimate(curve: Curves.linear, controller: _rippleCtrller);
+    _radiusAnimation = _radiusTween.curvedAnimate(
+        curve: Curves.linear, controller: _rippleCtrller);
 
     _colorAnimation = ColorTween(
       begin: description.rippleColor.withOpacity(1.0),
@@ -107,10 +109,11 @@ class AnilocationTaskImpl implements IAnilocationTask {
   ///or the animation is completed or dismissed
   Future<void> _forward() async {
     //Start animation
-    var canMoveForward = description.isQueueNotEmpty && !isAnimating && _locationCtrller.isCompletedOrDismissed;
+    var canMoveForward = description.isQueueNotEmpty &&
+        !isAnimating &&
+        _locationCtrller.isCompletedOrDismissed;
 
     if (canMoveForward) {
-
       var next = description.next;
 
       var wasBeginLocationSet = _settingBeginLocation(next);
@@ -123,7 +126,7 @@ class AnilocationTaskImpl implements IAnilocationTask {
       await Future.wait([
         _locationCtrller.resetAndForward(),
         //if (_useRotation) _bearingCtrller.resetAndForward(),
-       /* if (_locationTween.isRipple && _rippleCtrller.isCompletedOrDismissed && !_rippleCtrller.isAnimating)
+        /* if (_locationTween.isRipple && _rippleCtrller.isCompletedOrDismissed && !_rippleCtrller.isAnimating)
           _rippleCtrller.resetAndForward(),*/
       ]);
     }
@@ -152,7 +155,8 @@ class AnilocationTaskImpl implements IAnilocationTask {
   bool _settingBeginLocation(ILatLng from) {
     if (from.isEmpty) return false;
 
-    if (_locationTween.interpolator.isStopped && _locationTween.interpolator.end == from) {
+    if (_locationTween.interpolator.isStopped &&
+        _locationTween.interpolator.end == from) {
       _locationTween.interpolator.begin = from;
 
       if (_useRotation) {
@@ -169,7 +173,8 @@ class AnilocationTaskImpl implements IAnilocationTask {
     if (description.isQueueNotEmpty) {
       _locationCtrller.removeStatusListener(_statusListener);
 
-      var interpolator = PolynomialLocationInterpolator(points: description.values);
+      var interpolator =
+          PolynomialLocationInterpolator(points: description.values);
       var multiPoint = LocationTween(interpolator: interpolator);
 
       _swappingValue(last);
@@ -217,8 +222,8 @@ class AnilocationTaskImpl implements IAnilocationTask {
         description.isQueueEmpty) {
       var halfDuration = description.rippleDuration.inMilliseconds ~/ 2;
       print('_rippleStatusListener');
-      await Future.delayed(
-          Duration(milliseconds: halfDuration), () async => await _rippleCtrller.forward(from: 0));
+      await Future.delayed(Duration(milliseconds: halfDuration),
+          () async => await _rippleCtrller.forward(from: 0));
     }
   }
 
@@ -285,7 +290,8 @@ class AnilocationTaskImpl implements IAnilocationTask {
   }
 
   @override
-  ILatLng get value => _proxyAnim.value.copyWith(bearing: _bearingAnimation.value);
+  ILatLng get value =>
+      _proxyAnim.value.copyWith(bearing: _bearingAnimation.value);
 
   @override
   bool get isAnimating => _locationCtrller.isAnimating;

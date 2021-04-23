@@ -45,17 +45,17 @@ class AnimarkerControllerDescription {
     MarkerListener? onMarkerAnimation,
   }) =>
       AnimarkerControllerDescription(
+        angleThreshold: animarker.angleThreshold,
         curve: animarker.curve,
         duration: animarker.duration,
         isActiveTrip: animarker.isActiveTrip,
         onMarkerAnimation: onMarkerAnimation,
         onRippleAnimation: onRippleAnimation,
         onStopover: onStopover,
-        runExpressAfter: animarker.runExpressAfter,
         rippleColor: animarker.rippleColor,
         rippleDuration: animarker.rippleDuration,
         rippleRadius: animarker.rippleRadius,
-        angleThreshold: animarker.angleThreshold,
+        runExpressAfter: animarker.runExpressAfter,
         useRotation: animarker.useRotation,
         vsync: vsync,
       );

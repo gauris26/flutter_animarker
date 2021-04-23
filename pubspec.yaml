@@ -1,6 +1,6 @@
 name: flutter_animarker
 description: Marker Geo-Animation solution for Google Maps.
-version: 3.1.2-beta.1
+version: 3.2.0-beta.3
 homepage: https://github.com/gauris26/flutter_animarker
 repository: https://github.com/gauris26/flutter_animarker
 publish_to: https://pub.dev

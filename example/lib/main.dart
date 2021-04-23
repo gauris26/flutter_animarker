@@ -19,13 +19,16 @@ const kLocations = [
 
 class SimpleMarkerAnimationExample extends StatefulWidget {
   @override
-  SimpleMarkerAnimationExampleState createState() => SimpleMarkerAnimationExampleState();
+  SimpleMarkerAnimationExampleState createState() =>
+      SimpleMarkerAnimationExampleState();
 }
 
-class SimpleMarkerAnimationExampleState extends State<SimpleMarkerAnimationExample> {
+class SimpleMarkerAnimationExampleState
+    extends State<SimpleMarkerAnimationExample> {
   final markers = <MarkerId, Marker>{};
   final controller = Completer<GoogleMapController>();
-  final stream = Stream.periodic(kDuration, (count) => kLocations[count]).take(kLocations.length);
+  final stream = Stream.periodic(kDuration, (count) => kLocations[count])
+      .take(kLocations.length);
 
   @override
   void initState() {
@@ -41,7 +44,8 @@ class SimpleMarkerAnimationExampleState extends State<SimpleMarkerAnimationExamp
         rippleRadius: 0.2,
         useRotation: false,
         duration: Duration(milliseconds: 2300),
-        mapId: controller.future.then<int>((value) => value.mapId), //Grab Google Map Id
+        mapId: controller.future
+            .then<int>((value) => value.mapId), //Grab Google Map Id
         markers: markers.values.toSet(),
         child: GoogleMap(
             mapType: MapType.normal,
@@ -60,6 +64,9 @@ class SimpleMarkerAnimationExampleState extends State<SimpleMarkerAnimationExamp
       markerId: kMarkerId,
       position: latLng,
       ripple: true,
+      onTap: (){
+        print('Tapped! $latLng');
+      }
     );
     setState(() => markers[kMarkerId] = marker);
   }

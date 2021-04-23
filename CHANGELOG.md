@@ -1,3 +1,6 @@
+# 3.2.0-beta.3
+    - onTap() marker function support added
+
 # 3.1.3-beta.2
     - Added a flag to control when animate Google Maps Camera.
 

@@ -276,7 +276,6 @@ class Animarker extends StatefulWidget {
   /// ```
   final Duration rippleDuration;
 
-
   final bool shouldAnimateCamera;
 
   Animarker({
@@ -335,6 +334,7 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
     widget.markers
         .forEach((marker) async => await _controller.pushMarker(marker));
     if (widget.markers.isNotEmpty) midPoint = _calculateMidPoint();
+
     super.initState();
   }
 
@@ -368,10 +368,22 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   }
 
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     _devicePxRatio = MediaQuery.of(context).devicePixelRatio;
     _zoomScale =
         SphericalUtil.calculateZoomScale(_devicePxRatio, widget.zoom, midPoint);
+
+    var mapId =  await widget.mapId;
+
+    GoogleMapsFlutterPlatform.instance
+        .onMarkerTap(mapId: mapId)
+        .listen((MarkerTapEvent e) {
+      var value = keyByMarkerId(widget.markers)[e.value];
+          if(value != null && value.onTap != null) {
+            value.onTap!();
+          }
+    });
+
     super.didChangeDependencies();
   }
 
@@ -388,7 +400,7 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
     if (widget.onStopover != null) {
       await widget.onStopover!(latLng);
     }
-    if(widget.shouldAnimateCamera){
+    if (widget.shouldAnimateCamera) {
       await _animateCamera();
     }
   }
@@ -431,6 +443,7 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    GoogleMapsFlutterPlatform.instance.dispose(mapId: 0);
     _controller.dispose();
     super.dispose();
   }
