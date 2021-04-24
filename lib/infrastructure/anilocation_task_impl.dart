@@ -35,6 +35,7 @@ class AnilocationTaskImpl implements IAnilocationTask {
   bool _isActiveTrip = true;
   bool _useRotation = true;
   bool _isMultipointAnimation = false;
+  DateTime rippleTimeCount = DateTime.now();
 
   @override
   AnilocationTaskDescription description;
@@ -50,33 +51,13 @@ class AnilocationTaskImpl implements IAnilocationTask {
     _isActiveTrip = description.isActiveTrip;
     _useRotation = description.useRotation;
 
-    _locationCtrller = AnimationController(
-        vsync: description.vsync, duration: description.duration);
+    //location
+    _locationCtrller = AnimationController(vsync: description.vsync, duration: description.duration);
 
+    //Bearing
     _bearingTween = BearingTween.from(_locationTween);
-    //_bearingCtrller = AnimationController(vsync: description.vsync, duration: description.duration);
 
-    _bearingAnimation = _bearingTween.curvedAnimate(
-      controller: _locationCtrller,
-      curve: description.curve,
-    );
-
-    _rippleCtrller = AnimationController(
-      vsync: description.vsync,
-      duration: description.rippleDuration,
-    )
-      ..addStatusListener(_rippleStatusListener)
-      ..addListener(_rippleListener);
-
-    _radiusTween = Tween<double>(begin: 0, end: description.rippleRadius);
-
-    _radiusAnimation = _radiusTween.curvedAnimate(
-        curve: Curves.linear, controller: _rippleCtrller);
-
-    _colorAnimation = ColorTween(
-      begin: description.rippleColor.withOpacity(1.0),
-      end: description.rippleColor.withOpacity(0.0),
-    ).curvedAnimate(curve: Curves.ease, controller: _rippleCtrller);
+    _bearingAnimation = _bearingTween.curvedAnimate(controller: _locationCtrller, curve: description.curve);
 
     _locationCtrller.addListener(_locationListener);
     _locationCtrller.addStatusListener(_statusListener);
@@ -87,21 +68,33 @@ class AnilocationTaskImpl implements IAnilocationTask {
     );
 
     _proxyAnim = ProxyAnimationGeneric<ILatLng>(_locationAnimation);
-    if (_locationTween.isRipple) _rippleCtrller.forward(from: 0);
+
+    //Ripple
+    _rippleCtrller = AnimationController(vsync: description.vsync, duration: description.rippleDuration)
+      ..addStatusListener(_rippleStatusListener)
+      ..addListener(_rippleListener);
+
+    _radiusTween = Tween<double>(begin: 0, end: description.rippleRadius);
+
+    _radiusAnimation = _radiusTween.curvedAnimate(curve: Curves.linear, controller: _rippleCtrller);
+
+    _colorAnimation = ColorTween(
+      begin: description.rippleColor.withOpacity(1.0),
+      end: description.rippleColor.withOpacity(0.0),
+    ).curvedAnimate(curve: Curves.ease, controller: _rippleCtrller);
   }
 
   @override
   Future<void> push(ILatLng latLng) async {
-    //debugPrint("Value: ${latLng.toLatLng} isActiveTrip: $_isActiveTrip: Length: ${description.length}");
-    if (_isActiveTrip) {
-      if (!_isMultipointAnimation) {
-        description.push(latLng);
-        await _forward();
-      } else if (description.length > description.runExpressAfter) {
-        _isMultipointAnimation = true;
-        description.clear();
-        animatePoints(last: latLng);
-      }
+    if (!_isActiveTrip) return;
+
+    if (!_isMultipointAnimation) {
+      description.push(latLng);
+      await _forward(); //Linear interpolation
+    } else if (description.length > description.runExpressAfter) {
+      _isMultipointAnimation = true;
+      description.clear();
+      animatePoints(last: latLng); //Multipoints interpolation
     }
   }
 
@@ -109,9 +102,8 @@ class AnilocationTaskImpl implements IAnilocationTask {
   ///or the animation is completed or dismissed
   Future<void> _forward() async {
     //Start animation
-    var canMoveForward = description.isQueueNotEmpty &&
-        !isAnimating &&
-        _locationCtrller.isCompletedOrDismissed;
+    var canMoveForward =
+        description.isQueueNotEmpty && !isAnimating && _locationCtrller.isCompletedOrDismissed;
 
     if (canMoveForward) {
       var next = description.next;
@@ -122,12 +114,12 @@ class AnilocationTaskImpl implements IAnilocationTask {
 
       _swappingValue(next);
 
+      rippleTimeCount = DateTime.now();
+
       _isResseting = true;
       await Future.wait([
         _locationCtrller.resetAndForward(),
-        //if (_useRotation) _bearingCtrller.resetAndForward(),
-        /* if (_locationTween.isRipple && _rippleCtrller.isCompletedOrDismissed && !_rippleCtrller.isAnimating)
-          _rippleCtrller.resetAndForward(),*/
+        _rippleCtrller.resetAndForward(),
       ]);
     }
   }
@@ -155,8 +147,7 @@ class AnilocationTaskImpl implements IAnilocationTask {
   bool _settingBeginLocation(ILatLng from) {
     if (from.isEmpty) return false;
 
-    if (_locationTween.interpolator.isStopped &&
-        _locationTween.interpolator.end == from) {
+    if (_locationTween.interpolator.isStopped && _locationTween.interpolator.end == from) {
       _locationTween.interpolator.begin = from;
 
       if (_useRotation) {
@@ -173,8 +164,7 @@ class AnilocationTaskImpl implements IAnilocationTask {
     if (description.isQueueNotEmpty) {
       _locationCtrller.removeStatusListener(_statusListener);
 
-      var interpolator =
-          PolynomialLocationInterpolator(points: description.values);
+      var interpolator = PolynomialLocationInterpolator(points: description.values);
       var multiPoint = LocationTween(interpolator: interpolator);
 
       _swappingValue(last);
@@ -207,8 +197,6 @@ class AnilocationTaskImpl implements IAnilocationTask {
         strokeColor: color,
       );
 
-      await Future.delayed(Duration(milliseconds: 100));
-
       if (_locationTween.isRipple && description.onRippleAnimation != null) {
         description.onRippleAnimation!(circle);
       }
@@ -216,19 +204,21 @@ class AnilocationTaskImpl implements IAnilocationTask {
   }
 
   void _rippleStatusListener(AnimationStatus status) async {
-    if (!_rippleCtrller.isAnimating &&
+
+    if(DateTime.now().difference(rippleTimeCount) > description.rippleIdleAfter) return;
+
+    var canRipple = !_rippleCtrller.isAnimating &&
         _rippleCtrller.isCompleted &&
         !_rippleCtrller.isDismissed &&
-        description.isQueueEmpty) {
-      var halfDuration = description.rippleDuration.inMilliseconds ~/ 2;
-      //print('_rippleStatusListener');
-      await Future.delayed(Duration(milliseconds: halfDuration),
-          () async => await _rippleCtrller.forward(from: 0));
+        description.isQueueEmpty;
+
+    if (canRipple) {
+      var halfDuration = Duration(milliseconds: description.rippleDuration.inMilliseconds ~/ 2);
+      await Future.delayed(halfDuration, () async => await _rippleCtrller.forward(from: 0));
     }
   }
 
   void _locationListener() {
-    //debugPrint('${value.toLatLng} (t): ${_locationCtrller.value} isStopover: ${value.isStopover} Length: ${description.length}');
     if (description.latLngListener != null) {
       description.latLngListener!(value);
     }
@@ -244,11 +234,6 @@ class AnilocationTaskImpl implements IAnilocationTask {
       if (description.onAnimCompleted != null) {
         await _forward();
         description.onAnimCompleted!(description);
-      }
-
-      if (_locationTween.isRipple && description.isQueueEmpty) {
-        print('_statusListener');
-        _rippleCtrller.reset();
       }
     }
   }
@@ -267,7 +252,6 @@ class AnilocationTaskImpl implements IAnilocationTask {
   @override
   void updateRadius(double radius) {
     if (_locationTween.isRipple) {
-      print('updateRadius');
       _radiusTween.end = radius;
     }
   }
@@ -290,8 +274,7 @@ class AnilocationTaskImpl implements IAnilocationTask {
   }
 
   @override
-  ILatLng get value =>
-      _proxyAnim.value.copyWith(bearing: _bearingAnimation.value);
+  ILatLng get value => _proxyAnim.value.copyWith(bearing: _bearingAnimation.value);
 
   @override
   bool get isAnimating => _locationCtrller.isAnimating;

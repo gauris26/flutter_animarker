@@ -33,7 +33,7 @@ This package only animate the marker's changes. Both Geolocation and Google Maps
 
 ```dart
 Animarker(
- ...
+    ...
 	curve: Curves.bounceInOut,
 	duration: Duration(milliseconds: 2000),
 	markers: <Marker>{
@@ -48,6 +48,7 @@ Animarker(
 		onMapCreated: (gController) => controller.complete(gController), //Complete the future GoogleMapController
 		...
 	),
+	...
 )
 
 ```

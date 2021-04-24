@@ -5,13 +5,11 @@ import 'package:flutter_animarker/core/i_interpolation_service_optimized.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/helpers/spherical_util.dart';
 
-class LineLocationInterpolatorImpl<T extends ILatLng>
-    extends IInterpolationServiceOptimized<T> {
+class LineLocationInterpolatorImpl<T extends ILatLng> extends IInterpolationServiceOptimized<T> {
   @override
   late T begin;
   @override
   late T end;
-  //final ILatLng _previousPosition = ILatLng.empty();
   late Float32x4 float32x4FromVector;
   late Float32x4 float32x4Delta;
 
@@ -26,8 +24,6 @@ class LineLocationInterpolatorImpl<T extends ILatLng>
   @override
   bool get isStopped => begin == end;
 
-  //ILatLng get previousPosition => _previousPosition.isEmpty ? begin : _previousPosition;
-
   @override
   @protected
   void doSwap(T newValue) {
@@ -38,18 +34,14 @@ class LineLocationInterpolatorImpl<T extends ILatLng>
   @override
   @protected
   void doWarmUp() {
-    var fromVectorNorm =
-        SphericalUtil.toVector3(begin.latitude, begin.longitude).normalized();
+    var fromVectorNorm = SphericalUtil.toVector3(begin.latitude, begin.longitude).normalized();
 
-    float32x4FromVector =
-        Float32x4(fromVectorNorm.x, fromVectorNorm.y, fromVectorNorm.z, 0);
+    float32x4FromVector = Float32x4(fromVectorNorm.x, fromVectorNorm.y, fromVectorNorm.z, 0);
 
     if (!isStopped) {
-      var toVectorNorm =
-          SphericalUtil.toVector3(end.latitude, end.longitude).normalized();
+      var toVectorNorm = SphericalUtil.toVector3(end.latitude, end.longitude).normalized();
 
-      var float32x4ToVector =
-          Float32x4(toVectorNorm.x, toVectorNorm.y, toVectorNorm.z, 0);
+      var float32x4ToVector = Float32x4(toVectorNorm.x, toVectorNorm.y, toVectorNorm.z, 0);
 
       float32x4Delta = float32x4ToVector - float32x4FromVector;
     } else {
@@ -59,6 +51,6 @@ class LineLocationInterpolatorImpl<T extends ILatLng>
 
   @override
   @protected
-  T doInterpolate(double t) => SphericalUtil.vectorInterpolateOptimized(
-      float32x4Delta, float32x4FromVector, t) as T;
+  T doInterpolate(double t) =>
+      SphericalUtil.vectorInterpolateOptimized(float32x4Delta, float32x4FromVector, t) as T;
 }
