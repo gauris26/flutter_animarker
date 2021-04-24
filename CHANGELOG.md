@@ -1,3 +1,7 @@
+# 3.3.1
+    - Improve Ripple effect during Marker movement.
+    - Added rippleIdleAfter property to prevent ripple forever.
+
 # 3.2.0
     - onTap() marker function support added
     - Added a flag to control when animate Google Maps Camera.
