@@ -315,7 +315,8 @@ class Animarker extends StatefulWidget {
   })  : assert(rippleRadius >= 0.0 && rippleRadius <= 1.0,
             'Must choose values between [0.0, 1.0] for radius scale'),
         assert(!markers.isAnyEmpty, 'Must choose a not empty MarkerId'),
-        assert(markers.markerIds.length == markers.length, 'Must choose a unique MarkerId per Marker'),
+        assert(markers.markerIds.length == markers.length,
+            'Must choose a unique MarkerId per Marker'),
         super(key: key);
 
   @override
@@ -347,7 +348,8 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
     );
 
     _markers.addAll(keyByMarkerId(widget.markers));
-    widget.markers.forEach((marker) async => await _controller.pushMarker(marker));
+    widget.markers
+        .forEach((marker) async => await _controller.pushMarker(marker));
 
     if (widget.markers.isNotEmpty) midPoint = _calculateMidPoint();
 
@@ -360,8 +362,7 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(Animarker oldWidget) {
     if (!setEquals(oldWidget.markers, widget.markers)) {
-
-      if(widget.markers.isEmpty){
+      if (widget.markers.isEmpty) {
         widget.updateMarkers(oldWidget.markers, widget.markers);
         return;
       }
@@ -381,7 +382,8 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
     }
 
     if (widget.radiusOrZoomHasChanged(oldWidget) && midPoint.isNotEmpty) {
-      _zoomScale = SphericalUtil.calculateZoomScale(_devicePxRatio, widget.zoom, midPoint);
+      _zoomScale = SphericalUtil.calculateZoomScale(
+          _devicePxRatio, widget.zoom, midPoint);
       _controller.updateRadius(widget.rippleRadius);
     }
 
@@ -391,11 +393,14 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() async {
     _devicePxRatio = MediaQuery.of(context).devicePixelRatio;
-    _zoomScale = SphericalUtil.calculateZoomScale(_devicePxRatio, widget.zoom, midPoint);
+    _zoomScale =
+        SphericalUtil.calculateZoomScale(_devicePxRatio, widget.zoom, midPoint);
 
     var mapId = await widget.mapId;
 
-    GoogleMapsFlutterPlatform.instance.onMarkerTap(mapId: mapId).listen((MarkerTapEvent e) {
+    GoogleMapsFlutterPlatform.instance
+        .onMarkerTap(mapId: mapId)
+        .listen((MarkerTapEvent e) {
       var value = keyByMarkerId(widget.markers)[e.value];
       if (value != null && value.onTap != null) {
         value.onTap!();
@@ -452,7 +457,8 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   void _rippleListener(Circle circle) async {
     var tempCircles = _circles.set;
     _zoomScale = 0.000015;
-    _circles[circle.circleId] = circle.copyWith(radiusParam: circle.radius / _zoomScale);
+    _circles[circle.circleId] =
+        circle.copyWith(radiusParam: circle.radius / _zoomScale);
 
     await widget.updateCircles(tempCircles, _circles.set);
   }
@@ -467,9 +473,12 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
 
 extension AnimarkerEx on Animarker {
   bool radiusOrZoomHasChanged(Animarker oldWidget) =>
-      (oldWidget.rippleRadius != rippleRadius || oldWidget.zoom != zoom) && markers.isNotEmpty;
-  bool isActiveTripHasChanged(Animarker oldWidget) => oldWidget.isActiveTrip != isActiveTrip;
-  bool useRotationHasChanged(Animarker oldWidget) => oldWidget.useRotation != useRotation;
+      (oldWidget.rippleRadius != rippleRadius || oldWidget.zoom != zoom) &&
+      markers.isNotEmpty;
+  bool isActiveTripHasChanged(Animarker oldWidget) =>
+      oldWidget.isActiveTrip != isActiveTrip;
+  bool useRotationHasChanged(Animarker oldWidget) =>
+      oldWidget.useRotation != useRotation;
 
   Future<void> updateCircles(Set<Circle> previous, Set<Circle> current) async {
     var mapId = await this.mapId;
@@ -483,6 +492,7 @@ extension AnimarkerEx on Animarker {
 
   Future<void> animateCamera(CameraUpdate cameraUpdate) async {
     var mapId = await this.mapId;
-    await GoogleMapsFlutterPlatform.instance.animateCamera(cameraUpdate, mapId: mapId);
+    await GoogleMapsFlutterPlatform.instance
+        .animateCamera(cameraUpdate, mapId: mapId);
   }
 }

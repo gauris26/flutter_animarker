@@ -5,8 +5,8 @@ import 'package:flutter_animarker/core/i_location_dispatcher.dart';
 import 'package:flutter_animarker/helpers/spherical_util.dart';
 
 mixin ThresholdingLocation on ILocationDispatcher {
-
-  DoubleLinkedQueueEntry<ILatLng> thresholding(DoubleLinkedQueueEntry<ILatLng> entry) {
+  DoubleLinkedQueueEntry<ILatLng> thresholding(
+      DoubleLinkedQueueEntry<ILatLng> entry) {
     var current = entry.element;
 
     var nextEntry = entry.nextEntry();

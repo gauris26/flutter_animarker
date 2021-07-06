@@ -134,7 +134,10 @@ class _FlutterMapMarkerAnimationExampleState
                       ElevatedButton(
                         style: (ripple ? Colors.red : Colors.blue).buttonStyle,
                         onPressed: () => setState(() => ripple = !ripple),
-                        child: Text(ripple ? 'Stop Ripple' : 'Start Ripple',  style: TextStyle(fontSize: 12),),
+                        child: Text(
+                          ripple ? 'Stop Ripple' : 'Start Ripple',
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ),
                       ElevatedButton(
                         style: (useRotation ? Colors.red : Colors.blue)
@@ -142,21 +145,28 @@ class _FlutterMapMarkerAnimationExampleState
                         onPressed: () =>
                             setState(() => useRotation = !useRotation),
                         child: Text(
-                            useRotation ? 'Stop Rotation' : 'Start Rotation',  style: TextStyle(fontSize: 12),),
+                          useRotation ? 'Stop Rotation' : 'Start Rotation',
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ),
                       ElevatedButton(
                         style: (isActiveTrip ? Colors.red : Colors.blue)
                             .buttonStyle,
                         onPressed: () =>
                             setState(() => isActiveTrip = !isActiveTrip),
-                        child: Text(isActiveTrip ? 'Stop trip' : 'Start trip', style: TextStyle(fontSize: 12),),
+                        child: Text(
+                          isActiveTrip ? 'Stop trip' : 'Start trip',
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ),
                       ElevatedButton(
                         style: (isActiveTrip ? Colors.red : Colors.blue)
                             .buttonStyle,
-                        onPressed: () =>
-                            setState(() => _markers.clear()),
-                        child: Text('Clear marker', style: TextStyle(fontSize: 12),),
+                        onPressed: () => setState(() => _markers.clear()),
+                        child: Text(
+                          'Clear marker',
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ),
                     ],
                   ),

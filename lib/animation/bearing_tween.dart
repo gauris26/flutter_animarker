@@ -12,7 +12,8 @@ class BearingTween extends Tween<double> {
   final IInterpolationServiceOptimized<double> _interpolator;
 
   /// Create a tween that interpolate angle bearing/heading from given [begin],[end] angle.
-  BearingTween({required IInterpolationServiceOptimized<double> interpolator}): _interpolator = interpolator;
+  BearingTween({required IInterpolationServiceOptimized<double> interpolator})
+      : _interpolator = interpolator;
 
   /// Create a tween from a existing [LocationTween]
   factory BearingTween.from(LocationTween tween) =>

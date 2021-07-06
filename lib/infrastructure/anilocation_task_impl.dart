@@ -19,7 +19,8 @@ import 'interpolators/polynomial_location_interpolator_impl.dart';
 /// Hold the logic for interpolate each given marker per its MarkerId
 /// Every AnilocationTask control the animation of a unique Marker reference
 /// this way, the package can support multiple Marker simultaneously
-class AnilocationTaskImpl extends IAnilocationTask with AnilocationTaskInitializer {
+class AnilocationTaskImpl extends IAnilocationTask
+    with AnilocationTaskInitializer {
   //late final AnimationController _locationCtrller;
   //late final LocationTween _locationTween;
   late final AnimationController _rippleCtrller;
@@ -45,7 +46,8 @@ class AnilocationTaskImpl extends IAnilocationTask with AnilocationTaskInitializ
   @override
   AnilocationTaskDescription description;
 
-  AnilocationTaskImpl({required this.description}) : super(description: description) {
+  AnilocationTaskImpl({required this.description})
+      : super(description: description) {
     wrapper = animationWrapper();
 
     /*wrapper.locationTween = LocationTween(
@@ -61,8 +63,8 @@ class AnilocationTaskImpl extends IAnilocationTask with AnilocationTaskInitializ
     //Bearing
     _bearingTween = BearingTween.from(wrapper.locationTween);
 
-    _bearingAnimation =
-        _bearingTween.curvedAnimate(controller: wrapper.locationCtrller, curve: description.curve);
+    _bearingAnimation = _bearingTween.curvedAnimate(
+        controller: wrapper.locationCtrller, curve: description.curve);
 
     wrapper.locationCtrller.addListener(_locationListener);
     wrapper.locationCtrller.addStatusListener(_statusListener);
@@ -75,13 +77,15 @@ class AnilocationTaskImpl extends IAnilocationTask with AnilocationTaskInitializ
     _proxyAnim = ProxyAnimationGeneric<ILatLng>(_locationAnimation);
 
     //Ripple
-    _rippleCtrller = AnimationController(vsync: description.vsync, duration: description.rippleDuration)
+    _rippleCtrller = AnimationController(
+        vsync: description.vsync, duration: description.rippleDuration)
       ..addStatusListener(_rippleStatusListener)
       ..addListener(_rippleListener);
 
     _radiusTween = Tween<double>(begin: 0, end: description.rippleRadius);
 
-    _radiusAnimation = _radiusTween.curvedAnimate(curve: Curves.linear, controller: _rippleCtrller);
+    _radiusAnimation = _radiusTween.curvedAnimate(
+        curve: Curves.linear, controller: _rippleCtrller);
 
     _colorAnimation = ColorTween(
       begin: description.rippleColor.withOpacity(1.0),
@@ -107,8 +111,9 @@ class AnilocationTaskImpl extends IAnilocationTask with AnilocationTaskInitializ
   /// or the animation is completed or dismissed
   Future<void> _forward() async {
     //Start animation
-    var canMoveForward =
-        description.isQueueNotEmpty && !isAnimating && wrapper.locationCtrller.isCompletedOrDismissed;
+    var canMoveForward = description.isQueueNotEmpty &&
+        !isAnimating &&
+        wrapper.locationCtrller.isCompletedOrDismissed;
 
     if (canMoveForward) {
       var next = description.next;
@@ -146,8 +151,8 @@ class AnilocationTaskImpl extends IAnilocationTask with AnilocationTaskInitializ
     if (_useRotation) {
       double angle;
 
-      final angleRad =
-          SphericalUtil.computeAngleBetween(wrapper.locationTween.begin, wrapper.locationTween.end);
+      final angleRad = SphericalUtil.computeAngleBetween(
+          wrapper.locationTween.begin, wrapper.locationTween.end);
       final sinAngle = sin(angleRad);
 
       if (sinAngle < 1E-6 /*|| description.angleThreshold*/) {
@@ -183,7 +188,8 @@ class AnilocationTaskImpl extends IAnilocationTask with AnilocationTaskInitializ
     if (description.isQueueNotEmpty) {
       wrapper.locationCtrller.removeStatusListener(_statusListener);
 
-      var interpolator = PolynomialLocationInterpolator(points: description.values);
+      var interpolator =
+          PolynomialLocationInterpolator(points: description.values);
       var multiPoint = LocationTween(interpolator: interpolator);
 
       _swappingPosition(last);
@@ -216,7 +222,8 @@ class AnilocationTaskImpl extends IAnilocationTask with AnilocationTaskInitializ
         strokeColor: color,
       ).clone();
 
-      if (wrapper.locationTween.isRipple && description.onRippleAnimation != null) {
+      if (wrapper.locationTween.isRipple &&
+          description.onRippleAnimation != null) {
         description.onRippleAnimation!(circle);
       }
     }
@@ -224,7 +231,8 @@ class AnilocationTaskImpl extends IAnilocationTask with AnilocationTaskInitializ
 
   void _rippleStatusListener(AnimationStatus status) async {
     // Determine when the Marker is idle setting a timeout
-    if (DateTime.now().difference(rippleTimeCount) > description.rippleIdleAfter) return;
+    if (DateTime.now().difference(rippleTimeCount) >
+        description.rippleIdleAfter) return;
 
     var canRipple = !_rippleCtrller.isAnimating &&
         _rippleCtrller.isCompleted &&
@@ -232,8 +240,10 @@ class AnilocationTaskImpl extends IAnilocationTask with AnilocationTaskInitializ
         description.isQueueEmpty;
 
     if (canRipple) {
-      var halfDuration = Duration(milliseconds: description.rippleDuration.inMilliseconds ~/ 2);
-      await Future.delayed(halfDuration, () async => await _rippleCtrller.forward(from: 0));
+      var halfDuration = Duration(
+          milliseconds: description.rippleDuration.inMilliseconds ~/ 2);
+      await Future.delayed(
+          halfDuration, () async => await _rippleCtrller.forward(from: 0));
     }
   }
 
@@ -293,7 +303,8 @@ class AnilocationTaskImpl extends IAnilocationTask with AnilocationTaskInitializ
   }
 
   @override
-  ILatLng get value => _proxyAnim.value.copyWith(bearing: _bearingAnimation.value);
+  ILatLng get value =>
+      _proxyAnim.value.copyWith(bearing: _bearingAnimation.value);
 
   @override
   bool get isAnimating => wrapper.locationCtrller.isAnimating;
@@ -305,7 +316,8 @@ class AnilocationTaskImpl extends IAnilocationTask with AnilocationTaskInitializ
   bool get isDismissed => wrapper.locationCtrller.isDismissed;
 
   @override
-  bool get isCompletedOrDismissed => wrapper.locationCtrller.isCompletedOrDismissed;
+  bool get isCompletedOrDismissed =>
+      wrapper.locationCtrller.isCompletedOrDismissed;
 
   @override
   void dispose() {

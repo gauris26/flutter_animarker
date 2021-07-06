@@ -78,7 +78,8 @@ class AnilocationTaskDescription {
       useRotation: description.useRotation,
       rippleDuration: description.rippleDuration,
       onRippleAnimation: description.onRippleAnimation,
-      dispatcher: ILocationDispatcher.queue(threshold: description.angleThreshold),
+      dispatcher:
+          ILocationDispatcher.queue(threshold: description.angleThreshold),
     );
   }
 
