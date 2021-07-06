@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animarker/flutter_map_marker_animation.dart';
 import 'package:flutter_animarker/core/i_lat_lng.dart';
@@ -25,6 +26,9 @@ extension LatLngInfoEx on LatLng {
 }
 
 extension ColorEx on Color {
-  ButtonStyle get buttonStyle =>
-      ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(this));
+  ButtonStyle get buttonStyle => ButtonStyle(
+        backgroundColor: MaterialStateProperty.all<Color>(this),
+        padding:
+            MaterialStateProperty.all<EdgeInsetsGeometry>(EdgeInsets.all(4)),
+      );
 }

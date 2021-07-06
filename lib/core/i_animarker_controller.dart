@@ -1,5 +1,5 @@
 // Flutter imports:
-import 'package:flutter_animarker/infrastructure/i_location_observable.dart';
+import 'package:flutter_animarker/core/i_location_observable.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 
 // Package imports:
