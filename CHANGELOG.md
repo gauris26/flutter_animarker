@@ -1,12 +1,9 @@
-# 3.2.0-beta.4
+# 3.3.1-beta.4
     - runExpressAfter property to control when the animation queue should run express to the last position
     - shouldAnimateCamera property to prevent Google Map Camera Updates to be handled
     - rippleIdleAfter property to stop ripple animation on static marker (no updates) after timeout
     - Fixing bug when trying to clear the markers
-
-# 3.3.1
     - Improve Ripple effect during Marker movement.
-    - Added rippleIdleAfter property to prevent ripple forever.
 
 # 3.2.0
     - onTap() marker function support added
