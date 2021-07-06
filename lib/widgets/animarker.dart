@@ -276,8 +276,22 @@ class Animarker extends StatefulWidget {
   /// ```
   final Duration rippleDuration;
 
+  /// Prevent Google Maps camera to be control by the Animarker
+  /// Setting this flag to false won't change the map position when location change.
+  /// ```dart
+  ///   shouldAnimateCamera = false,
+  /// ```
+  /// Default value: true
+  ///
   final bool shouldAnimateCamera;
 
+  /// Set the Ripple effect idle/stop after the defined timeout from this property, preventing
+  /// ripple forever if the location doesn't change
+  /// ```dart
+  ///   shouldAnimateCamera = false,
+  /// ```
+  /// Default value: true
+  ///
   final Duration rippleIdleAfter;
 
   Animarker({
@@ -346,6 +360,12 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(Animarker oldWidget) {
     if (!setEquals(oldWidget.markers, widget.markers)) {
+
+      if(widget.markers.isEmpty){
+        widget.updateMarkers(oldWidget.markers, widget.markers);
+        return;
+      }
+
       //Manage new markers updates after setState had gotten called
       widget.markers.difference(_markers.set).forEach((marker) async {
         await _controller.pushMarker(marker);
@@ -398,9 +418,8 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
     if (widget.onStopover != null) {
       await widget.onStopover!(latLng);
     }
-    if (widget.shouldAnimateCamera) {
-      await _animateCamera();
-    }
+
+    if (widget.shouldAnimateCamera) await _animateCamera();
   }
 
   ILatLng _calculateMidPoint() {

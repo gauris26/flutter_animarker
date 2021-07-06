@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animarker/flutter_map_marker_animation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'listen_locations_updates.dart';
+
 //Setting dummies values
 const kStartPosition = LatLng(18.488213, -69.959186);
 const kSantoDomingo = CameraPosition(target: kStartPosition, zoom: 15);
@@ -72,5 +74,5 @@ class SimpleMarkerAnimationExampleState
 }
 
 void main() {
-  runApp(SimpleMarkerAnimationExample());
+  runApp(FlutterMapMarkerAnimationRealTimeExample());
 }

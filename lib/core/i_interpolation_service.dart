@@ -35,7 +35,7 @@ mixin IWarmUp<T> on IInterpolationService<T> {
   }
 
   T interpolate(double t) {
-    if (begin == end) return end;
+    if (isStopped) return end;
     if (t == 0.0) return begin;
     if (t == 1.0) return end;
 

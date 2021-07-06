@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animarker/animation/bearing_tween.dart';
 import 'package:flutter_animarker/core/anilocation_task_description.dart';
 import 'package:flutter_animarker/helpers/spherical_util.dart';
-import 'package:flutter_animarker/infrastructure/interpolators/line_location_interpolator_impl.dart';
+import 'package:flutter_animarker/infrastructure/anilocation_task_initializer_mixin.dart';
 
 // Project imports:
 import 'package:flutter_animarker/animation/proxy_location_animation.dart';
@@ -16,11 +16,14 @@ import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 import 'interpolators/polynomial_location_interpolator_impl.dart';
 
-class AnilocationTaskImpl implements IAnilocationTask {
-  late final AnimationController _locationCtrller;
+/// Hold the logic for interpolate each given marker per its MarkerId
+/// Every AnilocationTask control the animation of a unique Marker reference
+/// this way, the package can support multiple Marker simultaneously
+class AnilocationTaskImpl extends IAnilocationTask with AnilocationTaskInitializer {
+  //late final AnimationController _locationCtrller;
+  //late final LocationTween _locationTween;
   late final AnimationController _rippleCtrller;
 
-  late final LocationTween _locationTween;
   late final BearingTween _bearingTween;
   late final Tween<double> _radiusTween;
 
@@ -37,33 +40,35 @@ class AnilocationTaskImpl implements IAnilocationTask {
   bool _isMultipointAnimation = false;
   DateTime rippleTimeCount = DateTime.now();
 
+  late final AnimationWrapper wrapper;
+
   @override
   AnilocationTaskDescription description;
 
-  AnilocationTaskImpl({required this.description}) {
-    _locationTween = LocationTween(
+  AnilocationTaskImpl({required this.description}) : super(description: description) {
+    wrapper = animationWrapper();
+
+    /*wrapper.locationTween = LocationTween(
       interpolator: LineLocationInterpolatorImpl(
         begin: description.begin.copyWith(markerId: description.markerId),
         end: description.end.copyWith(markerId: description.markerId),
       ),
-    );
+    );*/
 
     _isActiveTrip = description.isActiveTrip;
     _useRotation = description.useRotation;
 
-    //location
-    _locationCtrller = AnimationController(vsync: description.vsync, duration: description.duration);
-
     //Bearing
-    _bearingTween = BearingTween.from(_locationTween);
+    _bearingTween = BearingTween.from(wrapper.locationTween);
 
-    _bearingAnimation = _bearingTween.curvedAnimate(controller: _locationCtrller, curve: description.curve);
+    _bearingAnimation =
+        _bearingTween.curvedAnimate(controller: wrapper.locationCtrller, curve: description.curve);
 
-    _locationCtrller.addListener(_locationListener);
-    _locationCtrller.addStatusListener(_statusListener);
+    wrapper.locationCtrller.addListener(_locationListener);
+    wrapper.locationCtrller.addStatusListener(_statusListener);
 
-    _locationAnimation = _locationTween.curvedAnimate(
-      controller: _locationCtrller,
+    _locationAnimation = wrapper.locationTween.curvedAnimate(
+      controller: wrapper.locationCtrller,
       curve: description.curve,
     );
 
@@ -98,12 +103,12 @@ class AnilocationTaskImpl implements IAnilocationTask {
     }
   }
 
-  ///Entry point to start animation of location positions if is not a running animation
-  ///or the animation is completed or dismissed
+  /// Entry point to start animation of location positions if is not a running animation
+  /// or the animation is completed or dismissed
   Future<void> _forward() async {
     //Start animation
     var canMoveForward =
-        description.isQueueNotEmpty && !isAnimating && _locationCtrller.isCompletedOrDismissed;
+        description.isQueueNotEmpty && !isAnimating && wrapper.locationCtrller.isCompletedOrDismissed;
 
     if (canMoveForward) {
       var next = description.next;
@@ -112,46 +117,58 @@ class AnilocationTaskImpl implements IAnilocationTask {
 
       if (!wasBeginLocationSet) return;
 
-      _swappingValue(next);
+      _swappingPosition(next);
 
       rippleTimeCount = DateTime.now();
 
       _isResseting = true;
       await Future.wait([
-        _locationCtrller.resetAndForward(),
+        wrapper.locationCtrller.resetAndForward(),
         _rippleCtrller.resetAndForward(),
       ]);
     }
   }
 
-  void _swappingValue(ILatLng from) {
-    _locationTween.interpolator.swap(from);
+  /// Move the old [_locationTween].[end] to [_locationTween].[begin] position,
+  /// and the [from] position to [_locationTween].[end] .
+  ///
+  /// Move the old [_bearingTween].[end] to [_bearingTween].[begin] position,
+  /// and the bearing angle from [_locationTween] position to [_locationTween].[end] .
+  ///
+  ///  When [_locationTween].[begin] to [_locationTween].[end] are equal or very similar
+  ///  can produce unreal angle result, to prevent this the method set the same [_bearingTween].[end]
+  ///  and skip the previous angle result.
+  ///
+  /// This produce a stable angle interpolation
+  void _swappingPosition(ILatLng from) {
+    wrapper.locationTween.swap(from);
 
     if (_useRotation) {
       double angle;
 
-      final angleRad = SphericalUtil.computeAngleBetween(
-          _locationTween.interpolator.begin, _locationTween.interpolator.end);
+      final angleRad =
+          SphericalUtil.computeAngleBetween(wrapper.locationTween.begin, wrapper.locationTween.end);
       final sinAngle = sin(angleRad);
 
       if (sinAngle < 1E-6 /*|| description.angleThreshold*/) {
-        angle = _bearingTween.interpolator.end;
+        angle = _bearingTween.end;
       } else {
-        angle = _locationTween.bearing;
+        angle = wrapper.locationTween.bearing;
       }
 
-      _bearingTween.interpolator.swap(angle);
+      _bearingTween.swap(angle);
     }
   }
 
+  /// Set the [_locationTween].[begin] initially
   bool _settingBeginLocation(ILatLng from) {
     if (from.isEmpty) return false;
 
-    if (_locationTween.interpolator.isStopped && _locationTween.interpolator.end == from) {
-      _locationTween.interpolator.begin = from;
+    if (wrapper.locationTween.isStopped && wrapper.locationTween.end == from) {
+      wrapper.locationTween.begin = from;
 
       if (_useRotation) {
-        _bearingTween.interpolator.begin = 0;
+        _bearingTween.begin = 0;
       }
 
       return false;
@@ -160,25 +177,27 @@ class AnilocationTaskImpl implements IAnilocationTask {
     return true;
   }
 
+  /// Multipoint animation allow to interpolation "sewing" through all position in the
+  /// Location Queue at once.
   void animatePoints({ILatLng last = const ILatLng.empty()}) {
     if (description.isQueueNotEmpty) {
-      _locationCtrller.removeStatusListener(_statusListener);
+      wrapper.locationCtrller.removeStatusListener(_statusListener);
 
       var interpolator = PolynomialLocationInterpolator(points: description.values);
       var multiPoint = LocationTween(interpolator: interpolator);
 
-      _swappingValue(last);
+      _swappingPosition(last);
 
       _isResseting = true;
 
-      _locationCtrller.addStatusListener(_statusListenerPoints);
+      wrapper.locationCtrller.addStatusListener(_statusListenerPoints);
 
       _proxyAnim.parent = multiPoint.curvedAnimate(
         curve: description.curve,
-        controller: _locationCtrller,
+        controller: wrapper.locationCtrller,
       );
 
-      _locationCtrller.resetAndForward();
+      wrapper.locationCtrller.resetAndForward();
     }
   }
 
@@ -195,17 +214,17 @@ class AnilocationTaskImpl implements IAnilocationTask {
         fillColor: color,
         strokeWidth: 1,
         strokeColor: color,
-      );
+      ).clone();
 
-      if (_locationTween.isRipple && description.onRippleAnimation != null) {
+      if (wrapper.locationTween.isRipple && description.onRippleAnimation != null) {
         description.onRippleAnimation!(circle);
       }
     }
   }
 
   void _rippleStatusListener(AnimationStatus status) async {
-
-    if(DateTime.now().difference(rippleTimeCount) > description.rippleIdleAfter) return;
+    // Determine when the Marker is idle setting a timeout
+    if (DateTime.now().difference(rippleTimeCount) > description.rippleIdleAfter) return;
 
     var canRipple = !_rippleCtrller.isAnimating &&
         _rippleCtrller.isCompleted &&
@@ -241,9 +260,9 @@ class AnilocationTaskImpl implements IAnilocationTask {
   void _statusListenerPoints(AnimationStatus status) async {
     if (status == AnimationStatus.completed) {
       _isMultipointAnimation = false;
-      _locationCtrller.removeStatusListener(_statusListenerPoints);
+      wrapper.locationCtrller.removeStatusListener(_statusListenerPoints);
       _proxyAnim.parent = _locationAnimation;
-      _locationCtrller.addStatusListener(_statusListener);
+      wrapper.locationCtrller.addStatusListener(_statusListener);
       _isResseting = true;
       await _forward();
     }
@@ -251,7 +270,7 @@ class AnilocationTaskImpl implements IAnilocationTask {
 
   @override
   void updateRadius(double radius) {
-    if (_locationTween.isRipple) {
+    if (wrapper.locationTween.isRipple) {
       _radiusTween.end = radius;
     }
   }
@@ -277,21 +296,21 @@ class AnilocationTaskImpl implements IAnilocationTask {
   ILatLng get value => _proxyAnim.value.copyWith(bearing: _bearingAnimation.value);
 
   @override
-  bool get isAnimating => _locationCtrller.isAnimating;
+  bool get isAnimating => wrapper.locationCtrller.isAnimating;
 
   @override
-  bool get isCompleted => _locationCtrller.isCompleted;
+  bool get isCompleted => wrapper.locationCtrller.isCompleted;
 
   @override
-  bool get isDismissed => _locationCtrller.isDismissed;
+  bool get isDismissed => wrapper.locationCtrller.isDismissed;
 
   @override
-  bool get isCompletedOrDismissed => _locationCtrller.isCompletedOrDismissed;
+  bool get isCompletedOrDismissed => wrapper.locationCtrller.isCompletedOrDismissed;
 
   @override
   void dispose() {
     description.dispose();
-    _locationCtrller
+    wrapper.locationCtrller
       ..removeStatusListener(_statusListener)
       ..removeListener(_locationListener)
       ..dispose();
@@ -299,6 +318,5 @@ class AnilocationTaskImpl implements IAnilocationTask {
       ..removeStatusListener(_rippleStatusListener)
       ..removeListener(_rippleListener)
       ..dispose();
-    //_bearingCtrller.dispose();
   }
 }

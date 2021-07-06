@@ -9,30 +9,33 @@ import 'package:flutter_animarker/helpers/spherical_util.dart';
 
 /// A tween with a location values (latitude, Longitude).
 class LocationTween extends Tween<ILatLng> {
-  final IInterpolationServiceOptimized<ILatLng> interpolator;
+  final IInterpolationServiceOptimized<ILatLng> _interpolator;
 
-  LocationTween({required this.interpolator});
-
-  @override
-  ILatLng get begin => interpolator.begin;
+  LocationTween({required IInterpolationServiceOptimized<ILatLng> interpolator})
+      : _interpolator = interpolator;
 
   @override
-  set begin(ILatLng? value) => interpolator.begin = value ?? ILatLng.empty();
+  ILatLng get begin => _interpolator.begin;
+
+  bool get isStopped => _interpolator.isStopped;
 
   @override
-  ILatLng get end => interpolator.end;
-
-  bool get isRipple => interpolator.end.ripple && interpolator.end.ripple;
+  set begin(ILatLng? value) => _interpolator.begin = value ?? ILatLng.empty();
 
   @override
-  set end(ILatLng? value) => interpolator.end = value ?? ILatLng.empty();
+  ILatLng get end => _interpolator.end;
+
+  bool get isRipple => _interpolator.end.ripple && _interpolator.end.ripple;
+
+  @override
+  set end(ILatLng? value) => _interpolator.end = value ?? ILatLng.empty();
 
   /// Interpolate two locations with planet spherical calculations at the given animation clock value.
   @override
   ILatLng lerp(double t) {
-    if (interpolator.isStopped) return end;
+    if (_interpolator.isStopped) return end;
 
-    return interpolator.interpolate(t).copyWith(
+    return _interpolator.interpolate(t).copyWith(
           markerId: end.markerId,
           isStopover: t == 1.0,
           markerJson: begin.markerJson,
@@ -54,7 +57,9 @@ class LocationTween extends Tween<ILatLng> {
   double get bearing => SphericalUtil.computeHeading(begin, end).toDouble();
 
   LocationTween operator +(ILatLng end) {
-    interpolator.swap(end);
+    _interpolator.swap(end);
     return this;
   }
+
+  void swap(ILatLng from) => _interpolator.swap(from);
 }
