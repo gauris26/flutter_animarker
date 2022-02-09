@@ -1,5 +1,7 @@
 # Google Maps Marker Animation - Overview
 
+<a href="https://www.buymeacoffee.com/gauris" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="195" height="55"></a>
+
 <a href="https://pub.dev/packages/flutter_animarker">
     <img src="https://img.shields.io/badge/pub-3.2.0-blue" alt="pub package"/>
 </a>
