@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter_animarker/widgets/animarker.dart';
-import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'extensions.dart';
@@ -45,23 +43,30 @@ class _FlutterMapMarkerAnimationExampleState
 
   @override
   void initState() {
-    BitmapDescriptor.fromAssetImage(ImageConfiguration(devicePixelRatio: 2.5),
-            'assets/pin_marker_1.png')
-        .then((onValue) {
-      pinLocationIcon = onValue;
-    });
+    BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(devicePixelRatio: 2.5),
+      'assets/pin_marker_1.png',
+    ).then(
+      (onValue) {
+        pinLocationIcon = onValue;
+      },
+    );
 
     super.initState();
 
-    positionStream = Geolocator.getPositionStream(
-      desiredAccuracy: LocationAccuracy.bestForNavigation,
+    final settings = LocationSettings(
+      accuracy: LocationAccuracy.bestForNavigation,
       distanceFilter: 20,
-    ).listen((Position p) async {
+    );
+
+    positionStream = Geolocator.getPositionStream(locationSettings: settings)
+        .listen((Position p) async {
       setState(() {
         var markerId = MarkerId('MarkerId3');
         _markers[markerId] = RippleMarker(
           markerId: markerId,
           icon: pinLocationIcon,
+          rotation: 270,
           position: LatLng(p.latitude, p.longitude),
           ripple: ripple,
         );
@@ -93,87 +98,94 @@ class _FlutterMapMarkerAnimationExampleState
       ),
       home: Scaffold(
         body: SafeArea(
-          child: Builder(builder: (context) {
-            return Stack(
-              children: [
-                Animarker(
-                  mapId: _controller.future.then<int>((value) => value.mapId),
-                  isActiveTrip: isActiveTrip,
-                  rippleRadius: 0.25,
-                  useRotation: useRotation,
-                  zoom: zoom,
-                  duration: Duration(milliseconds: 2000),
-                  onStopover: onStopover,
-                  markers: <Marker>{
-                    //Avoid sent duplicate MarkerId
-                    ..._markers.values.toSet(),
-                    /*RippleMarker(
-                      icon: BitmapDescriptor.defaultMarker,
-                      markerId: MarkerId('MarkerId1'),
-                      position: startPosition,
-                      ripple: false,
+          child: Builder(
+            builder: (context) {
+              return Stack(
+                children: [
+                  Animarker(
+                    mapId: _controller.future.then<int>((value) => value.mapId),
+                    isActiveTrip: isActiveTrip,
+                    rippleRadius: 0.25,
+                    useRotation: useRotation,
+                    zoom: zoom,
+                    duration: Duration(milliseconds: 2000),
+                    onStopover: onStopover,
+                    markers: <Marker>{
+                      //Avoid sent duplicate MarkerId
+                      ..._markers.values.toSet(),
+                     /*  RippleMarker(
+                        icon: BitmapDescriptor.defaultMarker,
+                        markerId: MarkerId('MarkerId1'),
+                        position: startPosition,
+                        ripple: false,
+                      ),
+                      Marker(
+                        markerId: MarkerId('MarkerId2'),
+                        position: startPosition2,
+                      ), */
+                    },
+                    child: GoogleMap(
+                      mapType: MapType.normal,
+                      initialCameraPosition: _kSantoDomingo,
+                      onMapCreated: (controller) =>
+                          _controller.complete(controller),
+                      onCameraMove: (ca) => setState(() => zoom = ca.zoom),
                     ),
-                    Marker(
-                      markerId: MarkerId('MarkerId2'),
-                      position: startPosition2,
-                    ),*/
-                  },
-                  child: GoogleMap(
-                    mapType: MapType.normal,
-                    initialCameraPosition: _kSantoDomingo,
-                    onMapCreated: (controller) =>
-                        _controller.complete(controller),
-                    onCameraMove: (ca) => setState(() => zoom = ca.zoom),
                   ),
-                ),
-                Align(
-                  alignment: Alignment(0, 0.85),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        style: (ripple ? Colors.red : Colors.blue).buttonStyle,
-                        onPressed: () => setState(() => ripple = !ripple),
-                        child: Text(
-                          ripple ? 'Stop Ripple' : 'Start Ripple',
-                          style: TextStyle(fontSize: 12),
+                  Align(
+                    alignment: Alignment(0, 0.85),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          style:
+                              (ripple ? Colors.red : Colors.blue).buttonStyle,
+                          onPressed: () => setState(() => ripple = !ripple),
+                          child: Text(
+                            ripple ? 'Stop Ripple' : 'Start Ripple',
+                            style: TextStyle(fontSize: 12),
+                          ),
                         ),
-                      ),
-                      ElevatedButton(
-                        style: (useRotation ? Colors.red : Colors.blue)
-                            .buttonStyle,
-                        onPressed: () =>
-                            setState(() => useRotation = !useRotation),
-                        child: Text(
-                          useRotation ? 'Stop Rotation' : 'Start Rotation',
-                          style: TextStyle(fontSize: 12),
+                        ElevatedButton(
+                          style: (useRotation ? Colors.red : Colors.blue)
+                              .buttonStyle,
+                          onPressed: () =>
+                              setState(() => useRotation = !useRotation),
+                          child: Text(
+                            useRotation ? 'Stop Rotation' : 'Start Rotation',
+                            style: TextStyle(fontSize: 12),
+                          ),
                         ),
-                      ),
-                      ElevatedButton(
-                        style: (isActiveTrip ? Colors.red : Colors.blue)
-                            .buttonStyle,
-                        onPressed: () =>
-                            setState(() => isActiveTrip = !isActiveTrip),
-                        child: Text(
-                          isActiveTrip ? 'Stop trip' : 'Start trip',
-                          style: TextStyle(fontSize: 12),
+                        ElevatedButton(
+                          style: (isActiveTrip ? Colors.red : Colors.blue)
+                              .buttonStyle,
+                          onPressed: () =>
+                              setState(() => isActiveTrip = !isActiveTrip),
+                          child: Text(
+                            isActiveTrip ? 'Stop trip' : 'Start trip',
+                            style: TextStyle(fontSize: 12),
+                          ),
                         ),
-                      ),
-                      ElevatedButton(
-                        style: (isActiveTrip ? Colors.red : Colors.blue)
-                            .buttonStyle,
-                        onPressed: () => setState(() => _markers.clear()),
-                        child: Text(
-                          'Clear marker',
-                          style: TextStyle(fontSize: 12),
+                        ElevatedButton(
+                          style: (isActiveTrip ? Colors.red : Colors.blue)
+                              .buttonStyle,
+                          onPressed: () => setState(() {
+                            print('LENGTH -> ${_markers.length}');
+                            positionStream.pause();
+                            _markers.clear();
+                          }),
+                          child: Text(
+                            'Clear marker',
+                            style: TextStyle(fontSize: 12),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            );
-          }),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

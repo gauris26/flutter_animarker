@@ -1,9 +1,5 @@
-import 'dart:ui';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animarker/flutter_map_marker_animation.dart';
-import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'
     show CameraPosition, CameraUpdate, LatLng, MarkerId;
 

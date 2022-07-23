@@ -4,7 +4,6 @@ import 'package:flutter_animarker/infrastructure/interpolators/angle_interpolato
 import 'package:flutter_test/flutter_test.dart';
 
 // Project imports:
-//import 'package:flutter_animarker/anims/bearing_tween.dart';
 
 void main() {
   group('Angle Tween Interpolation', () {
@@ -89,7 +88,7 @@ void main() {
           AngleInterpolatorImpl(begin: beginAngle, end: endAngle);
       var angleTween = BearingTween(interpolator: interpolator);
 
-      angleTween.interpolator.swap(newAngle);
+      angleTween.swap(newAngle);
 
       expect(angleTween.begin, equals(endAngle));
       expect(angleTween.end, equals(newAngle));

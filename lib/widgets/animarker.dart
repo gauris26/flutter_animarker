@@ -1,4 +1,5 @@
 // Flutter imports:
+import 'package:diffutil_dart/diffutil.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animarker/core/animarker_controller_description.dart';
@@ -361,17 +362,32 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
 
   @override
   void didUpdateWidget(Animarker oldWidget) {
-    if (!setEquals(oldWidget.markers, widget.markers)) {
-      if (widget.markers.isEmpty) {
-        widget.updateMarkers(oldWidget.markers, widget.markers);
-        return;
-      }
-
-      //Manage new markers updates after setState had gotten called
-      widget.markers.difference(_markers.set).forEach((marker) async {
-        await _controller.pushMarker(marker);
-      });
+    print(
+        'didUpdateWidget: ${oldWidget.markers.map((e) => e.rotation).join(',')}');
+    if (oldWidget.markers.length > widget.markers.length) {
+      print('didUpdateWidget: updateMarkers');
+      widget.updateMarkers(oldWidget.markers, widget.markers);
+      return;
     }
+    print('didUpdateWidget: calculateListDiff');
+    final diffResult = calculateListDiff<Marker>(
+      oldWidget.markers.toList(),
+      widget.markers.toList(),
+      equalityChecker: (o1, o2) =>
+          o1.markerId == o2.markerId &&
+          o1.position == o2.position &&
+          o1.rotation == o2.rotation,
+    );
+    diffResult.getUpdatesWithData().forEach((element) {
+      element.when(
+          insert: (pos, marker) async {
+            print('didUpdateWidget: pushMarker');
+            await _controller.pushMarker(marker);
+          },
+          remove: (pos, marker) => {},
+          change: (pos, payload, payload2) {},
+          move: (from, to, payload) => {});
+    });
 
     if (widget.isActiveTripHasChanged(oldWidget)) {
       _controller.updateActiveTrip(widget.isActiveTrip);
@@ -392,6 +408,7 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
 
   @override
   void didChangeDependencies() async {
+    print('Markers: didChangeDependencies ${widget.markers.length}');
     _devicePxRatio = MediaQuery.of(context).devicePixelRatio;
     _zoomScale =
         SphericalUtil.calculateZoomScale(_devicePxRatio, widget.zoom, midPoint);
@@ -403,7 +420,7 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
         .listen((MarkerTapEvent e) {
       var value = keyByMarkerId(widget.markers)[e.value];
       if (value != null && value.onTap != null) {
-        value.onTap!();
+        value.onTap?.call();
       }
     });
 
@@ -411,6 +428,7 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   }
 
   void _locationListener(Marker marker, bool isStopover) async {
+    print('_locationListener');
     //Update the marker with animation
     _markers[marker.markerId] = marker;
     var temp = _previousMarkers;

@@ -31,20 +31,6 @@ extension AnimationStatusEx on AnimationStatus {
 }
 
 extension GoogleMapLatLng on ILatLng {
-/*  this.alpha = 1.0,
-  this.anchor = const Offset(0.5, 1.0),
-  this.consumeTapEvents = false,
-  this.draggable = false,
-  this.flat = false,
-  this.icon = BitmapDescriptor.defaultMarker,
-  this.infoWindow = InfoWindow.noText,
-  this.position = const LatLng(0.0, 0.0),
-  this.rotation = 0.0,
-  this.visible = true,
-  this.zIndex = 0.0,
-  this.onTap,
-  this.onDragEnd,*/
-
   Marker get fromJson {
     var bitmap = markerJson['icon'] != null
         ? BitmapDescriptor.fromJson(markerJson['icon'])
@@ -124,7 +110,7 @@ extension LatLngEx on Marker {
     }
   }
 
-  ILatLng get toLatLngInfo => LatLngInfo.marker(this, ripple: isRipple);
+  ILatLng get toLatLngInfo => LatLngInfo.marker(this, ripple: isRipple, bearing: rotation);
 }
 
 extension TweenEx<T> on Tween<T> {

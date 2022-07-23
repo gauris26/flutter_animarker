@@ -56,7 +56,7 @@ void main() {
       var interpolation = LineLocationInterpolatorImpl(begin: end, end: end);
       var locationTween = LocationTween(interpolator: interpolation);
 
-      locationTween.interpolator.swap(newPosition);
+      locationTween.swap(newPosition);
 
       expect(locationTween.begin, equals(end));
       expect(locationTween.end, equals(newPosition));
@@ -240,7 +240,7 @@ void main() {
       var newPosition = LatLngInfo(18.48430279636411, -69.94079341600313,
           markerId); //new location updates
 
-      locationTween.interpolator.swap(newPosition);
+      locationTween.swap(newPosition);
 
       var newBeginPosition = locationTween.begin;
       var newEndPosition = locationTween.end;

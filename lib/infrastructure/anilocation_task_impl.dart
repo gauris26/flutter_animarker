@@ -50,13 +50,6 @@ class AnilocationTaskImpl extends IAnilocationTask
       : super(description: description) {
     wrapper = animationWrapper();
 
-    /*wrapper.locationTween = LocationTween(
-      interpolator: LineLocationInterpolatorImpl(
-        begin: description.begin.copyWith(markerId: description.markerId),
-        end: description.end.copyWith(markerId: description.markerId),
-      ),
-    );*/
-
     _isActiveTrip = description.isActiveTrip;
     _useRotation = description.useRotation;
 
