@@ -1,6 +1,5 @@
 // Flutter imports:
 import 'package:diffutil_dart/diffutil.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animarker/core/animarker_controller_description.dart';
 import 'package:flutter_animarker/helpers/spherical_util.dart';
@@ -362,14 +361,11 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
 
   @override
   void didUpdateWidget(Animarker oldWidget) {
-    print(
-        'didUpdateWidget: ${oldWidget.markers.map((e) => e.rotation).join(',')}');
     if (oldWidget.markers.length > widget.markers.length) {
-      print('didUpdateWidget: updateMarkers');
       widget.updateMarkers(oldWidget.markers, widget.markers);
       return;
     }
-    print('didUpdateWidget: calculateListDiff');
+
     final diffResult = calculateListDiff<Marker>(
       oldWidget.markers.toList(),
       widget.markers.toList(),
@@ -381,7 +377,6 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
     diffResult.getUpdatesWithData().forEach((element) {
       element.when(
           insert: (pos, marker) async {
-            print('didUpdateWidget: pushMarker');
             await _controller.pushMarker(marker);
           },
           remove: (pos, marker) => {},
@@ -408,7 +403,6 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
 
   @override
   void didChangeDependencies() async {
-    print('Markers: didChangeDependencies ${widget.markers.length}');
     _devicePxRatio = MediaQuery.of(context).devicePixelRatio;
     _zoomScale =
         SphericalUtil.calculateZoomScale(_devicePxRatio, widget.zoom, midPoint);
@@ -428,7 +422,6 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   }
 
   void _locationListener(Marker marker, bool isStopover) async {
-    print('_locationListener');
     //Update the marker with animation
     _markers[marker.markerId] = marker;
     var temp = _previousMarkers;

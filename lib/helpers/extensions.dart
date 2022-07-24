@@ -110,7 +110,8 @@ extension LatLngEx on Marker {
     }
   }
 
-  ILatLng get toLatLngInfo => LatLngInfo.marker(this, ripple: isRipple, bearing: rotation);
+  ILatLng get toLatLngInfo =>
+      LatLngInfo.marker(this, ripple: isRipple, bearing: rotation);
 }
 
 extension TweenEx<T> on Tween<T> {

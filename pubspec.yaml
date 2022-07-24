@@ -1,9 +1,9 @@
 name: flutter_animarker
-description: Marker Geo-Animation solution for Google Maps. Support Linear Animation, Rotation and Ripple Effect.
+description: Marker Geo-Animation solution for Google Maps. Support Linear Animation, Multi-point animation, Rotation and Ripple Effect. Useful for Uber-like application, tracking and other maps driving solutions.
 version: 3.4.0-beta.1
 homepage: https://github.com/gauris26/flutter_animarker
 repository: https://github.com/gauris26/flutter_animarker
-publish_to: https://pub.dev
+publish_to:
 environment:
   sdk: '>=2.16.2 <3.0.0'
 

@@ -1,3 +1,7 @@
+# 3.4.0-beta.1
+    - Fix issue when marker is being removed
+    - Allow set rotation when the marker is static/not animated
+
 # 3.3.1-beta.4
     - runExpressAfter property to control when the animation queue should run express to the last position
     - shouldAnimateCamera property to prevent Google Map Camera Updates to be handled

@@ -20,8 +20,6 @@ class AnimarkerRobot {
     var animarker = getNewAnimarker(
         key, completer, <Marker>{newMarker}, cameraPosition, useRotation);
 
-    debugPrint('Pumping ${++counter}');
-
     await tester.pumpWidget(MaterialApp(home: animarker));
 
     return animarker;

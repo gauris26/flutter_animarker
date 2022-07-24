@@ -30,19 +30,15 @@ void main() {
     var end = DateTime.now().millisecondsSinceEpoch;
 
     var delta = end - start;
-
-    print('Spherical Interpolation: ${delta / 10000} $i');
   });
 
   test('Spherical Interpolation Vector', () {
     var start = DateTime.now().millisecondsSinceEpoch;
 
-    var i = SphericalUtil.vectorInterpolate(list[0], list[5], 0.658789);
+    SphericalUtil.vectorInterpolate(list[0], list[5], 0.658789);
 
     var end = DateTime.now().millisecondsSinceEpoch;
 
     var delta = end - start;
-
-    print('Spherical Interpolation Vector: ${delta / 10000} $i');
   });
 }

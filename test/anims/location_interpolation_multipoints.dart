@@ -58,11 +58,7 @@ void main() {
     }
 
     for (var interpolator in interpolators) {
-      var i = piecewiseLerp(ranges, results, interpolator);
-
-      final lat = atan2(i.z, sqrt(i.x * i.x + i.y * i.y));
-      final lng = atan2(i.y, i.x);
-      print('(${MathUtil.toDegrees(lat)}, ${MathUtil.toDegrees(lng)})');
+      piecewiseLerp(ranges, results, interpolator);
     }
   });
 

@@ -57,7 +57,6 @@ class PolynomialLocationInterpolator<T extends ILatLng>
     var vector = SphericalUtil.vectorSlerpOptimized(
         _preListFloat32x4, _lastFloat32x4, _step, t);
     var latLng = SphericalUtil.vectorToPolarOptimized(vector);
-    //debugPrint('($t): [${latLng.latitude},${latLng.longitude}]');
     return latLng as T;
   }
 

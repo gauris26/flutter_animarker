@@ -170,7 +170,6 @@ class _FlutterMapMarkerAnimationExampleState
                           style: (isActiveTrip ? Colors.red : Colors.blue)
                               .buttonStyle,
                           onPressed: () => setState(() {
-                            print('LENGTH -> ${_markers.length}');
                             positionStream.pause();
                             _markers.clear();
                           }),
