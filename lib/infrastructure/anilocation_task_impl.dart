@@ -242,7 +242,49 @@ class AnilocationTaskImpl extends IAnilocationTask
 
   void _locationListener() {
     if (description.latLngListener != null) {
-      description.latLngListener!(value);
+      /// check it first weather rotation is grater than 180 or not
+      if ((wrapper.locationTween.begin.bearing -
+                  wrapper.locationTween.end.bearing)
+              .abs() >
+          180) {
+        var bearing = wrapper.locationTween.begin.bearing;
+
+        /// calculate total rotation complated
+        final complatedRotation = (bearing - _bearingAnimation.value).abs();
+
+        /// cheking for clockwise or anti clockwise
+        if (wrapper.locationTween.begin.bearing >
+            wrapper.locationTween.end.bearing) {
+          // clock wise
+          bearing = bearing + complatedRotation;
+          if (bearing > 360) bearing = bearing - 360;
+          /// as we are not using default animation value so our rotation will complate ealier,
+          /// and it will try to go further rotatio.
+          /// so we need to keep our bearing between given two points(Start and end points)
+          if (bearing > wrapper.locationTween.begin.bearing ||
+              bearing < wrapper.locationTween.end.bearing) {
+            description
+                .latLngListener!(_proxyAnim.value.copyWith(bearing: bearing));
+          } else {
+            description.latLngListener!(_proxyAnim.value
+                .copyWith(bearing: wrapper.locationTween.end.bearing));
+          }
+        } else {
+          /// anti-clock wise
+          bearing = bearing - complatedRotation;
+          if (bearing < 0) bearing = 360 - bearing.abs();
+          if (bearing < wrapper.locationTween.begin.bearing ||
+              bearing > wrapper.locationTween.end.bearing) {
+            description
+                .latLngListener!(_proxyAnim.value.copyWith(bearing: bearing));
+          } else {
+            description.latLngListener!(_proxyAnim.value
+                .copyWith(bearing: wrapper.locationTween.end.bearing));
+          }
+        }
+      } else {
+        description.latLngListener!(value);
+      }
     }
   }
 
