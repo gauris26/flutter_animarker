@@ -11,7 +11,6 @@ import 'package:flutter_animarker/core/i_lat_lng.dart';
 import 'package:flutter_animarker/helpers/extensions.dart';
 
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
-import '../helpers/extensions.dart';
 
 class AnimarkerController extends IAnimarkerController {
   @override

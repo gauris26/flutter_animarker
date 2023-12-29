@@ -1,6 +1,5 @@
 // Flutter imports:
 import 'package:diffutil_dart/diffutil.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animarker/core/animarker_controller_description.dart';
 import 'package:flutter_animarker/helpers/spherical_util.dart';
@@ -11,7 +10,6 @@ import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platf
 // Project imports:
 import '../helpers/extensions.dart';
 import '../flutter_map_marker_animation.dart';
-import 'package:flutter_animarker/helpers/extensions.dart';
 import 'package:flutter_animarker/helpers/google_map_helper.dart';
 import 'package:flutter_animarker/animation/animarker_controller.dart';
 import 'package:flutter_animarker/core/i_animarker_controller.dart';
@@ -363,7 +361,8 @@ class AnimarkerState extends State<Animarker> with TickerProviderStateMixin {
   @override
   void didUpdateWidget(Animarker oldWidget) {
     print(
-        'didUpdateWidget: ${oldWidget.markers.map((e) => e.rotation).join(',')}');
+      'didUpdateWidget: ${oldWidget.markers.map((e) => e.rotation).join(',')}',
+    );
     if (oldWidget.markers.length > widget.markers.length) {
       print('didUpdateWidget: updateMarkers');
       widget.updateMarkers(oldWidget.markers, widget.markers);

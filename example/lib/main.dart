@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animarker/flutter_map_marker_animation.dart';
+import 'package:flutter_config/flutter_config.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'listen_locations_updates.dart';
@@ -18,6 +19,13 @@ const kLocations = [
   LatLng(18.487307, -69.952759),
   LatLng(18.487308, -69.952759),
 ];
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Required by FlutterConfig
+  await FlutterConfig.loadEnvVariables();
+
+  runApp(SimpleMarkerAnimationExample());
+}
 
 class SimpleMarkerAnimationExample extends StatefulWidget {
   @override
@@ -71,8 +79,4 @@ class SimpleMarkerAnimationExampleState
         });
     setState(() => markers[kMarkerId] = marker);
   }
-}
-
-void main() {
-  runApp(FlutterMapMarkerAnimationRealTimeExample());
 }

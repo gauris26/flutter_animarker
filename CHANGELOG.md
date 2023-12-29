@@ -1,3 +1,5 @@
+# 4.0.0
+    - This version upgrades all dependencies to match the latest Dart and Flutter versions, to start addressing bugs, and introduces new features then.
 # 3.3.1-beta.4
     - runExpressAfter property to control when the animation queue should run express to the last position
     - shouldAnimateCamera property to prevent Google Map Camera Updates to be handled

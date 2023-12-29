@@ -1,24 +1,23 @@
-/*
-import 'dart:async';
+
+/*import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animarker/animation/animarker_controller.dart';
 import 'package:flutter_animarker/flutter_map_marker_animation.dart';
-import 'package:flutter_animarker/animation_marker_controller.dart';
-import 'package:flutter_animarker/models/lat_lng_delta.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'extensions.dart';
 
-final startPosition = LatLngInfo(18.488213, -69.959186);
+final startPosition = LatLngInfo(18.488213, -69.959186, MarkerId("0"));
 
 //Run over the polygon position
 final polygon = <LatLngInfo>[
   startPosition,
-  LatLngInfo(18.489338, -69.947091),
-  LatLngInfo(18.495351, -69.949366),
-  LatLngInfo(18.497477, -69.947596),
-  LatLngInfo(18.498932, -69.948615),
-  LatLngInfo(18.498373, -69.958779),
-  LatLngInfo(18.488600, -69.959574),
+  LatLngInfo(18.489338, -69.947091, MarkerId("1")),
+  LatLngInfo(18.495351, -69.949366, MarkerId("2")),
+  LatLngInfo(18.497477, -69.947596, MarkerId("3")),
+  LatLngInfo(18.498932, -69.948615, MarkerId("4")),
+  LatLngInfo(18.498373, -69.958779, MarkerId("5")),
+  LatLngInfo(18.488600, -69.959574, MarkerId("6")),
 ];
 
 class FlutterMapMarkerAnimationExample extends StatefulWidget {
@@ -120,5 +119,4 @@ class _FlutterMapMarkerAnimationExampleState
     subscription.cancel();
     super.dispose();
   }
-}
-*/
+}*/

@@ -113,7 +113,7 @@ class _FlutterMapMarkerAnimationExampleState
                     markers: <Marker>{
                       //Avoid sent duplicate MarkerId
                       ..._markers.values.toSet(),
-                     /*  RippleMarker(
+                      /*  RippleMarker(
                         icon: BitmapDescriptor.defaultMarker,
                         markerId: MarkerId('MarkerId1'),
                         position: startPosition,
