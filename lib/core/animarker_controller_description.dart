@@ -21,6 +21,7 @@ class AnimarkerControllerDescription {
   final Duration duration;
   final Duration rippleDuration;
   final Duration rippleIdleAfter;
+  final int rippleWaveCount;
 
   const AnimarkerControllerDescription({
     required this.vsync,
@@ -37,6 +38,7 @@ class AnimarkerControllerDescription {
     this.duration = const Duration(milliseconds: 2500),
     this.rippleDuration = const Duration(milliseconds: 2000),
     this.rippleIdleAfter = const Duration(seconds: 30),
+    this.rippleWaveCount = 3,
   });
 
   factory AnimarkerControllerDescription.animarker(
@@ -61,5 +63,6 @@ class AnimarkerControllerDescription {
         runExpressAfter: animarker.runExpressAfter,
         useRotation: animarker.useRotation,
         vsync: vsync,
+        rippleWaveCount: animarker.rippleWaveCount,
       );
 }

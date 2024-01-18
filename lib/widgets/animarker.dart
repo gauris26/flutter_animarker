@@ -292,6 +292,7 @@ class Animarker extends StatefulWidget {
   /// Default value: true
   ///
   final Duration rippleIdleAfter;
+  final int rippleWaveCount;
 
   Animarker({
     Key? key,
@@ -311,6 +312,7 @@ class Animarker extends StatefulWidget {
     this.duration = const Duration(milliseconds: 1000),
     this.rippleDuration = const Duration(milliseconds: 2000),
     this.shouldAnimateCamera = true,
+    this.rippleWaveCount = 3,
   })  : assert(rippleRadius >= 0.0 && rippleRadius <= 1.0,
             'Must choose values between [0.0, 1.0] for radius scale'),
         assert(!markers.isAnyEmpty, 'Must choose a not empty MarkerId'),

@@ -29,6 +29,7 @@ class AnilocationTaskDescription {
   final RippleListener? onRippleAnimation;
   final ILocationDispatcher _dispatcher;
   final Duration rippleIdleAfter;
+  final rippleWaveCount;
 
   const AnilocationTaskDescription({
     required this.vsync,
@@ -49,6 +50,7 @@ class AnilocationTaskDescription {
     this.duration = const Duration(milliseconds: 2000),
     this.rippleDuration = const Duration(milliseconds: 2000),
     this.rippleIdleAfter = const Duration(seconds: 30),
+    this.rippleWaveCount = 3,
   }) : _dispatcher = dispatcher;
 
   factory AnilocationTaskDescription.animarker({
@@ -78,6 +80,7 @@ class AnilocationTaskDescription {
       useRotation: description.useRotation,
       rippleDuration: description.rippleDuration,
       onRippleAnimation: description.onRippleAnimation,
+      rippleWaveCount: description.rippleWaveCount,
       dispatcher:
           ILocationDispatcher.queue(threshold: description.angleThreshold),
     );

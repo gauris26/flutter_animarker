@@ -204,7 +204,7 @@ class AnilocationTaskImpl extends IAnilocationTask
     var radius = (_radiusAnimation.value / 100);
     var color = _colorAnimation.value!;
 
-    for (var wave = 3; wave >= 0; wave--) {
+    for (var wave = description.rippleWaveCount; wave >= 0; wave--) {
       var circleId = CircleId('CircleId->$wave');
       var circle = Circle(
         circleId: circleId,
