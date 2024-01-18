@@ -40,6 +40,7 @@ class RippleMarker extends Marker {
 
   @override
   RippleMarker copyWith({
+    bool? ripple,
     double? alphaParam,
     Offset? anchorParam,
     bool? consumeTapEventsParam,
@@ -59,18 +60,18 @@ class RippleMarker extends Marker {
     return RippleMarker(
       markerId: markerId ?? this.markerId,
       ripple: ripple ?? this.ripple,
-      alpha: alpha ?? this.alpha,
-      anchor: anchor ?? this.anchor,
-      draggable: draggable ?? this.draggable,
-      flat: flat ?? this.flat,
-      icon: icon ?? this.icon,
-      infoWindow: infoWindow ?? this.infoWindow,
-      position: position ?? this.position,
-      rotation: rotation ?? this.rotation,
-      visible: visible ?? this.visible,
-      zIndex: zIndex ?? this.zIndex,
-      onTap: onTap ?? this.onTap,
-      onDragEnd: onDragEnd ?? this.onDragEnd,
+      alpha: alphaParam ?? this.alpha,
+      anchor: anchorParam ?? this.anchor,
+      draggable: draggableParam ?? this.draggable,
+      flat: flatParam ?? this.flat,
+      icon: iconParam ?? this.icon,
+      infoWindow: infoWindowParam ?? this.infoWindow,
+      position: positionParam ?? this.position,
+      rotation: rotationParam ?? this.rotation,
+      visible: visibleParam ?? this.visible,
+      zIndex: zIndexParam ?? this.zIndex,
+      onTap: onTapParam ?? this.onTap,
+      onDragEnd: onDragEndParam ?? this.onDragEnd,
     );
   }
 }
